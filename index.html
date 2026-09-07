@@ -469,23 +469,40 @@
       if (!musteriCache.length) musteriCache = await api("/api/musteriler");
       const p = id ? policeCache.find((x) => x.id === id) || (await api("/api/policeler/" + id)) : {};
       
-      // PDF'ten gelen müşteri adı/soyadı varsa formda gösterelim ki seçilmediğinde otomatik oluşturabilelim
       const pdfAdSoyad = pdfVeri && pdfVeri.ad_soyad ? pdfVeri.ad_soyad : (pdfVeri && pdfVeri.ad ? `${pdfVeri.ad} ${pdfVeri.soyad || ''}` : '');
       const pdfTc = pdfVeri && pdfVeri.tckn ? pdfVeri.tckn : '';
 
       const eslesenId = pdfVeri && pdfVeri.musteri ? pdfVeri.musteri.id : p.musteri_id;
-      const opts = `<option value="">-- Müşteri Seçin veya Yeni Oluşturulsun --</option>` + musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Atanmadı'})</option>`).join("");
+      const opts = `<option value="">-- Yeni Müşteri Oluşturulsun --</option>` + musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Atanmadı'})</option>`).join("");
       const islemTuru = p.islem_turu || (pdfVeri && pdfVeri.islem_turu) || "Yeni Poliçe";
 
+      const danismanOpts = DANISMANLAR.map(d => `<option value="${d}">${d}</option>`).join("");
+
       let musteriBlok = `
-        <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-          <label class="block text-xs font-bold text-slate-700 mb-2 uppercase">Müşteri Eşleştirme</label>
-          <select name="musteri_id" class="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-white mb-3">${opts}</select>
-          <div class="text-xs text-slate-500 font-medium flex items-center justify-between">
-            <span>Listede yoksa PDF'teki isim ile <strong>otomatik yeni müşteri</strong> oluşturulur.</span>
+        <div class="mb-6 p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-2 uppercase">Müşteri Seçimi</label>
+            <select name="musteri_id" class="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-white">${opts}</select>
+            <p class="text-[11px] text-slate-500 mt-1">Seçim yapmazsanız alttaki bilgilerle <strong>yeni müşteri</strong> otomatik oluşturulur.</p>
           </div>
-          <input type="hidden" name="pdf_gelen_ad" value="${pdfAdSoyad}" />
-          <input type="hidden" name="pdf_gelen_tc" value="${pdfTc}" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Yeni Müşteri Adı / Soyadı</label>
+              <input type="text" name="pdf_gelen_ad" value="${pdfAdSoyad}" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" placeholder="Ad Soyad" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Telefon Numarası <span class="text-red-500">*</span></label>
+              <input type="tel" name="yeni_telefon" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" placeholder="05XXXXXXXXX" required />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Portföy Sorumlusu (Danışman) <span class="text-red-500">*</span></label>
+              <select name="yeni_danisman" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none">${danismanOpts}</select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">TC / Vergi No</label>
+              <input type="text" name="pdf_gelen_tc" value="${pdfTc}" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" placeholder="TCKN" />
+            </div>
+          </div>
         </div>`;
 
       modalAc(id ? "Poliçe Detayları" : (pdfVeri ? "Yapay Zeka Analiz Sonucu" : "Manuel Poliçe Ekle"),
@@ -509,7 +526,7 @@
             const body = formData();
             let musteriId = body.musteri_id ? Number(body.musteri_id) : null;
 
-            // Eğer müşteri seçilmediyse (0 müşterim var durumu veya listede yok), PDF'ten gelen ad ile arka planda yeni müşteri oluşturalım
+            // Eğer müşteri seçilmediyse, yeni müşteri oluştur
             if (!musteriId) {
               const adSoyadParca = (body.pdf_gelen_ad || "Bilinmeyen Müşteri").trim().split(" ");
               const soyad = adSoyadParca.length > 1 ? adSoyadParca.pop() : "Müşteri";
@@ -520,8 +537,9 @@
                 body: JSON.stringify({
                   ad: ad,
                   soyad: soyad,
-                  tc_kimlik: body.pdf_gelen_tc || null,
-                  portfoy_sorumlusu: DANISMANLAR[0] // Varsayılan ilk danışman
+                  telefon: body.yeni_telefon,
+                  portfoy_sorumlusu: body.yeni_danisman,
+                  tc_kimlik: body.pdf_gelen_tc || null
                 })
               });
               musteriId = yeniMusRes.id;
