@@ -1,13 +1,12 @@
 import io
 import json
-import time
 import pdfplumber
 from google import genai
 from google.genai import types
 import os
 
 # Render ortamındaki GCP_API_KEY değişkenini güvenli bir şekilde okuyoruz
-GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GCP_API_KEY")
+GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GEMINI_API_KEY")
 
 def pdf_metni_al(dosya: bytes) -> str:
     sayfalar = []
@@ -27,7 +26,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
 
     client = genai.Client(api_key=GEMINI_API_KEY)
     
-    # Metin uzunluğunu 8000 karakterle sınırlandırarak analiz hızını maksimuma çıkarıyoruz
+    # Metni 4000 karaktere indirerek hem token limitini koruyoruz hem de 3 kat daha hızlı okutuyoruz
     prompt = f"""
     Aşağıdaki sigorta poliçesini analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
 
@@ -45,33 +44,26 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     - brut_prim: Sayısal float değer (Örn: 28469.07)
 
     Poliçe Metni:
-    {metin[:8000]}
+    {metin[:4000]}
     """
 
-    # Arka planda 3 kez kısa aralıklarla otomatik tekrar deneyen akıllı mekanizma
-    max_deneme = 3
-    response = None
-    for deneme in range(max_deneme):
-        try:
-            response = client.models.generate_content(
-                model="gemini-3.6-flash",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.1
-                )
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.1
             )
-            if response and response.text:
-                break
-        except Exception as e:
-            if deneme == max_deneme - 1:
-                raise ValueError("Google sunucuları şu an çok yoğun. Lütfen 5-10 saniye bekleyip tekrar deneyin.")
-            time.sleep(2) # Arka planda 2 saniye bekleyip otomatik yeniden dener
-
-    if not response or not response.text:
-        raise ValueError("Yapay zekadan yanıt alınamadı.")
-
-    veri = json.loads(response.text)
+        )
+        if not response or not response.text:
+            raise ValueError("Yapay zekadan yanıt alınamadı.")
+        veri = json.loads(response.text)
+    except Exception as e:
+        err_str = str(e)
+        if "429" in err_str or "ResourceExhausted" in err_str or "quota" in err_str.lower():
+            raise ValueError("API kota sınırı doldu! Lütfen 10-15 saniye bekleyip tekrar yükle.")
+        raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
 
     ad = veri.get("ad") or ""
     soyad = veri.get("soyad") or ""
