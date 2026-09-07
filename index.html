@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Altun Kardeşler CRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 
+              black: "#0a0a0a", 
+              dark: "#141414", 
+              panel: "#1e1e1e",
+              gold: "#D4AF37", 
+              goldhover: "#AA8C2C",
+              light: "#f3f4f6"
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1e1e1e; }
+    ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #AA8C2C; }
+  </style>
+</head>
+<body class="bg-brand-light text-slate-800 min-h-screen">
+  <div class="flex min-h-screen">
+    
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-brand-black text-white flex flex-col shrink-0 border-r border-brand-gold/20 shadow-2xl">
+      <div class="px-6 py-8 border-b border-white/10 text-center">
+        <img src="Logo.png" alt="Altun Kardeşler Logo" class="w-24 mx-auto mb-3" onerror="this.style.display='none'">
+        <h1 class="text-xl font-bold text-brand-gold tracking-wider">ALTUN</h1>
+        <p class="text-xs uppercase tracking-widest text-slate-400 mt-1">KARDEŞLER CRM</p>
+      </div>
+      <nav class="p-3 space-y-1 flex-1 mt-4">
+        <button data-view="dashboard" class="nav-btn w-full text-left px-4 py-3 rounded-lg bg-brand-gold/10 text-brand-gold font-medium transition-all">Ana Ekran</button>
+        <button data-view="musteriler" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-all">Müşteriler</button>
+        <button data-view="policeler" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-all">Poliçeler</button>
+        <button data-view="finansal" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-all border border-transparent hover:border-brand-gold/30">Finansal Analiz</button>
+      </nav>
+      <p class="px-6 py-4 text-xs text-brand-gold/50 text-center">Altun Kardeşler Sigorta</p>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-8 bg-slate-50 overflow-y-auto max-h-screen">
+      
+      <!-- DASHBOARD -->
+      <section id="view-dashboard">
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-brand-black">Hoş Geldiniz</h2>
+            <p class="text-sm text-slate-500 mt-1">Bitişi yaklaşan poliçeler (0–3 gün kırmızı · 3–15 gün sarı · 15–30 gün yeşil)</p>
+          </div>
+        </div>
+        <div id="ozet-kartlar" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+        <div id="yaklasan-liste" class="space-y-3"></div>
+      </section>
+
+      <!-- MÜŞTERİLER -->
+      <section id="view-musteriler" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h2 class="text-2xl font-bold text-brand-black">Müşteriler</h2>
+          <div class="flex gap-2">
+            <input id="musteri-ara" type="search" placeholder="Ad, telefon, TCKN veya danışman…" class="border border-slate-300 rounded-lg px-3 py-2 text-sm w-72 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold" />
+            <button onclick="musteriFormu()" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors shadow-md">Yeni Müşteri</button>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-brand-black text-left text-brand-gold">
+              <tr>
+                <th class="px-4 py-4">Ad Soyad</th>
+                <th class="px-4 py-4">Telefon</th>
+                <th class="px-4 py-4">Aktif Branş Dağılımı</th>
+                <th class="px-4 py-4">Portföy Sorumlusu</th>
+                <th class="px-4 py-4">TC / Vergi No</th>
+                <th class="px-4 py-4 text-right">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="musteri-tbody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- POLİÇELER -->
+      <section id="view-policeler" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 class="text-2xl font-bold text-brand-black">Poliçeler</h2>
+          <button onclick="policeFormu()" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors shadow-md">Yeni Poliçe</button>
+        </div>
+
+        <label id="pdf-drop" class="mb-6 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-brand-gold/50 bg-white rounded-xl p-8 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/5 transition-all">
+          <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" />
+          <svg class="w-10 h-10 text-brand-gold mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <p class="font-bold text-brand-black text-lg">PDF poliçe sürükleyin veya tıklayın</p>
+          <p class="text-sm text-slate-500">Tüm şirketlerin poliçeleri (Zeyil, İptal vb.) yapay zeka ile otomatik okunur.</p>
+          <p id="pdf-durum" class="text-sm text-brand-gold hidden font-semibold mt-2"></p>
+        </label>
+
+        <!-- Sekmeler -->
+        <div class="flex border-b border-slate-200 mb-4 gap-6 text-sm font-semibold">
+          <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-3 border-b-2 border-brand-gold text-brand-black">Mevcut / Aktif Poliçeler</button>
+          <button onclick="policeSekmeSec('eski')" id="btn-sekme-eski" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black">Süresi Dolan / Eski Poliçeler</button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-brand-black text-left text-brand-gold">
+              <tr>
+                <th class="px-4 py-4">Poliçe No</th>
+                <th class="px-4 py-4">Müşteri</th>
+                <th class="px-4 py-4">Şirket / Branş</th>
+                <th class="px-4 py-4">Bitiş Tarihi</th>
+                <th class="px-4 py-4">Durum</th>
+                <th class="px-4 py-4">Prim</th>
+                <th class="px-4 py-4 text-right">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="police-tbody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FİNANSAL ANALİZ -->
+      <section id="view-finansal" class="hidden">
+        <div class="mb-6 flex justify-between items-end">
+          <div>
+            <h2 class="text-2xl font-bold text-brand-black">Finansal Analiz & Raporlama</h2>
+            <p class="text-sm text-slate-500 mt-1">Ciro, net komisyon karı ve poliçe üretim detayları.</p>
+          </div>
+        </div>
+
+        <!-- Filtre Paneli -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başlangıç</label>
+              <input type="date" id="fin-start" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Bitiş</label>
+              <input type="date" id="fin-end" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Şirket</label>
+              <select id="fin-sirket" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold">
+                <option value="">Tümü</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Danışman / Sorumlu</label>
+              <select id="fin-sorumlu" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold">
+                <option value="">Tümü</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sigorta Branşı</label>
+              <select id="fin-brans" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold">
+                <option value="">Tümü</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mt-4 pt-4 border-t flex items-center gap-2">
+            <input type="checkbox" id="fin-compare-mode" onchange="toggleCompareMode()" class="w-4 h-4 text-brand-gold rounded border-slate-300 focus:ring-brand-gold">
+            <label for="fin-compare-mode" class="text-sm font-semibold text-slate-700">Başka bir tarih aralığıyla karşılaştır</label>
+          </div>
+          
+          <div id="fin-compare-dates" class="hidden grid-cols-1 md:grid-cols-5 gap-4 mt-3 items-end">
+            <div>
+              <label class="block text-xs font-bold text-sky-600 uppercase mb-1">Karşılaştırma Başlangıç</label>
+              <input type="date" id="fin-start2" class="w-full border border-sky-300 bg-sky-50 rounded-lg px-3 py-2 text-sm focus:border-sky-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-sky-600 uppercase mb-1">Karşılaştırma Bitiş</label>
+              <input type="date" id="fin-end2" class="w-full border border-sky-300 bg-sky-50 rounded-lg px-3 py-2 text-sm focus:border-sky-500" />
+            </div>
+          </div>
+
+          <div class="mt-5 flex justify-end">
+            <button onclick="calistirFinansalRapor()" class="bg-brand-black text-brand-gold px-6 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-brand-dark">Raporu Oluştur</button>
+          </div>
+        </div>
+
+        <!-- Ana Metrikler -->
+        <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 hidden">
+          <div class="bg-brand-black text-white rounded-xl p-6 shadow-lg border border-brand-gold/30">
+            <p class="text-sm text-brand-gold font-medium mb-1 uppercase tracking-wider">Toplam Üretim (Ciro)</p>
+            <p id="fin-ciro" class="text-3xl font-bold">₺0,00</p>
+            <p id="fin-ciro-diff" class="text-sm mt-2 hidden"></p>
+          </div>
+          <div class="bg-gradient-to-br from-brand-gold to-brand-goldhover text-brand-black rounded-xl p-6 shadow-lg">
+            <p class="text-sm font-bold mb-1 uppercase tracking-wider opacity-80">Tahmini Net Komisyon Karı</p>
+            <p id="fin-kar" class="text-3xl font-black">₺0,00</p>
+            <p id="fin-kar-diff" class="text-sm mt-2 font-medium hidden"></p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+            <p class="text-sm text-slate-500 font-bold mb-1 uppercase tracking-wider">Toplam Satış Adedi</p>
+            <p id="fin-adet" class="text-3xl font-bold text-brand-black">0 Adet</p>
+            <p id="fin-adet-diff" class="text-sm mt-2 hidden"></p>
+          </div>
+        </div>
+
+        <!-- Detay Tabloları -->
+        <div id="fin-details" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-5 py-3 border-b font-bold text-sm text-brand-black">Branşlara Göre Üretim</div>
+            <div class="p-4 max-h-80 overflow-y-auto" id="fin-brans-liste"></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-5 py-3 border-b font-bold text-sm text-brand-black">Şirketlere Göre Üretim</div>
+            <div class="p-4 max-h-80 overflow-y-auto" id="fin-sirket-liste"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- GENEL MODAL -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto border-t-4 border-brand-gold">
+      <h3 id="modal-baslik" class="text-xl font-bold mb-4 text-brand-black"></h3>
+      <div id="modal-icerik">
+        <form id="modal-form" class="space-y-4"></form>
+      </div>
+      <p id="modal-hata" class="hidden text-sm font-semibold text-red-600 bg-red-50 p-3 rounded-lg mt-4 border border-red-200"></p>
+      <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+        <button type="button" onclick="modalKapat()" class="px-5 py-2 text-sm rounded-lg border border-slate-300 font-medium hover:bg-slate-50">Kapat</button>
+        <button type="button" id="modal-kaydet" class="px-5 py-2 text-sm rounded-lg bg-brand-black text-brand-gold font-bold hover:bg-brand-dark shadow-md">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "";
+    let musteriCache = [];
+    let policeCache = [];
+    let aktifPoliceSekmesi = 'aktif';
+
+    const DANISMANLAR = [
+      "Muammer Altunkaynak",
+      "İhsan Berat Altunkaynak",
+      "Serhat Altunkaynak",
+      "Ahmet Galip Altunkaynak",
+      "Sezai Karakoç",
+      "Diğer"
+    ];
+
+    document.querySelectorAll(".nav-btn").forEach((btn) => {
+      btn.addEventListener("click", () => goster(btn.dataset.view));
+    });
+
+    function goster(ad) {
+      ["dashboard", "musteriler", "policeler", "finansal"].forEach((v) => {
+        document.getElementById("view-" + v).classList.toggle("hidden", v !== ad);
+      });
+      document.querySelectorAll(".nav-btn").forEach((b) => {
+        if(b.dataset.view === ad) {
+          b.classList.add("bg-brand-gold/10", "text-brand-gold", "border-l-4", "border-brand-gold");
+          b.classList.remove("text-white", "hover:bg-white/5", "border-transparent", "hover:border-brand-gold/30");
+        } else {
+          b.classList.remove("bg-brand-gold/10", "text-brand-gold", "border-l-4", "border-brand-gold");
+          b.classList.add("text-white", "hover:bg-white/5", "border-transparent", "hover:border-brand-gold/30");
+        }
+      });
+      if (ad === "dashboard") yukleDashboard();
+      if (ad === "musteriler") yukleMusteriler();
+      if (ad === "policeler") yuklePoliceler();
+      if (ad === "finansal") yukleFinansalHazirlik();
+    }
+
+    function policeSekmeSec(sekme) {
+      aktifPoliceSekmesi = sekme;
+      document.getElementById("btn-sekme-aktif").className = sekme === 'aktif' ? "pb-3 border-b-2 border-brand-gold text-brand-black font-bold" : "pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black";
+      document.getElementById("btn-sekme-eski").className = sekme === 'eski' ? "pb-3 border-b-2 border-brand-gold text-brand-black font-bold" : "pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black";
+      renderPoliceListesi();
+    }
+
+    function seviyeSinif(seviye) {
+      if (seviye === "kirmizi") return { wrap: "border-red-200 bg-red-50", badge: "bg-red-500 text-white", etiket: "0–3 gün" };
+      if (seviye === "sari") return { wrap: "border-amber-300 bg-amber-50", badge: "bg-amber-400 text-brand-black", etiket: "3–15 gün" };
+      if (seviye === "yesil") return { wrap: "border-emerald-200 bg-emerald-50", badge: "bg-emerald-500 text-white", etiket: "15–30 gün" };
+      return { wrap: "border-slate-200 bg-white", badge: "bg-slate-200 text-slate-700", etiket: "30+ gün" };
+    }
+
+    function para(n) {
+      if (n == null || n === "") return "—";
+      return Number(n).toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
+    }
+
+    function tarih(d) {
+      if (!d) return "—";
+      return new Date(d + "T00:00:00").toLocaleDateString("tr-TR");
+    }
+
+    async function api(path, opts) {
+      const res = await fetch(API + path, {
+        headers: { "Content-Type": "application/json" },
+        ...opts,
+      });
+      if (!res.ok) {
+        let msg = "İstek başarısız";
+        try { const j = await res.json(); msg = j.detail || msg; } catch (_) {}
+        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+      }
+      if (res.status === 204) return null;
+      return res.json();
+    }
+
+    async function yukleDashboard() {
+      const [ozet, liste] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=30")]);
+      document.getElementById("ozet-kartlar").innerHTML = [
+        ["Müşteri Sayısı", ozet.musteri_sayisi],
+        ["Toplam Poliçe", ozet.police_sayisi],
+        ["Aktif Poliçe", ozet.aktif_police],
+        ["30 Gün İçinde Biten", ozet.yaklasan_30_gun],
+      ].map(([t, v]) => `<div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm border-l-4 border-l-brand-gold"><p class="text-xs font-bold text-slate-400 uppercase">${t}</p><p class="text-3xl font-black text-brand-black mt-2">${v}</p></div>`).join("");
+
+      const el = document.getElementById("yaklasan-liste");
+      if (!liste.length) {
+        el.innerHTML = `<div class="bg-white rounded-xl p-8 text-center text-slate-500 border border-slate-200">Önümüzdeki 30 günde biten poliçe yok. Rahat bir ay!</div>`;
+        return;
+      }
+      el.innerHTML = liste.map((p) => {
+        const s = seviyeSinif(p.uyar_seviyesi);
+        const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
+        return `<article class="border rounded-xl p-4 shadow-sm ${s.wrap}">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="font-bold text-brand-black text-lg">${ad || "Müşteri"} <span class="text-sm font-normal text-slate-500 ml-2">No: ${p.police_no}</span></p>
+              <p class="text-sm font-semibold mt-1">${p.sigorta_turu} <span class="text-slate-500 font-normal">(${p.islem_turu || 'Yeni Poliçe'})</span> ${p.sigorta_sirketi ? " · " + p.sigorta_sirketi : ""}</p>
+              <p class="text-sm text-slate-600 mt-1">Bitiş: <span class="font-bold">${tarih(p.bitis_tarihi)}</span> · Sorumlu: ${p.musteri_portfoy_sorumlusu || 'Atanmadı'}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-brand-dark shadow-sm">PDF Aç</a>` : ""}
+              <span class="text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ${s.badge}">${p.kalan_gun} gün kaldı</span>
+            </div>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    async function yukleMusteriler(q) {
+      const qs = q ? "?q=" + encodeURIComponent(q) : "";
+      musteriCache = await api("/api/musteriler" + qs);
+      document.getElementById("musteri-tbody").innerHTML = musteriCache.map((m) => {
+        let dagilimHtml = "—";
+        if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) {
+          dagilimHtml = Object.entries(m.aktif_police_sayilari)
+            .map(([tur, adet]) => `<span class="bg-brand-black text-brand-gold text-xs px-2 py-1 rounded-md font-bold mr-1 inline-block mb-1">${tur}: ${adet}</span>`)
+            .join("");
+        }
+        return `<tr class="hover:bg-brand-gold/5 cursor-pointer transition-colors" onclick="musteriDetay(${m.id})">
+          <td class="px-4 py-4 font-bold text-brand-black">${m.ad} ${m.soyad}</td>
+          <td class="px-4 py-4 font-medium">${m.telefon || "—"}</td>
+          <td class="px-4 py-4">${dagilimHtml}</td>
+          <td class="px-4 py-4"><span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md font-bold border">${m.portfoy_sorumlusu || "Atanmadı"}</span></td>
+          <td class="px-4 py-4 text-slate-500">${m.tc_kimlik || "—"}</td>
+          <td class="px-4 py-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+            <button class="text-brand-black bg-brand-gold/20 hover:bg-brand-gold hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors mr-2" onclick="musteriFormu(${m.id})">Düzenle</button>
+            <button class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors" onclick="musteriSil(${m.id})">Sil</button>
+          </td>
+        </tr>`;
+      }).join("");
+    }
+
+    async function musteriDetay(id) {
+      try {
+        const m = await api("/api/musteriler/" + id);
+        const policeler = await api("/api/policeler?musteri_id=" + id);
+        
+        let dagilimStr = "Aktif poliçesi yok";
+        if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) {
+          dagilimStr = Object.entries(m.aktif_police_sayilari).map(([t, a]) => `${t} (${a})`).join(", ");
+        }
+
+        const html = `
+          <div class="space-y-4">
+            <div class="bg-brand-black text-white p-5 rounded-xl shadow-inner space-y-2 text-sm border-l-4 border-brand-gold">
+              <p><span class="text-brand-gold/70 font-bold w-32 inline-block">Telefon:</span> ${m.telefon || "—"}</p>
+              <p><span class="text-brand-gold/70 font-bold w-32 inline-block">TC / Vergi No:</span> ${m.tc_kimlik || "—"}</p>
+              <p><span class="text-brand-gold/70 font-bold w-32 inline-block">Danışman:</span> <span class="bg-brand-gold text-brand-black px-2 py-0.5 rounded font-bold">${m.portfoy_sorumlusu || "Atanmadı"}</span></p>
+              <p><span class="text-brand-gold/70 font-bold w-32 inline-block">Aktif Dağılım:</span> ${dagilimStr}</p>
+            </div>
+            <div>
+              <h4 class="font-bold text-brand-black mb-3">Geçmiş ve Aktif Tüm Poliçeleri</h4>
+              <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                ${policeler.length === 0 ? '<p class="text-sm text-slate-500 italic">Kayıtlı poliçe yok.</p>' : policeler.map(p => `
+                  <div class="border border-slate-200 rounded-lg p-3 text-xs bg-white flex items-center justify-between hover:border-brand-gold transition-colors shadow-sm">
+                    <div>
+                      <p class="font-bold text-brand-black text-sm">${p.police_no} <span class="font-normal text-slate-500 ml-1">- ${p.sigorta_turu} (${p.islem_turu || 'Yeni Poliçe'})</span></p>
+                      <p class="text-slate-600 mt-1">Şirket: <span class="font-semibold">${p.sigorta_sirketi || "—"}</span> | Bitiş: <span class="font-semibold">${tarih(p.bitis_tarihi)}</span> | Prim: <span class="font-bold text-brand-black">${para(p.prim)}</span></p>
+                    </div>
+                    ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold px-3 py-1.5 rounded font-bold hover:bg-brand-dark">PDF</a>` : ""}
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+        modalAc(`${m.ad} ${m.soyad} Müşteri Kartı`, html, null, true);
+      } catch (e) {
+        alert("Müşteri detayları alınamadı: " + e.message);
+      }
+    }
+
+    async function yuklePoliceler() {
+      policeCache = await api("/api/policeler");
+      musteriCache = await api("/api/musteriler");
+      renderPoliceListesi();
+    }
+
+    function renderPoliceListesi() {
+      const filtrelenmis = policeCache.filter(p => {
+        if (aktifPoliceSekmesi === 'aktif') return !p.suresi_dolmus;
+        return p.suresi_dolmus;
+      });
+
+      document.getElementById("police-tbody").innerHTML = filtrelenmis.length === 0 
+        ? `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium italic">Bu sekmede kayıtlı poliçe bulunmuyor.</td></tr>`
+        : filtrelenmis.map((p) => {
+          const s = seviyeSinif(p.uyar_seviyesi);
+          const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
+          const durumHucresi = p.suresi_dolmus 
+            ? `<span class="text-xs text-slate-400 font-bold border border-slate-200 px-2.5 py-1 rounded-md">Süresi doldu</span>`
+            : `<span class="text-xs font-bold px-2.5 py-1 rounded-md shadow-sm ${s.badge}">${p.kalan_gun} gün</span>`;
+
+          const pdfButon = p.pdf_dosya_adi 
+            ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold text-xs px-3 py-1.5 rounded font-bold hover:bg-brand-dark transition-colors shadow-sm inline-block">PDF</a>` 
+            : `<span class="text-xs text-slate-400 mr-2 italic">PDF Yok</span>`;
+
+          return `<tr class="hover:bg-brand-gold/5 transition-colors">
+            <td class="px-4 py-4 font-bold text-brand-black">${p.police_no}</td>
+            <td class="px-4 py-4 font-medium">${ad}<br><span class="text-xs text-slate-400 font-normal">Sorumlu: ${p.musteri_portfoy_sorumlusu || '—'}</span></td>
+            <td class="px-4 py-4 font-medium">${p.sigorta_sirketi || '—'}<br><span class="text-xs text-brand-gold bg-brand-black px-1.5 py-0.5 rounded">${p.sigorta_turu}</span> <span class="text-xs text-slate-500">(${p.islem_turu})</span></td>
+            <td class="px-4 py-4 font-bold text-slate-700">${tarih(p.bitis_tarihi)}</td>
+            <td class="px-4 py-4">${durumHucresi}</td>
+            <td class="px-4 py-4 font-black text-brand-black">${para(p.prim)}</td>
+            <td class="px-4 py-4 text-right whitespace-nowrap space-x-1">
+              ${pdfButon}
+              <button class="text-brand-black bg-brand-gold/20 hover:bg-brand-gold hover:text-white px-2 py-1.5 rounded text-xs font-bold transition-colors" onclick="policeFormu(${p.id})">Düzenle</button>
+              <button class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-2 py-1.5 rounded text-xs font-bold transition-colors" onclick="policeSil(${p.id})">Sil</button>
+            </td>
+          </tr>`;
+        }).join("");
+    }
+
+    function input(name, label, value, type = "text", required = false) {
+      const reqStar = required ? '<span class="text-brand-gold ml-1">*</span>' : '';
+      return `<label class="block"><span class="text-sm font-bold text-brand-black mb-1 block">${label}${reqStar}</span>
+        <input name="${name}" type="${type}" value="${value ?? ""}" ${required ? "required" : ""}
+          class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold bg-slate-50 focus:bg-white transition-colors" /></label>`;
+    }
+
+    function danismanSelect(seciliDeger) {
+      const opts = DANISMANLAR.map(d => `<option value="${d}" ${d === seciliDeger ? 'selected' : ''}>${d}</option>`).join("");
+      return `<label class="block"><span class="text-sm font-bold text-brand-black mb-1 block">Portföy Sorumlusu / Danışman <span class="text-brand-gold">*</span></span>
+        <select name="portfoy_sorumlusu" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold focus:border-brand-gold bg-slate-50">${opts}</select></label>`;
+    }
+
+    function modalAc(baslik, htmlIcerik, onKaydetFn, sadeceKapat = false) {
+      document.getElementById("modal-baslik").textContent = baslik;
+      const formEl = document.getElementById("modal-form");
+      const kaydetBtn = document.getElementById("modal-kaydet");
+      
+      if (sadeceKapat) {
+        formEl.innerHTML = htmlIcerik;
+        kaydetBtn.classList.add("hidden");
+      } else {
+        formEl.innerHTML = htmlIcerik;
+        kaydetBtn.classList.remove("hidden");
+        kaydetBtn.onclick = () => {
+          if(!formEl.checkValidity()) {
+            formEl.reportValidity();
+            return;
+          }
+          onKaydetFn();
+        };
+      }
+      document.getElementById("modal-hata").classList.add("hidden");
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function modalKapat() {
+      document.getElementById("modal").classList.add("hidden");
+    }
+
+    function formData() {
+      const fd = new FormData(document.getElementById("modal-form"));
+      const o = {};
+      fd.forEach((v, k) => { o[k] = v === "" ? null : v; });
+      return o;
+    }
+
+    async function musteriFormu(id) {
+      const m = id ? musteriCache.find((x) => x.id === id) || (await api("/api/musteriler/" + id)) : {};
+      modalAc(
+        id ? "Müşteriyi Düzenle" : "Yeni Müşteri Oluştur",
+        input("ad", "Ad", m.ad, "text", true) +
+          input("soyad", "Soyad", m.soyad, "text", true) +
+          input("telefon", "Telefon", m.telefon, "tel", true) +
+          danismanSelect(m.portfoy_sorumlusu) +
+          input("tc_kimlik", "TC / Vergi No", m.tc_kimlik) +
+          `<label class="block"><span class="text-sm font-bold text-brand-black mb-1 block">Adres</span>
+           <textarea name="adres" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold bg-slate-50 focus:bg-white transition-colors">${m.adres || ""}</textarea></label>`,
+        async () => {
+          try {
+            const body = formData();
+            if (id) await api("/api/musteriler/" + id, { method: "PUT", body: JSON.stringify(body) });
+            else await api("/api/musteriler", { method: "POST", body: JSON.stringify(body) });
+            modalKapat();
+            yukleMusteriler();
+          } catch (e) {
+            const h = document.getElementById("modal-hata");
+            h.textContent = e.message;
+            h.classList.remove("hidden");
+          }
+        }
+      );
+    }
+
+    async function musteriSil(id) {
+      if (!confirm("Müşteri ve bağlı tüm poliçeleri KALICI OLARAK SİLİNECEK. Onaylıyor musunuz?")) return;
+      await api("/api/musteriler/" + id, { method: "DELETE" });
+      yukleMusteriler();
+    }
+
+    async function policeFormu(id, pdfVeri) {
+      if (!musteriCache.length) musteriCache = await api("/api/musteriler");
+      const p = id ? policeCache.find((x) => x.id === id) || (await api("/api/policeler/" + id)) : {};
+      
+      const eslesenId = pdfVeri && pdfVeri.musteri ? pdfVeri.musteri.id : p.musteri_id;
+      const yeniMusteri = pdfVeri && !pdfVeri.musteri_eslesti;
+      const opts = musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Danışmansız'})</option>`).join("");
+
+      const bannerMesaj = pdfVeri && pdfVeri.mevcut_police_id 
+        ? `<div class="text-sm rounded-lg px-4 py-3 mb-4 bg-sky-50 border border-sky-200 text-sky-800 font-bold shadow-sm">${pdfVeri.mesaj}</div>` 
+        : pdfVeri ? `<div class="text-sm rounded-lg px-4 py-3 mb-4 border shadow-sm ${pdfVeri.musteri_eslesti ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-bold" : "bg-amber-50 border-amber-200 text-amber-900 font-bold"}">${pdfVeri.mesaj || ""}</div>` : "";
+
+      const musteriBlok = yeniMusteri
+        ? `<div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3 mb-4 shadow-inner">
+             <p class="text-xs font-black text-brand-gold uppercase tracking-wider mb-2 border-b pb-2">Yeni Müşteri Zorunlu Bilgileri</p>
+             ${input("ad", "Müşteri Adı", pdfVeri.ad, "text", true)}
+             ${input("soyad", "Müşteri Soyadı", pdfVeri.soyad, "text", true)}
+             ${input("tc_kimlik", "TC / Vergi No", pdfVeri.tckn)}
+             ${input("telefon", "Telefon Numarası", "", "tel", true)}
+             ${danismanSelect("")}
+           </div>`
+        : `<label class="block mb-4"><span class="text-sm font-bold text-brand-black mb-1 block">Kayıtlı Müşteri <span class="text-brand-gold">*</span></span>
+          <select name="musteri_id" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold focus:border-brand-gold bg-slate-50">${opts}</select></label>`;
+      
+      const baslangicDeger = p.baslangic_tarihi || (pdfVeri && pdfVeri.baslangic_tarihi) || "";
+      const bitisDeger = p.bitis_tarihi || (pdfVeri && pdfVeri.bitis_tarihi) || "";
+      const sirketDeger = p.sigorta_sirketi || (pdfVeri && pdfVeri.sigorta_sirketi) || "";
+      const islemTuruDeger = p.islem_turu || (pdfVeri && pdfVeri.islem_turu) || "Yeni Poliçe";
+      const pdfDosyaAdiDeger = p.pdf_dosya_adi || (pdfVeri && pdfVeri.pdf_dosya_adi) || "";
+
+      let pdfGostergeHtml = "";
+      if (id && pdfDosyaAdiDeger) {
+        pdfGostergeHtml = `<div class="bg-brand-black border border-brand-gold/30 rounded-xl p-4 flex items-center justify-between text-sm mb-4 shadow-lg">
+          <div class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-gold" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg><span class="text-white font-bold">Orijinal Poliçe Yüklü</span></div>
+          <a href="/api/policeler/${id}/pdf" target="_blank" class="bg-brand-gold text-brand-black text-xs px-4 py-2 rounded-lg font-black hover:bg-brand-goldhover shadow-sm">PDF Görüntüle</a>
+        </div>`;
+      } else if (pdfDosyaAdiDeger) {
+        pdfGostergeHtml = `<div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 flex items-center justify-center text-sm mb-4 shadow-sm">
+          <span class="text-emerald-800 font-bold">✓ PDF Başarıyla Analiz Edildi ve Sisteme Eklendi</span>
+        </div>`;
+      }
+
+      modalAc(
+        id ? "Poliçeyi Düzenle" : pdfVeri ? "Yapay Zeka ile Aktarılan Poliçe" : "Manuel Poliçe Ekle",
+        bannerMesaj +
+          pdfGostergeHtml +
+          `<input type="hidden" name="pdf_dosya_adi" value="${pdfDosyaAdiDeger}" />` +
+          musteriBlok +
+          `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">` +
+          input("police_no", "Poliçe No", p.police_no || (pdfVeri && pdfVeri.police_no), "text", true) +
+          input("sigorta_turu", "Sigorta Branşı", p.sigorta_turu || (pdfVeri && pdfVeri.sigorta_turu), "text", true) +
+          input("sigorta_sirketi", "Sigorta Şirketi", sirketDeger) +
+          `<label class="block"><span class="text-sm font-bold text-brand-black mb-1 block">İşlem Türü</span>
+           <select name="islem_turu" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-slate-50 focus:border-brand-gold">
+             ${["Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"].map(it => `<option ${islemTuruDeger === it ? "selected" : ""}>${it}</option>`).join("")}
+           </select></label>` +
+          input("baslangic_tarihi", "Başlangıç", baslangicDeger, "date", true) +
+          input("bitis_tarihi", "Bitiş", bitisDeger, "date", true) +
+          input("prim", "Prim (₺)", p.prim != null ? p.prim : pdfVeri && pdfVeri.prim, "number") +
+          `<label class="block"><span class="text-sm font-bold text-brand-black mb-1 block">Durum</span>
+           <select name="durum" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-slate-50 focus:border-brand-gold">
+             ${["aktif", "yenilendi", "iptal"].map((d) => `<option ${p.durum === d ? "selected" : ""}>${d.toUpperCase()}</option>`).join("")}
+           </select></label>` +
+          `</div>` +
+          `<label class="block"><span class="text-sm font-bold text-brand-black mb-1 block">Açıklama / Not</span>
+           <textarea name="aciklama" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:border-brand-gold">${p.aciklama || ""}</textarea></label>`,
+        async () => {
+          try {
+            const body = formData();
+            let musteriId = body.musteri_id ? Number(body.musteri_id) : null;
+            if (yeniMusteri) {
+              const kayit = await api("/api/musteriler", {
+                method: "POST",
+                body: JSON.stringify({ ad: body.ad, soyad: body.soyad, tc_kimlik: body.tc_kimlik, telefon: body.telefon, portfoy_sorumlusu: body.portfoy_sorumlusu }),
+              });
+              musteriId = kayit.id;
+            }
+            if (!musteriId) throw new Error("Müşteri seçin");
+            const policeGovde = {
+              musteri_id: musteriId,
+              police_no: body.police_no,
+              sigorta_turu: body.sigorta_turu,
+              sigorta_sirketi: body.sigorta_sirketi,
+              islem_turu: body.islem_turu,
+              baslangic_tarihi: body.baslangic_tarihi,
+              bitis_tarihi: body.bitis_tarihi,
+              prim: body.prim != null ? Number(body.prim) : null,
+              durum: body.durum ? body.durum.toLowerCase() : "aktif",
+              aciklama: body.aciklama,
+              pdf_dosya_adi: body.pdf_dosya_adi || null,
+            };
+            if (id) await api("/api/policeler/" + id, { method: "PUT", body: JSON.stringify(policeGovde) });
+            else await api("/api/policeler", { method: "POST", body: JSON.stringify(policeGovde) });
+            modalKapat();
+            yuklePoliceler();
+          } catch (e) {
+            const h = document.getElementById("modal-hata");
+            h.textContent = "Hata: " + e.message;
+            h.classList.remove("hidden");
+          }
+        }
+      );
+    }
+
+    async function pdfGonder(file) {
+      const durum = document.getElementById("pdf-durum");
+      const dosyaAdi = file && (file.name || file.fileName) ? String(file.name || file.fileName) : "dosya.pdf";
+      if (!file || !dosyaAdi.toLowerCase().endsWith(".pdf")) { alert("Lütfen geçerli bir PDF seçin"); return; }
+      durum.classList.remove("hidden");
+      durum.textContent = "Yapay Zeka Okuyor, Lütfen Bekleyin...";
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch(API + "/api/upload-policy", { method: "POST", body: fd });
+        const veri = await res.json();
+        if (!res.ok) throw new Error(veri.detail || "Yükleme başarısız");
+        durum.textContent = veri.mesaj;
+        goster("policeler");
+        await policeFormu(null, veri);
+      } catch (e) {
+        durum.textContent = "Analiz Hatası: " + e.message;
+        alert(e.message);
+      }
+    }
+
+    function pdfDropKur() {
+      const drop = document.getElementById("pdf-drop");
+      const input = document.getElementById("pdf-input");
+      if (!drop || !input) return;
+      input.addEventListener("change", () => { if (input.files[0]) pdfGonder(input.files[0]); input.value = ""; });
+      ["dragenter", "dragover"].forEach((ev) => { drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("border-brand-gold", "bg-brand-gold/10"); }); });
+      ["dragleave", "drop"].forEach((ev) => { drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("border-brand-gold", "bg-brand-gold/10"); }); });
+      drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) pdfGonder(f); });
+    }
+
+    async function policeSil(id) {
+      if (!confirm("Poliçe silinsin mi?")) return;
+      await api("/api/policeler/" + id, { method: "DELETE" });
+      yuklePoliceler();
+    }
+
+    let araZaman;
+    const musteriAraEl = document.getElementById("musteri-ara");
+    if (musteriAraEl) {
+      musteriAraEl.addEventListener("input", (e) => {
+        clearTimeout(araZaman);
+        araZaman = setTimeout(() => yukleMusteriler(e.target.value), 250);
+      });
+    }
+
+    function toggleCompareMode() {
+      const isChecked = document.getElementById("fin-compare-mode").checked;
+      const compDiv = document.getElementById("fin-compare-dates");
+      if (isChecked) compDiv.classList.remove("hidden");
+      else compDiv.classList.add("hidden");
+    }
+
+    async function yukleFinansalHazirlik() {
+      if(!policeCache.length) policeCache = await api("/api/policeler");
+      
+      const sirketler = new Set();
+      const sorumlular = new Set();
+      const branslar = new Set();
+      
+      policeCache.forEach(p => {
+        if(p.sigorta_sirketi) sirketler.add(p.sigorta_sirketi.toUpperCase());
+        if(p.musteri_portfoy_sorumlusu) sorumlular.add(p.musteri_portfoy_sorumlusu.toUpperCase());
+        if(p.sigorta_turu) branslar.add(p.sigorta_turu.toUpperCase());
+      });
+
+      const doldur = (id, setVal) => {
+        const el = document.getElementById(id);
+        el.innerHTML = '<option value="">Tümü</option>' + Array.from(setVal).sort().map(v => `<option value="${v}">${v}</option>`).join("");
+      };
+
+      doldur("fin-sirket", sirketler);
+      doldur("fin-sorumlu", sorumlular);
+      doldur("fin-brans", branslar);
+    }
+
+    function hesaplaFiltreliVeri(startDate, endDate, sirket, sorumlu, brans) {
+      let filtered = policeCache;
+      
+      if(startDate) { const d = new Date(startDate); filtered = filtered.filter(p => new Date(p.baslangic_tarihi) >= d); }
+      if(endDate) { const d = new Date(endDate); filtered = filtered.filter(p => new Date(p.baslangic_tarihi) <= d); }
+      if(sirket) filtered = filtered.filter(p => p.sigorta_sirketi && p.sigorta_sirketi.toUpperCase() === sirket);
+      if(sorumlu) filtered = filtered.filter(p => p.musteri_portfoy_sorumlusu && p.musteri_portfoy_sorumlusu.toUpperCase() === sorumlu);
+      if(brans) filtered = filtered.filter(p => p.sigorta_turu && p.sigorta_turu.toUpperCase() === brans);
+
+      let totalCiro = 0;
+      let totalKar = 0;
+      let totalAdet = filtered.length;
+      let bransDagilimi = {};
+      let sirketDagilimi = {};
+
+      filtered.forEach(p => {
+        if(p.prim) totalCiro += p.prim;
+        if(p.komisyon) totalKar += p.komisyon;
+        
+        let b = (p.sigorta_turu || "Bilinmiyor").toUpperCase();
+        if(!bransDagilimi[b]) bransDagilimi[b] = {adet: 0, ciro: 0, kar: 0};
+        bransDagilimi[b].adet += 1;
+        bransDagilimi[b].ciro += p.prim || 0;
+        bransDagilimi[b].kar += p.komisyon || 0;
+
+        let s = (p.sigorta_sirketi || "Bilinmiyor").toUpperCase();
+        if(!sirketDagilimi[s]) sirketDagilimi[s] = {adet: 0, ciro: 0, kar: 0};
+        sirketDagilimi[s].adet += 1;
+        sirketDagilimi[s].ciro += p.prim || 0;
+        sirketDagilimi[s].kar += p.komisyon || 0;
+      });
+
+      return { totalCiro, totalKar, totalAdet, bransDagilimi, sirketDagilimi };
+    }
+
+    function diffHTML(val1, val2, formatPara=false) {
+      if(!val2 && val2 !== 0) return "";
+      const diff = val1 - val2;
+      if (diff === 0) return `<span class="text-slate-400">Değişim yok</span>`;
+      const isPos = diff > 0;
+      const color = isPos ? "text-emerald-500" : "text-red-500";
+      const sign = isPos ? "▲" : "▼";
+      const txt = formatPara ? para(Math.abs(diff)) : Math.abs(diff);
+      return `<span class="${color} font-bold">${sign} ${txt}</span> <span class="text-slate-400 font-normal">fark</span>`;
+    }
+
+    function renderDagilimTable(dagilimObj, elementId) {
+      const arr = Object.entries(dagilimObj).sort((a,b) => b[1].kar - a[1].kar);
+      if(arr.length === 0) {
+        document.getElementById(elementId).innerHTML = '<p class="text-slate-400 italic text-sm">Veri bulunamadı.</p>';
+        return;
+      }
+      let html = '<table class="w-full text-sm"><thead class="text-left text-slate-500 border-b"><tr><th class="pb-2">İsim</th><th class="pb-2">Adet</th><th class="pb-2 text-right">Kar</th></tr></thead><tbody class="divide-y divide-slate-100">';
+      arr.forEach(([isim, vals]) => {
+        html += `<tr><td class="py-2 font-bold text-brand-black">${isim}</td><td class="py-2 font-medium">${vals.adet}</td><td class="py-2 text-right text-brand-gold font-bold">${para(vals.kar)}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById(elementId).innerHTML = html;
+    }
+
+    function calistirFinansalRapor() {
+      const sDate = document.getElementById("fin-start").value;
+      const eDate = document.getElementById("fin-end").value;
+      const sirket = document.getElementById("fin-sirket").value;
+      const sorumlu = document.getElementById("fin-sorumlu").value;
+      const brans = document.getElementById("fin-brans").value;
+
+      const v1 = hesaplaFiltreliVeri(sDate, eDate, sirket, sorumlu, brans);
+      
+      document.getElementById("fin-metrics").classList.remove("hidden");
+      document.getElementById("fin-details").classList.remove("hidden");
+
+      document.getElementById("fin-ciro").textContent = para(v1.totalCiro);
+      document.getElementById("fin-kar").textContent = para(v1.totalKar);
+      document.getElementById("fin-adet").textContent = v1.totalAdet + " Adet";
+
+      renderDagilimTable(v1.bransDagilimi, "fin-brans-liste");
+      renderDagilimTable(v1.sirketDagilimi, "fin-sirket-liste");
+
+      const compareMode = document.getElementById("fin-compare-mode").checked;
+      const elCiroDiff = document.getElementById("fin-ciro-diff");
+      const elKarDiff = document.getElementById("fin-kar-diff");
+      const elAdetDiff = document.getElementById("fin-adet-diff");
+
+      if(compareMode) {
+        const sDate2 = document.getElementById("fin-start2").value;
+        const eDate2 = document.getElementById("fin-end2").value;
+        const v2 = hesaplaFiltreliVeri(sDate2, eDate2, sirket, sorumlu, brans);
+        
+        elCiroDiff.innerHTML = diffHTML(v1.totalCiro, v2.totalCiro, true);
+        elKarDiff.innerHTML = diffHTML(v1.totalKar, v2.totalKar, true);
+        elAdetDiff.innerHTML = diffHTML(v1.totalAdet, v2.totalAdet, false);
+        
+        elCiroDiff.classList.remove("hidden");
+        elKarDiff.classList.remove("hidden");
+        elAdetDiff.classList.remove("hidden");
+      } else {
+        elCiroDiff.classList.add("hidden");
+        elKarDiff.classList.add("hidden");
+        elAdetDiff.classList.add("hidden");
+      }
+    }
+
+    yukleDashboard();
+    pdfDropKur();
+  </script>
+</body>
+</html>
