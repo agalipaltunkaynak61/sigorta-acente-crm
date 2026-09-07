@@ -527,7 +527,7 @@
     async function pdfGonder(file) {
       const durum = document.getElementById("pdf-durum");
       const dosyaAdi = file && (file.name || file.fileName) ? String(file.name || file.fileName) : "dosya.pdf";
-      if (!file || !dosyaAdi.toLowerCase().endswith(".pdf")) { alert("Lütfen PDF seçin"); return; }
+      if (!file || !dosyaAdi.toLowerCase().endsWith(".pdf")) { alert("Lütfen PDF seçin"); return; }
       durum.classList.remove("hidden"); durum.textContent = "Yapay Zeka Okuyor, Bekleyin...";
       document.getElementById("pdf-drop").classList.add("animate-pulse", "border-brand-gold");
       try {
