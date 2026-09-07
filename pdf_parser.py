@@ -6,7 +6,6 @@ from google import genai
 from google.genai import types
 import os
 
-# Render ortamındaki GCP_API_KEY değişkenini güvenli bir şekilde okuyoruz
 GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GCP_API_KEY")
 
 def pdf_metni_al(dosya: bytes) -> str:
@@ -47,7 +46,8 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     {metin[:4000]}
     """
 
-    max_deneme = 2
+    # 5 RPM limitini aşmamak için güvenli deneme ve bekleme döngüsü
+    max_deneme = 3
     response = None
     for deneme in range(max_deneme):
         try:
@@ -62,12 +62,14 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
             if response and response.text:
                 break
         except Exception as e:
+            err_str = str(e)
             if deneme == max_deneme - 1:
-                err_str = str(e)
+                if "429" in err_str or "ResourceExhausted" in err_str or "quota" in err_str.lower():
+                    raise ValueError("Ücretsiz API dakika sınırı (5 istek/dk) doldu. Lütfen 10-15 saniye bekleyip tekrar deneyin.")
                 if "503" in err_str or "UNAVAILABLE" in err_str:
-                    raise ValueError("Google sunucuları anlık yoğunluk yaşadı (503). Lütfen birkaç saniye sonra tekrar deneyin.")
+                    raise ValueError("Google sunucuları yoğun. Birkaç saniye sonra tekrar deneyin.")
                 raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
-            time.sleep(1.5)
+            time.sleep(12) # Kota sınırına takılmamak için akıllı bekleme
 
     if not response or not response.text:
         raise ValueError("Yapay zekadan yanıt alınamadı.")
