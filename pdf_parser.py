@@ -1,5 +1,6 @@
 import io
 import json
+import time
 import pdfplumber
 from google import genai
 from google.genai import types
@@ -46,25 +47,32 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     {metin[:4000]}
     """
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.1
+    max_deneme = 2
+    response = None
+    for deneme in range(max_deneme):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.1
+                )
             )
-        )
-        if not response or not response.text:
-            raise ValueError("Yapay zekadan yanıt alınamadı.")
-        veri = json.loads(response.text)
-    except Exception as e:
-        err_str = str(e)
-        if "503" in err_str or "UNAVAILABLE" in err_str:
-            raise ValueError("Google sunucuları anlık yoğunluk yaşadı. Lütfen birkaç saniye sonra tekrar deneyin.")
-        if "429" in err_str or "ResourceExhausted" in err_str or "quota" in err_str.lower():
-            raise ValueError("API kota sınırına ulaşıldı. Lütfen kısa bir süre bekleyin.")
-        raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
+            if response and response.text:
+                break
+        except Exception as e:
+            if deneme == max_deneme - 1:
+                err_str = str(e)
+                if "503" in err_str or "UNAVAILABLE" in err_str:
+                    raise ValueError("Google sunucuları anlık yoğunluk yaşadı (503). Lütfen birkaç saniye sonra tekrar deneyin.")
+                raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
+            time.sleep(1.5)
+
+    if not response or not response.text:
+        raise ValueError("Yapay zekadan yanıt alınamadı.")
+
+    veri = json.loads(response.text)
 
     ad = veri.get("ad") or ""
     soyad = veri.get("soyad") or ""
