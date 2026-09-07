@@ -471,15 +471,13 @@
       const danismanInput = document.getElementById("yeni-danisman-input");
       
       if (el.value) {
-        // Mevcut müşteri seçildi -> Yeni müşteri alanlarını tamamen gizle ve zorunlulukları kaldır
         yeniAlanlar.classList.add("hidden");
-        telInput.removeAttribute("required");
-        danismanInput.removeAttribute("required");
+        if(telInput) telInput.removeAttribute("required");
+        if(danismanInput) danismanInput.removeAttribute("required");
       } else {
-        // Boş bırakıldı -> Yeni müşteri oluşturulacak, alanları aç ve zorunlu yap
         yeniAlanlar.classList.remove("hidden");
-        telInput.setAttribute("required", "true");
-        danismanInput.setAttribute("required", "true");
+        if(telInput) telInput.setAttribute("required", "true");
+        if(danismanInput) danismanInput.setAttribute("required", "true");
       }
     }
 
@@ -581,11 +579,81 @@
         }
       );
 
-      // Modal açıldıktan hemen sonra mevcut müşteri seçiliyse alanları gizle
       setTimeout(() => {
         const selectEl = document.querySelector('select[name="musteri_id"]');
         if (selectEl) musteriSecimDegisti(selectEl);
       }, 50);
+    }
+
+    // --- FİNANSAL ANALİZ FONKSİYONLARI ---
+    async function yukleFinansalHazirlik() {
+      try {
+        if (!policeCache.length) policeCache = await api("/api/policeler");
+        
+        const sirketler = [...new Set(policeCache.map(p => p.sigorta_sirketi).filter(Boolean))];
+        const branslar = [...new Set(policeCache.map(p => p.sigorta_turu).filter(Boolean))];
+        const sorumlular = DANISMANLAR;
+
+        document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + sirketler.map(s => `<option value="${s}">${s}</option>`).join("");
+        document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + sorumlular.map(s => `<option value="${s}">${s}</option>`).join("");
+        document.getElementById("fin-brans").innerHTML = '<option value="">Tümü</option>' + branslar.map(b => `<option value="${b}">${b}</option>`).join("");
+
+        const bugun = new Date().toISOString().split('T')[0];
+        const yilBasi = new Date().getFullYear() + "-01-01";
+        if(!document.getElementById("fin-start").value) document.getElementById("fin-start").value = yilBasi;
+        if(!document.getElementById("fin-end").value) document.getElementById("fin-end").value = bugun;
+      } catch (e) {
+        console.error("Finansal hazırlık yüklenemedi:", e);
+      }
+    }
+
+    function toggleCompareMode() {
+      const compareMode = document.getElementById("fin-compare-mode").checked;
+      document.getElementById("fin-compare-dates").classList.toggle("hidden", !compareMode);
+    }
+
+    async function calistirFinansalRapor() {
+      try {
+        const start = document.getElementById("fin-start").value;
+        const end = document.getElementById("fin-end").value;
+        const sirket = document.getElementById("fin-sirket").value;
+        const sorumlu = document.getElementById("fin-sorumlu").value;
+        const brans = document.getElementById("fin-brans").value;
+
+        let query = `?start_date=${start}&end_date=${end}`;
+        if (sirket) query += `&sigorta_sirketi=${encodeURIComponent(sirket)}`;
+        if (sorumlu) query += `&portfoy_sorumlusu=${encodeURIComponent(sorumlu)}`;
+        if (brans) query += `&sigorta_turu=${encodeURIComponent(brans)}`;
+
+        const rapor = await api("/api/finansal/rapor" + query);
+        
+        document.getElementById("fin-metrics").classList.remove("hidden");
+        document.getElementById("fin-details").classList.remove("hidden");
+
+        document.getElementById("fin-ciro").textContent = para(rapor.toplam_ciro);
+        document.getElementById("fin-kar").textContent = para(rapor.tahmini_komisyon);
+        document.getElementById("fin-adet").textContent = (rapor.toplam_adet || 0) + " Adet";
+
+        const bransListe = document.getElementById("fin-brans-liste");
+        const sirketListe = document.getElementById("fin-sirket-liste");
+
+        bransListe.innerHTML = Object.entries(rapor.brans_dagilimi || {}).map(([k, v]) => `
+          <div class="flex justify-between items-center p-3 border-b border-slate-100 text-sm">
+            <span class="font-semibold text-slate-700">${k}</span>
+            <span class="font-bold text-brand-black">${para(v)}</span>
+          </div>
+        `).join("") || '<p class="p-4 text-sm text-slate-400 italic text-center">Veri bulunamadı</p>';
+
+        sirketListe.innerHTML = Object.entries(rapor.sirket_dagilimi || {}).map(([k, v]) => `
+          <div class="flex justify-between items-center p-3 border-b border-slate-100 text-sm">
+            <span class="font-semibold text-slate-700">${k}</span>
+            <span class="font-bold text-brand-black">${para(v)}</span>
+          </div>
+        `).join("") || '<p class="p-4 text-sm text-slate-400 italic text-center">Veri bulunamadı</p>';
+
+      } catch (e) {
+        alert("Rapor oluşturulamadı: " + e.message);
+      }
     }
 
     function pdfSecildi(event) {
@@ -625,7 +693,7 @@
       drop.addEventListener("drop", (e) => { 
         e.preventDefault();
         const f = e.dataTransfer.files[0]; 
-        if (f) pdfGond(f); 
+        if (f) pdfGonder(f); 
       });
     }
 
