@@ -7,7 +7,7 @@ from google.genai import types
 import os
 
 # Render ortamındaki GCP_API_KEY değişkenini güvenli bir şekilde okuyoruz
-GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GCP_API_KEY")
 
 def pdf_metni_al(dosya: bytes) -> str:
     sayfalar = []
@@ -27,8 +27,9 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
 
     client = genai.Client(api_key=GEMINI_API_KEY)
     
+    # Metin uzunluğunu 8000 karakterle sınırlandırarak analiz hızını maksimuma çıkarıyoruz
     prompt = f"""
-    Aşağıda metni verilen sigorta poliçesini analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
+    Aşağıdaki sigorta poliçesini analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
 
     Alanlar:
     - ad: Müşterinin adı
@@ -44,26 +45,33 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     - brut_prim: Sayısal float değer (Örn: 28469.07)
 
     Poliçe Metni:
-    {metin[:12000]}
+    {metin[:8000]}
     """
 
-    max_deneme = 5
+    # Uzun beklemeleri (dakikalarca takılmayı) önleyen hızlı ve akıllı deneme döngüsü
+    max_deneme = 3
+    response = None
     for deneme in range(max_deneme):
         try:
             response = client.models.generate_content(
                 model="gemini-3.6-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
+                    response_mime_type="application/json",
+                    temperature=0.1
                 )
             )
-            veri = json.loads(response.text)
-            break
+            if response and response.text:
+                break
         except Exception as e:
             if deneme == max_deneme - 1:
-                raise e
-            # Sunucu yoğunluklarında (503) kademeli olarak artan bekleme süresi
-            time.sleep(4 + (deneme * 2))
+                raise ValueError("Yapay zeka yoğunluk hatası (503): Sunucu şu an çok yoğun. Lütfen 10-15 saniye sonra tekrar deneyin.")
+            time.sleep(1) # Uzun uzun bekletmek yerine 1 saniye arayla hızlıca tekrar dener
+
+    if not response or not response.text:
+        raise ValueError("Yapay zekadan yanıt alınamadı.")
+
+    veri = json.loads(response.text)
 
     ad = veri.get("ad") or ""
     soyad = veri.get("soyad") or ""
