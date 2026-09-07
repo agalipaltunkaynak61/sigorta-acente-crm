@@ -27,7 +27,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     prompt = f"""
-    Aşağıdaki sigorta poliçesini analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
+    Aşağıdaki sigorta poliçesini dikkatlice analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
 
     Alanlar:
     - ad: Müşterinin adı
@@ -35,13 +35,14 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     - tckn: TC Kimlik veya Vergi No
     - police_no: Poliçe numarası
     - sigorta_sirketi: Sigorta şirketinin tam adı (Örn: AXA SİGORTA A.Ş.)
-    - sigorta_turu: Poliçe türü (Örn: Trafik, Kasko, DASK)
-    - islem_turu: Poliçenin mahiyeti nedir? "Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"
+    - sigorta_turu: Poliçe türü (Örn: Trafik, Kasko, DASK, Konut, TSS, İş Yeri)
+    - islem_turu: Poliçenin mahiyeti: "Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"
     - baslangic_tarihi: YYYY-MM-DD formatında başlangıç tarihi
     - bitis_tarihi: YYYY-MM-DD formatında bitiş tarihi
     - net_prim: Sayısal float değer
     - brut_prim: Sayısal float değer
-    - aciklama: Poliçenin türüne göre en kritik detay bilgileri. Eğer Trafik/Kasko ise: "Plaka: ..., Araç: ..., Şasi No: ...". Eğer DASK/Konut ise: "Adres: ..., m2: ..., Bina Yılı: ...". Sağlık ise kapsamı. Sadece kısa, net ve tek satırlık bir bilgi yaz.
+    - arac_bilgisi: Eğer poliçe Trafik veya Kasko ise, aracın Plaka, Marka, Model ve Model Yılı bilgilerini yaz (Örn: "34 ABC 123 - Ford Focus 2022"). Araç poliçesi değilse boş bırakın (null).
+    - varlik_bilgisi: Eğer poliçe DASK veya Konut/İş Yeri ise, adres ve metrekare (m2) bilgilerini yaz (Örn: "Atatürk Mah. No:12 D:3, 110 m2"). Değilse boş bırakın (null).
 
     Poliçe Metni:
     {metin[:4000]}
@@ -95,5 +96,6 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
         "net_prim": veri.get("net_prim"),
         "brut_prim": brut,
         "prim": brut,
-        "aciklama": veri.get("aciklama") or ""
+        "arac_bilgisi": veri.get("arac_bilgisi"),
+        "varlik_bilgisi": veri.get("varlik_bilgisi")
     }

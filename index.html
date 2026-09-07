@@ -359,7 +359,7 @@
               <div class="space-y-4 max-h-72 overflow-y-auto pr-2">
                 ${policeler.length === 0 ? '<p class="text-sm text-slate-500 italic p-4 bg-slate-50 rounded-xl text-center">Kayıtlı poliçe bulunamadı.</p>' : policeler.map(p => `
                   <div class="border border-slate-100 rounded-xl p-4 bg-white flex flex-col hover:border-brand-gold/30 hover:shadow-md transition-all group">
-                    <div class="flex justify-between items-start mb-3">
+                    <div class="flex justify-between items-start mb-2">
                       <div>
                         <p class="font-bold text-brand-black text-sm mb-1">${p.police_no} <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-2">${p.sigorta_turu}</span></p>
                         <p class="text-xs text-slate-500 font-medium space-x-2">
@@ -370,7 +370,8 @@
                       </div>
                       ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-gold hover:text-white transition-colors opacity-0 group-hover:opacity-100">PDF Aç</a>` : `<span class='text-[10px] text-slate-400 font-bold border px-2 py-1 rounded bg-slate-50'>PDF YOK</span>`}
                     </div>
-                    ${p.aciklama ? `<div class="bg-slate-50 border border-slate-100 p-2.5 rounded-lg text-xs text-slate-600 font-medium leading-relaxed"><span class="font-bold text-brand-gold">Polİçe Bİlgİsİ:</span> ${p.aciklama}</div>` : ''}
+                    ${p.arac_bilgisi ? `<div class="bg-sky-50 border border-sky-100 p-2.5 rounded-lg text-xs text-sky-900 font-medium mt-2 flex items-center gap-2"><svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg><span><strong>Araç Bilgisi:</strong> ${p.arac_bilgisi}</span></div>` : ''}
+                    ${p.varlik_bilgisi ? `<div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-lg text-xs text-emerald-900 font-medium mt-2 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><span><strong>Gayrimenkul / DASK Bilgisi:</strong> ${p.varlik_bilgisi}</span></div>` : ''}
                   </div>
                 `).join("")}
               </div>
@@ -477,7 +478,8 @@
       modalAc(id ? "Poliçe Detayları" : (pdfVeri ? "Yapay Zeka Analiz Sonucu" : "Manuel Poliçe Ekle"),
         `${pdfVeri ? `<div class="text-sm rounded-xl px-5 py-4 mb-6 bg-amber-50 text-amber-900 border font-medium">${pdfVeri.mesaj}</div>` : ""}
          <input type="hidden" name="pdf_dosya_adi" value="${p.pdf_dosya_adi || (pdfVeri && pdfVeri.pdf_dosya_adi) || ''}" />
-         <input type="hidden" name="aciklama" value="${p.aciklama || (pdfVeri && pdfVeri.aciklama) || ''}" />
+         <input type="hidden" name="arac_bilgisi" value="${p.arac_bilgisi || (pdfVeri && pdfVeri.arac_bilgisi) || ''}" />
+         <input type="hidden" name="varlik_bilgisi" value="${p.varlik_bilgisi || (pdfVeri && pdfVeri.varlik_bilgisi) || ''}" />
          ${musteriBlok}
          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
            ${input("police_no", "Poliçe No", p.police_no || (pdfVeri && pdfVeri.police_no), "text", true)}
@@ -498,7 +500,20 @@
               musteriId = kayit.id;
             }
             if (!musteriId) throw new Error("Müşteri hatası");
-            const policeGovde = { musteri_id: musteriId, police_no: body.police_no, sigorta_turu: body.sigorta_turu, sigorta_sirketi: body.sigorta_sirketi, islem_turu: body.islem_turu, baslangic_tarihi: body.baslangic_tarihi, bitis_tarihi: body.bitis_tarihi, prim: body.prim ? Number(body.prim) : null, durum: body.durum, pdf_dosya_adi: body.pdf_dosya_adi, aciklama: body.aciklama };
+            const policeGovde = { 
+              musteri_id: musteriId, 
+              police_no: body.police_no, 
+              sigorta_turu: body.sigorta_turu, 
+              sigorta_sirketi: body.sigorta_sirketi, 
+              islem_turu: body.islem_turu, 
+              baslangic_tarihi: body.baslangic_tarihi, 
+              bitis_tarihi: body.bitis_tarihi, 
+              prim: body.prim ? Number(body.prim) : null, 
+              durum: body.durum, 
+              pdf_dosya_adi: body.pdf_dosya_adi, 
+              arac_bilgisi: body.arac_bilgisi,
+              varlik_bilgisi: body.varlik_bilgisi 
+            };
             await api(id ? "/api/policeler/" + id : "/api/policeler", { method: id ? "PUT" : "POST", body: JSON.stringify(policeGovde) });
             modalKapat(); yuklePoliceler();
           } catch (e) { const h = document.getElementById("modal-hata"); h.textContent = "Hata: " + e.message; h.classList.remove("hidden"); }
@@ -509,12 +524,11 @@
     async function pdfGonder(file) {
       const durum = document.getElementById("pdf-durum");
       const dosyaAdi = file && (file.name || file.fileName) ? String(file.name || file.fileName) : "dosya.pdf";
-      if (!file || !dosyaAdi.toLowerCase().endsWith(".pdf")) { alert("Lütfen PDF seçin"); return; }
+      if (!file || !dosyaAdi.toLowerCase().endswith(".pdf")) { alert("Lütfen PDF seçin"); return; }
       durum.classList.remove("hidden"); durum.textContent = "Yapay Zeka Okuyor, Bekleyin...";
       document.getElementById("pdf-drop").classList.add("animate-pulse", "border-brand-gold");
       try {
         const fd = new FormData(); fd.append("file", file);
-        // HATA DÜZELTİLDİ: /api/upload-parse adresine gönderilmeli
         const res = await fetch(API + "/api/upload-parse", { method: "POST", body: fd });
         const veri = await res.json();
         document.getElementById("pdf-drop").classList.remove("animate-pulse", "border-brand-gold");

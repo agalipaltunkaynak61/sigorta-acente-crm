@@ -48,7 +48,8 @@ class Police(Base):
     bitis_tarihi = Column(Date, nullable=False)
     prim = Column(Float, nullable=True)
     durum = Column(String(30), default="aktif")
-    aciklama = Column(Text, nullable=True)
+    arac_bilgisi = Column(String(255), nullable=True) # Plaka, Marka, Model
+    varlik_bilgisi = Column(Text, nullable=True)     # Adres, m2
     pdf_dosya_adi = Column(String(255), nullable=True)
 
 def init_db():
@@ -61,7 +62,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.1.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -141,7 +142,8 @@ def police_to_out(p: Police, db_session: Session) -> dict:
         "bitis_tarihi": p.bitis_tarihi,
         "prim": p.prim,
         "durum": p.durum,
-        "aciklama": p.aciklama,
+        "arac_bilgisi": p.arac_bilgisi,
+        "varlik_bilgisi": p.varlik_bilgisi,
         "pdf_dosya_adi": p.pdf_dosya_adi,
         "kalan_gun": 0 if suresi_dolmus else kalan,
         "suresi_dolmus": suresi_dolmus,
@@ -254,6 +256,54 @@ def api_yaklasan(gun: int = 30, db: Session = Depends(get_db)):
     kayitlar = db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= bugun, Police.bitis_tarihi <= bugun + timedelta(days=gun)).all()
     return [police_to_out(p, db) for p in kayitlar]
 
+@app.post("/api/policeler", status_code=201)
+def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
+    try:
+        baslangic = parse_tarih(payload.get("baslangic_tarihi"))
+        bitis = parse_tarih(payload.get("bitis_tarihi"))
+        prim_deger = float(payload.get("prim") or 0) if payload.get("prim") is not None else None
+
+        police = Police(
+            musteri_id=payload.get("musteri_id"),
+            police_no=payload.get("police_no"),
+            sigorta_turu=payload.get("sigorta_turu"),
+            sigorta_sirketi=payload.get("sigorta_sirketi"),
+            islem_turu=payload.get("islem_turu", "Yeni Poliçe"),
+            baslangic_tarihi=baslangic,
+            bitis_tarihi=bitis,
+            prim=prim_deger,
+            durum=str(payload.get("durum", "aktif")).lower(),
+            arac_bilgisi=payload.get("arac_bilgisi"),
+            varlik_bilgisi=payload.get("varlik_bilgisi"),
+            pdf_dosya_adi=payload.get("pdf_dosya_adi")
+        )
+        db.add(police)
+        db.commit()
+        db.refresh(police)
+        return police_to_out(police, db)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.put("/api/policeler/{id}")
+def api_police_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
+    try:
+        p = db.query(Police).filter(Police.id == id).first()
+        if not p: raise HTTPException(404, "Poliçe bulunamadı")
+        
+        for k, v in payload.items():
+            if k in ["baslangic_tarihi", "bitis_tarihi"] and v:
+                setattr(p, k, parse_tarih(v))
+            elif k == "prim":
+                p.prim = float(v) if v is not None else None
+            elif hasattr(p, k):
+                setattr(p, k, v)
+        
+        db.commit()
+        db.refresh(p)
+        return police_to_out(p, db)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.delete("/api/policeler/{id}")
 def api_police_sil(id: int, db: Session = Depends(get_db)):
     p = db.query(Police).filter(Police.id == id).first()
@@ -261,7 +311,6 @@ def api_police_sil(id: int, db: Session = Depends(get_db)):
     db.delete(p); db.commit()
     return {"ok": True}
 
-# *** YENİ EKLENEN PDF GÖRÜNTÜLEME API'Sİ ***
 @app.get("/api/policeler/{id}/pdf")
 def api_pdf_goster(id: int, db: Session = Depends(get_db)):
     p = db.query(Police).filter(Police.id == id).first()
@@ -270,8 +319,7 @@ def api_pdf_goster(id: int, db: Session = Depends(get_db)):
     
     hedef_yol = UPLOAD_DIR / p.pdf_dosya_adi
     if not hedef_yol.exists():
-        # Render ücretsiz sürümde klasörler sunucu uyuyunca sıfırlandığı için bu hata çıkabilir
-        raise HTTPException(status_code=404, detail="Dosya sunucuda bulunamadı. (Sistem Render'da uyku moduna geçtiği için dosya silinmiş olabilir)")
+        raise HTTPException(status_code=404, detail="Dosya sunucuda bulunamadı.")
         
     return FileResponse(hedef_yol, media_type="application/pdf", filename=p.pdf_dosya_adi)
 
@@ -294,59 +342,3 @@ async def api_upload_parse(file: UploadFile = File(...)):
         return ayiklanan
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
-
-@app.post("/api/upload-save")
-async def api_upload_save(payload: dict, db: Session = Depends(get_db)):
-    try:
-        telefon = payload.get("telefon")
-        danisman = payload.get("portfoy_sorumlusu")
-        if not telefon or not danisman:
-            raise HTTPException(status_code=400, detail="Telefon numarası ve Portföy Sorumlusu seçilmesi zorunludur!")
-
-        tckn = (payload.get("tc_kimlik") or "").strip() or None
-        musteri = None
-        
-        if payload.get("musteri_id"):
-            musteri = db.query(Musteri).filter(Musteri.id == payload.get("musteri_id")).first()
-            
-        if not musteri and tckn:
-            musteri = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
-
-        if not musteri:
-            musteri = Musteri(
-                ad=payload.get("ad") or "Bilinmiyor",
-                soyad=payload.get("soyad") or "Müşteri",
-                tc_kimlik=tckn,
-                telefon=telefon,
-                portfoy_sorumlusu=danisman
-            )
-            db.add(musteri)
-            db.commit()
-            db.refresh(musteri)
-        else:
-            musteri.telefon = telefon
-            musteri.portfoy_sorumlusu = danisman
-            db.commit()
-
-        baslangic = parse_tarih(payload.get("baslangic_tarihi"))
-        bitis = parse_tarih(payload.get("bitis_tarihi"))
-        prim_deger = float(payload.get("prim") or 0)
-
-        police = Police(
-            musteri_id=musteri.id,
-            police_no=payload.get("police_no") or f"PLK-{int(datetime.utcnow().timestamp())}",
-            sigorta_turu=payload.get("sigorta_turu") or "Genel",
-            sigorta_sirketi=payload.get("sigorta_sirketi") or "Diğer",
-            islem_turu=payload.get("islem_turu") or "Yeni Poliçe",
-            baslangic_tarihi=baslangic,
-            bitis_tarihi=bitis,
-            prim=prim_deger,
-            aciklama=payload.get("aciklama") or "",
-            pdf_dosya_adi=payload.get("pdf_dosya_adi")
-        )
-        db.add(police)
-        db.commit()
-        
-        return {"ok": True, "mesaj": "Kayıt başarılı"}
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"Kayıt hatası: {str(e)}"})
