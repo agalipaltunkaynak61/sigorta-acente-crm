@@ -36,17 +36,17 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     - police_no: Poliçe numarası
     - sigorta_sirketi: Sigorta şirketinin tam adı (Örn: AXA SİGORTA A.Ş.)
     - sigorta_turu: Poliçe türü (Örn: Trafik, Kasko, DASK)
-    - islem_turu: Poliçenin mahiyeti nedir? Şunlardan biri olmalı: "Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"
+    - islem_turu: Poliçenin mahiyeti nedir? "Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"
     - baslangic_tarihi: YYYY-MM-DD formatında başlangıç tarihi
     - bitis_tarihi: YYYY-MM-DD formatında bitiş tarihi
-    - net_prim: Sayısal float değer (Örn: 25933.76)
-    - brut_prim: Sayısal float değer (Örn: 28469.07)
+    - net_prim: Sayısal float değer
+    - brut_prim: Sayısal float değer
+    - aciklama: Poliçenin türüne göre en kritik detay bilgileri. Eğer Trafik/Kasko ise: "Plaka: ..., Araç: ..., Şasi No: ...". Eğer DASK/Konut ise: "Adres: ..., m2: ..., Bina Yılı: ...". Sağlık ise kapsamı. Sadece kısa, net ve tek satırlık bir bilgi yaz.
 
     Poliçe Metni:
     {metin[:4000]}
     """
 
-    # 5 RPM limitini aşmamak için güvenli deneme ve bekleme döngüsü
     max_deneme = 3
     response = None
     for deneme in range(max_deneme):
@@ -69,7 +69,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
                 if "503" in err_str or "UNAVAILABLE" in err_str:
                     raise ValueError("Google sunucuları yoğun. Birkaç saniye sonra tekrar deneyin.")
                 raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
-            time.sleep(12) # Kota sınırına takılmamak için akıllı bekleme
+            time.sleep(12) 
 
     if not response or not response.text:
         raise ValueError("Yapay zekadan yanıt alınamadı.")
@@ -95,4 +95,5 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
         "net_prim": veri.get("net_prim"),
         "brut_prim": brut,
         "prim": brut,
+        "aciklama": veri.get("aciklama") or ""
     }

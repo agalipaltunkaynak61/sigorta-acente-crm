@@ -4,32 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Altun Kardeşler Premium CRM</title>
-  
-  <!-- Premium Fontlar -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
-  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            serif: ['Playfair Display', 'serif'],
-          },
-          colors: {
-            brand: { 
-              black: "#050505", 
-              dark: "#121212", 
-              panel: "#1e1e1e",
-              gold: "#D4AF37", 
-              goldhover: "#AA8C2C",
-              light: "#f8f9fa",
-              muted: "#8c8c8c"
-            },
-          },
+          fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+          colors: { brand: { black: "#050505", dark: "#121212", panel: "#1e1e1e", gold: "#D4AF37", goldhover: "#AA8C2C", light: "#f8f9fa", muted: "#8c8c8c" } },
         },
       },
     };
@@ -39,35 +23,25 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #AA8C2C; }
-    
-    /* Yumuşak geçişler için */
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-    }
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body class="bg-brand-light text-slate-800 min-h-screen antialiased selection:bg-brand-gold selection:text-white">
   <div class="flex min-h-screen">
     
-    <!-- SIDEBAR -->
     <aside class="w-72 bg-brand-black text-white flex flex-col shrink-0 border-r border-brand-gold/10 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-20">
-      
-      <!-- Logo Alanı -->
       <div class="px-6 pt-10 pb-8 border-b border-white/5 text-center flex flex-col items-center bg-gradient-to-b from-white/5 to-transparent">
-        <!-- Logo Konteyneri -->
         <div class="relative w-40 rounded-xl p-1 bg-[#121212] border border-brand-gold/20 shadow-[0_0_25px_rgba(212,175,55,0.15)] mb-5 overflow-hidden group hover:border-brand-gold/40 transition-all duration-500">
           <div class="absolute inset-0 bg-brand-gold/5 group-hover:bg-brand-gold/10 transition-colors"></div>
-          <img src="Logo.png" alt="Altun Kardeşler Logo" class="w-full h-auto object-contain relative z-10 rounded-lg" onerror="this.style.display='none'">
+          <img src="Logo.png" alt="Logo" class="w-full h-auto object-contain relative z-10 rounded-lg" onerror="this.style.display='none'">
         </div>
-        <!-- Şık CRM Etiketi -->
         <span class="inline-flex items-center gap-2 bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-brand-gold/20">
           <span class="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse"></span>
           Yönetim Paneli
         </span>
       </div>
 
-      <!-- Navigasyon -->
       <nav class="p-4 space-y-2 flex-1 mt-2">
         <button data-view="dashboard" class="nav-btn w-full text-left px-5 py-3.5 rounded-xl bg-brand-gold/10 text-brand-gold font-medium transition-all duration-300 flex items-center gap-3 group">
           <svg class="w-5 h-5 opacity-80 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -91,9 +65,7 @@
       </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 p-8 md:p-12 overflow-y-auto max-h-screen relative">
-      <!-- Arka plan dekoratif elementi -->
       <div class="absolute top-0 right-0 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
       <!-- DASHBOARD -->
@@ -105,7 +77,6 @@
           </div>
         </div>
         <div id="ozet-kartlar" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10"></div>
-        
         <h3 class="text-xl font-serif font-bold text-brand-black mb-4 flex items-center gap-2">
           <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           Yaklaşan Yenilemeler
@@ -159,7 +130,6 @@
           <p id="pdf-durum" class="text-sm bg-brand-black text-brand-gold rounded-full px-4 py-1.5 hidden font-semibold mt-2 shadow-lg"></p>
         </label>
 
-        <!-- Sekmeler -->
         <div class="flex border-b border-slate-200 mb-6 gap-8 text-sm font-semibold px-2">
           <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-3 border-b-2 border-brand-gold text-brand-black font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-brand-gold">Mevcut / Aktif Poliçeler</button>
           <button onclick="policeSekmeSec('eski')" id="btn-sekme-eski" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black transition-colors relative">Süresi Dolan / Eski Poliçeler</button>
@@ -189,68 +159,33 @@
           <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight mb-2">Finansal Raporlama</h2>
           <p class="text-sm font-medium text-slate-500">Ciro, komisyon analizi ve portföy üretim detayları.</p>
         </div>
-
-        <!-- Filtre Paneli -->
         <div class="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 mb-8">
           <div class="grid grid-cols-1 md:grid-cols-5 gap-5 items-end">
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Başlangıç</label>
-              <input type="date" id="fin-start" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Bitiş</label>
-              <input type="date" id="fin-end" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Şirket</label>
-              <select id="fin-sirket" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all bg-white">
-                <option value="">Tümü</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Sorumlu</label>
-              <select id="fin-sorumlu" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all bg-white">
-                <option value="">Tümü</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Branş</label>
-              <select id="fin-brans" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all bg-white">
-                <option value="">Tümü</option>
-              </select>
-            </div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">Başlangıç</label><input type="date" id="fin-start" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold outline-none" /></div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">Bitiş</label><input type="date" id="fin-end" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold outline-none" /></div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">Şirket</label><select id="fin-sirket" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-white"><option value="">Tümü</option></select></div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">Sorumlu</label><select id="fin-sorumlu" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-white"><option value="">Tümü</option></select></div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">Branş</label><select id="fin-brans" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-white"><option value="">Tümü</option></select></div>
           </div>
-          
           <div class="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <input type="checkbox" id="fin-compare-mode" onchange="toggleCompareMode()" class="w-4 h-4 text-brand-gold rounded border-slate-300 focus:ring-brand-gold accent-brand-gold cursor-pointer">
+              <input type="checkbox" id="fin-compare-mode" onchange="toggleCompareMode()" class="w-4 h-4 text-brand-gold rounded border-slate-300 accent-brand-gold">
               <label for="fin-compare-mode" class="text-sm font-semibold text-slate-700 cursor-pointer">Dönemsel Karşılaştırma Yap</label>
             </div>
-            <button onclick="calistirFinansalRapor()" class="bg-brand-black text-brand-gold px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-black/10 hover:bg-brand-gold hover:text-white transition-all duration-300">Raporu Oluştur</button>
+            <button onclick="calistirFinansalRapor()" class="bg-brand-black text-brand-gold px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-black/10 hover:bg-brand-gold hover:text-white transition-all">Raporu Oluştur</button>
           </div>
-          
           <div id="fin-compare-dates" class="hidden grid-cols-1 md:grid-cols-5 gap-5 mt-5 p-5 bg-slate-50 rounded-xl border border-slate-100 items-end">
-            <div>
-              <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Karşılaştırma Başlangıç</label>
-              <input type="date" id="fin-start2" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold outline-none" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Karşılaştırma Bitiş</label>
-              <input type="date" id="fin-end2" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold outline-none" />
-            </div>
+            <div><label class="block text-xs font-bold text-slate-600 uppercase mb-2">Karşılaştırma Başlangıç</label><input type="date" id="fin-start2" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm outline-none" /></div>
+            <div><label class="block text-xs font-bold text-slate-600 uppercase mb-2">Karşılaştırma Bitiş</label><input type="date" id="fin-end2" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm outline-none" /></div>
           </div>
         </div>
-
-        <!-- Ana Metrikler -->
         <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden">
           <div class="bg-brand-black text-white rounded-2xl p-8 shadow-xl border border-brand-gold/30 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-gold/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
             <p class="text-xs text-brand-gold font-bold mb-2 uppercase tracking-widest relative z-10">Toplam Üretim (Ciro)</p>
             <p id="fin-ciro" class="text-4xl font-serif font-bold relative z-10">₺0,00</p>
             <p id="fin-ciro-diff" class="text-sm mt-3 hidden relative z-10"></p>
           </div>
           <div class="bg-gradient-to-br from-brand-gold to-[#b59325] text-brand-black rounded-2xl p-8 shadow-xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
             <p class="text-xs font-black mb-2 uppercase tracking-widest opacity-80 relative z-10">Tahmini Net Komisyon Karı</p>
             <p id="fin-kar" class="text-4xl font-serif font-black relative z-10">₺0,00</p>
             <p id="fin-kar-diff" class="text-sm mt-3 font-semibold hidden relative z-10"></p>
@@ -261,70 +196,37 @@
             <p id="fin-adet-diff" class="text-sm mt-3 hidden"></p>
           </div>
         </div>
-
-        <!-- Detay Tabloları -->
         <div id="fin-details" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
-          <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-            <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 font-bold text-sm text-brand-black uppercase tracking-wider">Branşlara Göre Üretim</div>
-            <div class="p-2 max-h-96 overflow-y-auto" id="fin-brans-liste"></div>
-          </div>
-          <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-            <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 font-bold text-sm text-brand-black uppercase tracking-wider">Şirketlere Göre Üretim</div>
-            <div class="p-2 max-h-96 overflow-y-auto" id="fin-sirket-liste"></div>
-          </div>
+          <div class="bg-white rounded-2xl shadow-sm border overflow-hidden"><div class="bg-slate-50/80 px-6 py-4 border-b font-bold text-sm text-brand-black uppercase">Branşlara Göre Üretim</div><div class="p-2 max-h-96 overflow-y-auto" id="fin-brans-liste"></div></div>
+          <div class="bg-white rounded-2xl shadow-sm border overflow-hidden"><div class="bg-slate-50/80 px-6 py-4 border-b font-bold text-sm text-brand-black uppercase">Şirketlere Göre Üretim</div><div class="p-2 max-h-96 overflow-y-auto" id="fin-sirket-liste"></div></div>
         </div>
       </section>
-
     </main>
   </div>
 
-  <!-- GENEL MODAL -->
-  <div id="modal" class="hidden fixed inset-0 bg-brand-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-md transition-opacity">
+  <!-- MODAL -->
+  <div id="modal" class="hidden fixed inset-0 bg-brand-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-md">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto border-t-4 border-brand-gold relative">
-      <button onclick="modalKapat()" class="absolute top-6 right-6 text-slate-400 hover:text-brand-black transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-      </button>
+      <button onclick="modalKapat()" class="absolute top-6 right-6 text-slate-400 hover:text-brand-black transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
       <h3 id="modal-baslik" class="text-2xl font-serif font-bold mb-6 text-brand-black pr-8"></h3>
-      <div id="modal-icerik">
-        <form id="modal-form" class="space-y-5"></form>
-      </div>
+      <div id="modal-icerik"><form id="modal-form" class="space-y-5"></form></div>
       <p id="modal-hata" class="hidden text-sm font-semibold text-red-600 bg-red-50 p-4 rounded-xl mt-5 border border-red-100"></p>
       <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
-        <button type="button" onclick="modalKapat()" class="px-6 py-2.5 text-sm rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors">Vazgeç</button>
-        <button type="button" id="modal-kaydet" class="px-8 py-2.5 text-sm rounded-xl bg-brand-black text-brand-gold font-bold hover:bg-brand-gold hover:text-white shadow-lg shadow-black/10 transition-all duration-300">Kaydet</button>
+        <button type="button" onclick="modalKapat()" class="px-6 py-2.5 text-sm rounded-xl font-bold text-slate-500 hover:bg-slate-50">Vazgeç</button>
+        <button type="button" id="modal-kaydet" class="px-8 py-2.5 text-sm rounded-xl bg-brand-black text-brand-gold font-bold hover:bg-brand-gold hover:text-white shadow-lg shadow-black/10">Kaydet</button>
       </div>
     </div>
   </div>
 
-  <style>
-    /* Ekstra animasyonlar */
-    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
-
   <script>
     const API = "";
-    let musteriCache = [];
-    let policeCache = [];
-    let aktifPoliceSekmesi = 'aktif';
+    let musteriCache = [], policeCache = [], aktifPoliceSekmesi = 'aktif';
+    const DANISMANLAR = ["Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Serhat Altunkaynak", "Ahmet Galip Altunkaynak", "Sezai Karakoç", "Diğer"];
 
-    const DANISMANLAR = [
-      "Muammer Altunkaynak",
-      "İhsan Berat Altunkaynak",
-      "Serhat Altunkaynak",
-      "Ahmet Galip Altunkaynak",
-      "Sezai Karakoç",
-      "Diğer"
-    ];
-
-    document.querySelectorAll(".nav-btn").forEach((btn) => {
-      btn.addEventListener("click", () => goster(btn.dataset.view));
-    });
+    document.querySelectorAll(".nav-btn").forEach((btn) => btn.addEventListener("click", () => goster(btn.dataset.view)));
 
     function goster(ad) {
-      ["dashboard", "musteriler", "policeler", "finansal"].forEach((v) => {
-        document.getElementById("view-" + v).classList.toggle("hidden", v !== ad);
-      });
+      ["dashboard", "musteriler", "policeler", "finansal"].forEach((v) => document.getElementById("view-" + v).classList.toggle("hidden", v !== ad));
       document.querySelectorAll(".nav-btn").forEach((b) => {
         const svg = b.querySelector('svg');
         if(b.dataset.view === ad) {
@@ -347,68 +249,44 @@
       aktifPoliceSekmesi = sekme;
       const aktifStyle = "pb-3 border-b-2 border-brand-gold text-brand-black font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-brand-gold";
       const inaktifStyle = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black transition-colors relative";
-      
       document.getElementById("btn-sekme-aktif").className = sekme === 'aktif' ? aktifStyle : inaktifStyle;
       document.getElementById("btn-sekme-eski").className = sekme === 'eski' ? aktifStyle : inaktifStyle;
       renderPoliceListesi();
     }
 
     function seviyeSinif(seviye) {
-      if (seviye === "kirmizi") return { wrap: "border-red-100 bg-white", badge: "bg-red-50 text-red-600 border border-red-200", etiket: "0–3 gün" };
-      if (seviye === "sari") return { wrap: "border-amber-100 bg-white", badge: "bg-amber-50 text-amber-600 border border-amber-200", etiket: "3–15 gün" };
-      if (seviye === "yesil") return { wrap: "border-emerald-100 bg-white", badge: "bg-emerald-50 text-emerald-600 border border-emerald-200", etiket: "15–30 gün" };
-      return { wrap: "border-slate-100 bg-white", badge: "bg-slate-100 text-slate-600 border border-slate-200", etiket: "30+ gün" };
+      if (seviye === "kirmizi") return { wrap: "border-red-100 bg-white", badge: "bg-red-50 text-red-600 border border-red-200" };
+      if (seviye === "sari") return { wrap: "border-amber-100 bg-white", badge: "bg-amber-50 text-amber-600 border border-amber-200" };
+      if (seviye === "yesil") return { wrap: "border-emerald-100 bg-white", badge: "bg-emerald-50 text-emerald-600 border border-emerald-200" };
+      return { wrap: "border-slate-100 bg-white", badge: "bg-slate-100 text-slate-600 border border-slate-200" };
     }
 
-    function para(n) {
-      if (n == null || n === "") return "—";
-      return Number(n).toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
-    }
-
-    function tarih(d) {
-      if (!d) return "—";
-      return new Date(d + "T00:00:00").toLocaleDateString("tr-TR");
-    }
+    function para(n) { return (n == null || n === "") ? "—" : Number(n).toLocaleString("tr-TR", { style: "currency", currency: "TRY" }); }
+    function tarih(d) { return !d ? "—" : new Date(d + "T00:00:00").toLocaleDateString("tr-TR"); }
 
     async function api(path, opts) {
-      const res = await fetch(API + path, {
-        headers: { "Content-Type": "application/json" },
-        ...opts,
-      });
+      const res = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...opts });
       if (!res.ok) {
         let msg = "İstek başarısız";
         try { const j = await res.json(); msg = j.detail || msg; } catch (_) {}
         throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
       }
-      if (res.status === 204) return null;
-      return res.json();
+      return res.status === 204 ? null : res.json();
     }
 
     async function yukleDashboard() {
       const [ozet, liste] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=30")]);
-      
       const ozetData = [
         { t: "Müşteri Portföyü", v: ozet.musteri_sayisi, icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" },
         { t: "Toplam Poliçe", v: ozet.police_sayisi, icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
         { t: "Aktif Poliçe", v: ozet.aktif_police, icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
         { t: "30 Günde Biten", v: ozet.yaklasan_30_gun, icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
       ];
-
-      document.getElementById("ozet-kartlar").innerHTML = ozetData.map(d => `
-        <div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
-          <div class="flex items-center justify-between mb-4">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">${d.t}</p>
-            <div class="w-8 h-8 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${d.icon}"></path></svg>
-            </div>
-          </div>
-          <p class="text-4xl font-serif font-bold text-brand-black">${d.v}</p>
-        </div>
-      `).join("");
+      document.getElementById("ozet-kartlar").innerHTML = ozetData.map(d => `<div class="bg-white rounded-2xl p-6 shadow-sm border flex flex-col justify-between hover:-translate-y-1 transition-transform"><div class="flex items-center justify-between mb-4"><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">${d.t}</p><div class="w-8 h-8 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${d.icon}"></path></svg></div></div><p class="text-4xl font-serif font-bold text-brand-black">${d.v}</p></div>`).join("");
 
       const el = document.getElementById("yaklasan-liste");
       if (!liste.length) {
-        el.innerHTML = `<div class="bg-white rounded-2xl p-10 text-center text-slate-500 border border-slate-100 shadow-sm"><svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><p class="font-medium text-lg">Önümüzdeki 30 günde biten poliçe yok.</p></div>`;
+        el.innerHTML = `<div class="bg-white rounded-2xl p-10 text-center text-slate-500 border border-slate-100 shadow-sm"><p class="font-medium text-lg">Önümüzdeki 30 günde biten poliçe yok.</p></div>`;
         return;
       }
       el.innerHTML = liste.map((p) => {
@@ -419,18 +297,13 @@
             <div class="flex items-center gap-4">
               <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl uppercase ${s.badge.replace('border', '')}">${ad.charAt(0)}</div>
               <div>
-                <p class="font-bold text-brand-black text-lg">${ad || "Müşteri"} <span class="text-xs font-normal text-slate-400 ml-2 border border-slate-200 px-2 py-0.5 rounded-md">No: ${p.police_no}</span></p>
-                <p class="text-sm font-medium text-slate-600 mt-0.5">${p.sigorta_turu} <span class="text-slate-400 font-normal">(${p.islem_turu || 'Yeni'})</span> ${p.sigorta_sirketi ? " · " + p.sigorta_sirketi : ""}</p>
-                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  Bitiş: <span class="font-bold text-slate-700">${tarih(p.bitis_tarihi)}</span>
-                  <span class="mx-1">•</span>
-                  Sorumlu: ${p.musteri_portfoy_sorumlusu || 'Atanmadı'}
-                </p>
+                <p class="font-bold text-brand-black text-lg">${ad || "Müşteri"} <span class="text-xs font-normal text-slate-400 ml-2 border px-2 py-0.5 rounded-md">No: ${p.police_no}</span></p>
+                <p class="text-sm font-medium text-slate-600 mt-0.5">${p.sigorta_turu} <span class="text-slate-400 font-normal">(${p.islem_turu})</span> ${p.sigorta_sirketi ? " · " + p.sigorta_sirketi : ""}</p>
+                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1.5">Bitiş: <span class="font-bold text-slate-700">${tarih(p.bitis_tarihi)}</span><span class="mx-1">•</span>Sorumlu: ${p.musteri_portfoy_sorumlusu || 'Atanmadı'}</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
-              ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold hover:text-brand-black bg-brand-gold/10 hover:bg-brand-gold/20 text-xs px-4 py-2 rounded-lg font-bold transition-colors">PDF Görüntüle</a>` : ""}
+              ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold bg-brand-gold/10 text-xs px-4 py-2 rounded-lg font-bold">PDF Görüntüle</a>` : ""}
               <span class="text-xs font-bold px-4 py-2 rounded-lg ${s.badge}">${p.kalan_gun} gün kaldı</span>
             </div>
           </div>
@@ -444,20 +317,15 @@
       document.getElementById("musteri-tbody").innerHTML = musteriCache.map((m) => {
         let dagilimHtml = '<span class="text-slate-400 italic text-xs">Poliçe yok</span>';
         if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) {
-          dagilimHtml = Object.entries(m.aktif_police_sayilari)
-            .map(([tur, adet]) => `<span class="bg-brand-black text-brand-gold text-[10px] uppercase tracking-wider px-2 py-1 rounded border border-brand-gold/20 font-bold mr-1 inline-block mb-1">${tur}: ${adet}</span>`)
-            .join("");
+          dagilimHtml = Object.entries(m.aktif_police_sayilari).map(([tur, adet]) => `<span class="bg-brand-black text-brand-gold text-[10px] uppercase tracking-wider px-2 py-1 rounded border mr-1 inline-block mb-1">${tur}: ${adet}</span>`).join("");
         }
         return `<tr class="hover:bg-slate-50 cursor-pointer transition-colors group" onclick="musteriDetay(${m.id})">
-          <td class="px-6 py-4 font-bold text-brand-black flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs uppercase">${(m.ad||"").charAt(0)}</div>
-            ${m.ad} ${m.soyad}
-          </td>
+          <td class="px-6 py-4 font-bold text-brand-black flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs uppercase">${(m.ad||"").charAt(0)}</div>${m.ad} ${m.soyad}</td>
           <td class="px-6 py-4 font-medium text-slate-700">${m.telefon || "—"}</td>
           <td class="px-6 py-4">${dagilimHtml}</td>
           <td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg font-semibold">${m.portfoy_sorumlusu || "Atanmadı"}</span></td>
           <td class="px-6 py-4 text-slate-500 font-medium">${m.tc_kimlik || "—"}</td>
-          <td class="px-6 py-4 text-right whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
+          <td class="px-6 py-4 text-right opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
             <button class="text-brand-black bg-slate-100 hover:bg-brand-black hover:text-brand-gold px-3 py-1.5 rounded-lg text-xs font-bold transition-colors mr-2" onclick="musteriFormu(${m.id})">Düzenle</button>
             <button class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors" onclick="musteriSil(${m.id})">Sil</button>
           </td>
@@ -477,7 +345,7 @@
 
         const html = `
           <div class="space-y-6">
-            <div class="bg-brand-black text-white p-6 rounded-xl shadow-lg border border-brand-gold/20 relative overflow-hidden">
+            <div class="bg-brand-black text-white p-6 rounded-xl shadow-lg border relative overflow-hidden">
               <div class="absolute right-0 top-0 w-32 h-32 bg-brand-gold/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
               <div class="space-y-3 relative z-10 text-sm">
                 <p class="flex items-center"><span class="text-brand-gold font-bold w-32 uppercase tracking-wider text-xs">Telefon</span> <span class="font-medium">${m.telefon || "—"}</span></p>
@@ -488,20 +356,21 @@
             </div>
             <div>
               <h4 class="font-bold text-brand-black mb-4 uppercase tracking-wider text-xs border-b pb-2">Kayıtlı Tüm Poliçeler</h4>
-              <div class="space-y-3 max-h-64 overflow-y-auto pr-2">
+              <div class="space-y-4 max-h-72 overflow-y-auto pr-2">
                 ${policeler.length === 0 ? '<p class="text-sm text-slate-500 italic p-4 bg-slate-50 rounded-xl text-center">Kayıtlı poliçe bulunamadı.</p>' : policeler.map(p => `
-                  <div class="border border-slate-100 rounded-xl p-4 bg-white flex items-center justify-between hover:border-brand-gold/30 hover:shadow-md transition-all group">
-                    <div>
-                      <p class="font-bold text-brand-black text-sm mb-1">${p.police_no} <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-2">${p.sigorta_turu}</span></p>
-                      <p class="text-xs text-slate-500 font-medium space-x-2">
-                        <span>Şirket: <strong class="text-slate-700">${p.sigorta_sirketi || "—"}</strong></span>
-                        <span class="text-slate-300">|</span>
-                        <span>Bitiş: <strong class="text-slate-700">${tarih(p.bitis_tarihi)}</strong></span>
-                        <span class="text-slate-300">|</span>
-                        <span>Prim: <strong class="text-brand-gold">${para(p.prim)}</strong></span>
-                      </p>
+                  <div class="border border-slate-100 rounded-xl p-4 bg-white flex flex-col hover:border-brand-gold/30 hover:shadow-md transition-all group">
+                    <div class="flex justify-between items-start mb-3">
+                      <div>
+                        <p class="font-bold text-brand-black text-sm mb-1">${p.police_no} <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-2">${p.sigorta_turu}</span></p>
+                        <p class="text-xs text-slate-500 font-medium space-x-2">
+                          <span>Şirket: <strong class="text-slate-700">${p.sigorta_sirketi || "—"}</strong></span><span class="text-slate-300">|</span>
+                          <span>Bitiş: <strong class="text-slate-700">${tarih(p.bitis_tarihi)}</strong></span><span class="text-slate-300">|</span>
+                          <span>Prim: <strong class="text-brand-gold">${para(p.prim)}</strong></span>
+                        </p>
+                      </div>
+                      ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-gold hover:text-white transition-colors opacity-0 group-hover:opacity-100">PDF Aç</a>` : `<span class='text-[10px] text-slate-400 font-bold border px-2 py-1 rounded bg-slate-50'>PDF YOK</span>`}
                     </div>
-                    ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-gold hover:text-white transition-colors opacity-0 group-hover:opacity-100">PDF Aç</a>` : ""}
+                    ${p.aciklama ? `<div class="bg-slate-50 border border-slate-100 p-2.5 rounded-lg text-xs text-slate-600 font-medium leading-relaxed"><span class="font-bold text-brand-gold">Polİçe Bİlgİsİ:</span> ${p.aciklama}</div>` : ''}
                   </div>
                 `).join("")}
               </div>
@@ -509,9 +378,7 @@
           </div>
         `;
         modalAc(`${m.ad} ${m.soyad}`, html, null, true);
-      } catch (e) {
-        alert("Müşteri detayları alınamadı: " + e.message);
-      }
+      } catch (e) { alert("Müşteri detayları alınamadı: " + e.message); }
     }
 
     async function yuklePoliceler() {
@@ -521,226 +388,120 @@
     }
 
     function renderPoliceListesi() {
-      const filtrelenmis = policeCache.filter(p => {
-        if (aktifPoliceSekmesi === 'aktif') return !p.suresi_dolmus;
-        return p.suresi_dolmus;
-      });
-
+      const filtrelenmis = policeCache.filter(p => aktifPoliceSekmesi === 'aktif' ? !p.suresi_dolmus : p.suresi_dolmus);
       document.getElementById("police-tbody").innerHTML = filtrelenmis.length === 0 
         ? `<tr><td colspan="7" class="px-6 py-10 text-center text-slate-400 font-medium italic bg-slate-50">Bu sekmede kayıtlı poliçe bulunmuyor.</td></tr>`
         : filtrelenmis.map((p) => {
           const s = seviyeSinif(p.uyar_seviyesi);
           const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
-          const durumHucresi = p.suresi_dolmus 
-            ? `<span class="text-xs text-slate-500 font-bold border border-slate-200 bg-slate-100 px-3 py-1.5 rounded-lg">Süresi doldu</span>`
-            : `<span class="text-xs font-bold px-3 py-1.5 rounded-lg ${s.badge.replace('border', '')}">${p.kalan_gun} gün</span>`;
-
-          const pdfButon = p.pdf_dosya_adi 
-            ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold hover:text-brand-black bg-brand-gold/10 hover:bg-brand-gold text-xs px-3 py-1.5 rounded-lg font-bold transition-colors inline-block">PDF</a>` 
-            : `<span class="text-[10px] text-slate-400 mr-2 uppercase tracking-wider font-bold border border-slate-200 px-2 py-1 rounded">Yok</span>`;
+          const durum = p.suresi_dolmus ? `<span class="text-xs text-slate-500 font-bold border px-3 py-1.5 rounded-lg">Süresi doldu</span>` : `<span class="text-xs font-bold px-3 py-1.5 rounded-lg ${s.badge.replace('border', '')}">${p.kalan_gun} gün</span>`;
+          const pdfBtn = p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold hover:text-brand-black bg-brand-gold/10 hover:bg-brand-gold text-xs px-3 py-1.5 rounded-lg font-bold transition-colors">PDF</a>` : "";
 
           return `<tr class="hover:bg-slate-50 transition-colors group">
             <td class="px-6 py-4 font-bold text-brand-black">${p.police_no}</td>
-            <td class="px-6 py-4 font-semibold text-slate-700">${ad}<br><span class="text-xs text-slate-400 font-medium">Danışman: ${p.musteri_portfoy_sorumlusu || '—'}</span></td>
-            <td class="px-6 py-4 font-medium text-slate-600">${p.sigorta_sirketi || '—'}<br><span class="text-[10px] font-bold uppercase tracking-wider text-brand-gold bg-brand-black px-2 py-0.5 rounded mr-1">${p.sigorta_turu}</span> <span class="text-xs text-slate-400">${p.islem_turu}</span></td>
+            <td class="px-6 py-4 font-semibold text-slate-700">${ad}<br><span class="text-xs text-slate-400">Danışman: ${p.musteri_portfoy_sorumlusu || '—'}</span></td>
+            <td class="px-6 py-4 font-medium text-slate-600">${p.sigorta_sirketi || '—'}<br><span class="text-[10px] font-bold text-brand-gold bg-brand-black px-2 py-0.5 rounded">${p.sigorta_turu}</span></td>
             <td class="px-6 py-4 font-bold text-slate-700">${tarih(p.bitis_tarihi)}</td>
-            <td class="px-6 py-4">${durumHucresi}</td>
+            <td class="px-6 py-4">${durum}</td>
             <td class="px-6 py-4 font-serif font-bold text-lg text-brand-black">${para(p.prim)}</td>
-            <td class="px-6 py-4 text-right whitespace-nowrap space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              ${pdfButon}
-              <button class="text-slate-600 bg-slate-100 hover:bg-brand-black hover:text-brand-gold px-3 py-1.5 rounded-lg text-xs font-bold transition-colors" onclick="policeFormu(${p.id})">Düzen</button>
-              <button class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors" onclick="policeSil(${p.id})">Sil</button>
+            <td class="px-6 py-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+              ${pdfBtn}
+              <button class="text-slate-600 bg-slate-100 hover:bg-brand-black hover:text-brand-gold px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ml-1" onclick="policeFormu(${p.id})">Düzen</button>
+              <button class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ml-1" onclick="policeSil(${p.id})">Sil</button>
             </td>
           </tr>`;
         }).join("");
     }
 
     function input(name, label, value, type = "text", required = false) {
-      const reqStar = required ? '<span class="text-red-500 ml-1">*</span>' : '';
-      return `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">${label}${reqStar}</label>
-        <input name="${name}" type="${type}" value="${value ?? ""}" ${required ? "required" : ""}
-          class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 bg-slate-50 focus:bg-white outline-none transition-all" /></div>`;
+      return `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">${label}${required ? '<span class="text-red-500 ml-1">*</span>' : ''}</label>
+        <input name="${name}" type="${type}" value="${value ?? ""}" ${required ? "required" : ""} class="w-full border rounded-xl px-4 py-2.5 text-sm focus:border-brand-gold bg-slate-50 outline-none" /></div>`;
     }
 
-    function danismanSelect(seciliDeger) {
-      const opts = DANISMANLAR.map(d => `<option value="${d}" ${d === seciliDeger ? 'selected' : ''}>${d}</option>`).join("");
+    function danismanSelect(secili) {
+      const opts = DANISMANLAR.map(d => `<option value="${d}" ${d === secili ? 'selected' : ''}>${d}</option>`).join("");
       return `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Danışman <span class="text-red-500">*</span></label>
-        <select name="portfoy_sorumlusu" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 bg-slate-50 outline-none transition-all">${opts}</select></div>`;
+        <select name="portfoy_sorumlusu" required class="w-full border rounded-xl px-4 py-2.5 text-sm font-semibold bg-slate-50 outline-none">${opts}</select></div>`;
     }
 
-    function modalAc(baslik, htmlIcerik, onKaydetFn, sadeceKapat = false) {
+    function modalAc(baslik, html, onKaydet, sadeceKapat = false) {
       document.getElementById("modal-baslik").textContent = baslik;
       const formEl = document.getElementById("modal-form");
       const kaydetBtn = document.getElementById("modal-kaydet");
-      
+      formEl.innerHTML = html;
       if (sadeceKapat) {
-        formEl.innerHTML = htmlIcerik;
         kaydetBtn.classList.add("hidden");
       } else {
-        formEl.innerHTML = htmlIcerik;
         kaydetBtn.classList.remove("hidden");
-        kaydetBtn.onclick = () => {
-          if(!formEl.checkValidity()) {
-            formEl.reportValidity();
-            return;
-          }
-          onKaydetFn();
-        };
+        kaydetBtn.onclick = () => { if(!formEl.checkValidity()) { formEl.reportValidity(); return; } onKaydet(); };
       }
       document.getElementById("modal-hata").classList.add("hidden");
       document.getElementById("modal").classList.remove("hidden");
     }
 
-    function modalKapat() {
-      document.getElementById("modal").classList.add("hidden");
-    }
-
-    function formData() {
-      const fd = new FormData(document.getElementById("modal-form"));
-      const o = {};
-      fd.forEach((v, k) => { o[k] = v === "" ? null : v; });
-      return o;
-    }
+    function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
+    function formData() { const fd = new FormData(document.getElementById("modal-form")); const o = {}; fd.forEach((v, k) => { o[k] = v === "" ? null : v; }); return o; }
 
     async function musteriFormu(id) {
       const m = id ? musteriCache.find((x) => x.id === id) || (await api("/api/musteriler/" + id)) : {};
-      modalAc(
-        id ? "Müşteri Bilgilerini Düzenle" : "Yeni Müşteri Kaydı",
-        `<div class="grid grid-cols-1 md:grid-cols-2 gap-5">` +
-          input("ad", "Ad", m.ad, "text", true) +
-          input("soyad", "Soyad", m.soyad, "text", true) +
-          input("telefon", "Telefon", m.telefon, "tel", true) +
-          input("tc_kimlik", "TC / Vergi No", m.tc_kimlik) +
-        `</div>` + 
-        `<div class="mt-5">` + danismanSelect(m.portfoy_sorumlusu) + `</div>` +
-        `<div class="mt-5"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Adres</label>
-           <textarea name="adres" rows="3" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 bg-slate-50 focus:bg-white outline-none transition-all">${m.adres || ""}</textarea></div>`,
+      modalAc(id ? "Müşteri Düzenle" : "Yeni Müşteri Kaydı",
+        `<div class="grid grid-cols-1 md:grid-cols-2 gap-5">${input("ad", "Ad", m.ad, "text", true)}${input("soyad", "Soyad", m.soyad, "text", true)}${input("telefon", "Telefon", m.telefon, "tel", true)}${input("tc_kimlik", "TC / Vergi No", m.tc_kimlik)}</div>
+         <div class="mt-5">${danismanSelect(m.portfoy_sorumlusu)}</div>
+         <div class="mt-5"><label class="block text-xs font-bold text-slate-500 mb-2">Adres</label><textarea name="adres" rows="3" class="w-full border rounded-xl px-4 py-3 text-sm bg-slate-50 outline-none">${m.adres || ""}</textarea></div>`,
         async () => {
           try {
             const body = formData();
-            if (id) await api("/api/musteriler/" + id, { method: "PUT", body: JSON.stringify(body) });
-            else await api("/api/musteriler", { method: "POST", body: JSON.stringify(body) });
-            modalKapat();
-            yukleMusteriler();
+            await api(id ? "/api/musteriler/" + id : "/api/musteriler", { method: id ? "PUT" : "POST", body: JSON.stringify(body) });
+            modalKapat(); yukleMusteriler();
           } catch (e) {
-            const h = document.getElementById("modal-hata");
-            h.textContent = e.message;
-            h.classList.remove("hidden");
+            const h = document.getElementById("modal-hata"); h.textContent = e.message; h.classList.remove("hidden");
           }
         }
       );
     }
 
-    async function musteriSil(id) {
-      if (!confirm("Müşteri ve bağlı tüm poliçeleri KALICI OLARAK SİLİNECEK. Onaylıyor musunuz?")) return;
-      await api("/api/musteriler/" + id, { method: "DELETE" });
-      yukleMusteriler();
-    }
+    async function musteriSil(id) { if (confirm("Müşteri ve poliçeleri SİLİNECEK. Emin misiniz?")) { await api("/api/musteriler/" + id, { method: "DELETE" }); yukleMusteriler(); } }
+    async function policeSil(id) { if (confirm("Poliçe silinsin mi?")) { await api("/api/policeler/" + id, { method: "DELETE" }); yuklePoliceler(); } }
 
     async function policeFormu(id, pdfVeri) {
       if (!musteriCache.length) musteriCache = await api("/api/musteriler");
       const p = id ? policeCache.find((x) => x.id === id) || (await api("/api/policeler/" + id)) : {};
-      
       const eslesenId = pdfVeri && pdfVeri.musteri ? pdfVeri.musteri.id : p.musteri_id;
-      const yeniMusteri = pdfVeri && !pdfVeri.musteri_eslesti;
-      const opts = musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Danışmansız'})</option>`).join("");
+      const opts = musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Atanmadı'})</option>`).join("");
+      const islemTuru = p.islem_turu || (pdfVeri && pdfVeri.islem_turu) || "Yeni Poliçe";
 
-      const bannerMesaj = pdfVeri && pdfVeri.mevcut_police_id 
-        ? `<div class="text-sm rounded-xl px-5 py-4 mb-6 bg-sky-50 border border-sky-200 text-sky-800 font-medium shadow-sm flex items-start gap-3"><svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${pdfVeri.mesaj}</div>` 
-        : pdfVeri ? `<div class="text-sm rounded-xl px-5 py-4 mb-6 shadow-sm flex items-start gap-3 ${pdfVeri.musteri_eslesti ? "bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium" : "bg-amber-50 border border-amber-200 text-amber-900 font-medium"}"><svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${pdfVeri.mesaj || ""}</div>` : "";
+      let musteriBlok = (pdfVeri && !pdfVeri.musteri_eslesti) 
+        ? `<div class="bg-slate-50 border p-6 rounded-2xl mb-6"><p class="text-[10px] font-bold text-brand-gold uppercase mb-4 border-b pb-2">Yeni Müşteri Bilgileri</p><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${input("ad", "Ad", pdfVeri.ad, "text", true)}${input("soyad", "Soyad", pdfVeri.soyad, "text", true)}${input("tc_kimlik", "TC No", pdfVeri.tckn)}${input("telefon", "Telefon", "", "tel", true)}</div><div class="mt-4">${danismanSelect("")}</div></div>` 
+        : `<div class="mb-6"><label class="block text-xs font-bold text-slate-500 mb-2">Müşteri Seç <span class="text-red-500">*</span></label><select name="musteri_id" required class="w-full border rounded-xl px-4 py-3 text-sm outline-none">${opts}</select></div>`;
 
-      const musteriBlok = yeniMusteri
-        ? `<div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl mb-6">
-             <p class="text-[10px] font-bold text-brand-gold uppercase tracking-widest mb-4 border-b border-slate-200 pb-2">Yeni Müşteri Zorunlu Bilgileri</p>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-               ${input("ad", "Müşteri Adı", pdfVeri.ad, "text", true)}
-               ${input("soyad", "Müşteri Soyadı", pdfVeri.soyad, "text", true)}
-               ${input("tc_kimlik", "TC / Vergi No", pdfVeri.tckn)}
-               ${input("telefon", "Telefon Numarası", "", "tel", true)}
-             </div>
-             <div class="mt-4">${danismanSelect("")}</div>
-           </div>`
-        : `<div class="mb-6"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kayıtlı Müşteri <span class="text-red-500">*</span></label>
-          <select name="musteri_id" required class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all">${opts}</select></div>`;
-      
-      const baslangicDeger = p.baslangic_tarihi || (pdfVeri && pdfVeri.baslangic_tarihi) || "";
-      const bitisDeger = p.bitis_tarihi || (pdfVeri && pdfVeri.bitis_tarihi) || "";
-      const sirketDeger = p.sigorta_sirketi || (pdfVeri && pdfVeri.sigorta_sirketi) || "";
-      const islemTuruDeger = p.islem_turu || (pdfVeri && pdfVeri.islem_turu) || "Yeni Poliçe";
-      const pdfDosyaAdiDeger = p.pdf_dosya_adi || (pdfVeri && pdfVeri.pdf_dosya_adi) || "";
-
-      let pdfGostergeHtml = "";
-      if (id && pdfDosyaAdiDeger) {
-        pdfGostergeHtml = `<div class="bg-brand-black rounded-xl p-5 flex items-center justify-between mb-6 shadow-lg border border-brand-gold/20">
-          <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-brand-gold/20 flex items-center justify-center"><svg class="w-5 h-5 text-brand-gold" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg></div>
-          <div><p class="text-white font-bold text-sm">Orijinal Poliçe Belgesi</p><p class="text-xs text-brand-muted mt-0.5">Sisteme güvenli şekilde yüklendi.</p></div></div>
-          <a href="/api/policeler/${id}/pdf" target="_blank" class="bg-brand-gold text-brand-black text-sm px-5 py-2.5 rounded-lg font-bold hover:bg-brand-goldhover transition-colors shadow-md">Görüntüle</a>
-        </div>`;
-      } else if (pdfDosyaAdiDeger) {
-        pdfGostergeHtml = `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-center gap-2 mb-6 shadow-sm">
-          <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span class="text-emerald-800 font-bold text-sm">PDF Başarıyla Analiz Edildi</span>
-        </div>`;
-      }
-
-      modalAc(
-        id ? "Poliçe Detayları" : pdfVeri ? "Yapay Zeka Analiz Sonucu" : "Manuel Poliçe Ekle",
-        bannerMesaj +
-          pdfGostergeHtml +
-          `<input type="hidden" name="pdf_dosya_adi" value="${pdfDosyaAdiDeger}" />` +
-          musteriBlok +
-          `<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">` +
-          input("police_no", "Poliçe No", p.police_no || (pdfVeri && pdfVeri.police_no), "text", true) +
-          input("sigorta_turu", "Sigorta Branşı", p.sigorta_turu || (pdfVeri && pdfVeri.sigorta_turu), "text", true) +
-          input("sigorta_sirketi", "Sigorta Şirketi", sirketDeger) +
-          `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">İşlem Türü</label>
-           <select name="islem_turu" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all">
-             ${["Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"].map(it => `<option ${islemTuruDeger === it ? "selected" : ""}>${it}</option>`).join("")}
-           </select></div>` +
-          input("baslangic_tarihi", "Başlangıç", baslangicDeger, "date", true) +
-          input("bitis_tarihi", "Bitiş", bitisDeger, "date", true) +
-          input("prim", "Prim (₺)", p.prim != null ? p.prim : pdfVeri && pdfVeri.prim, "number") +
-          `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Durum</label>
-           <select name="durum" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold bg-slate-50 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all">
-             ${["aktif", "yenilendi", "iptal"].map((d) => `<option ${p.durum === d ? "selected" : ""}>${d.toUpperCase()}</option>`).join("")}
-           </select></div>` +
-          `</div>` +
-          `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Açıklama / Not</label>
-           <textarea name="aciklama" rows="3" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none transition-all">${p.aciklama || ""}</textarea></div>`,
+      modalAc(id ? "Poliçe Detayları" : (pdfVeri ? "Yapay Zeka Analiz Sonucu" : "Manuel Poliçe Ekle"),
+        `${pdfVeri ? `<div class="text-sm rounded-xl px-5 py-4 mb-6 bg-amber-50 text-amber-900 border font-medium">${pdfVeri.mesaj}</div>` : ""}
+         <input type="hidden" name="pdf_dosya_adi" value="${p.pdf_dosya_adi || (pdfVeri && pdfVeri.pdf_dosya_adi) || ''}" />
+         <input type="hidden" name="aciklama" value="${p.aciklama || (pdfVeri && pdfVeri.aciklama) || ''}" />
+         ${musteriBlok}
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+           ${input("police_no", "Poliçe No", p.police_no || (pdfVeri && pdfVeri.police_no), "text", true)}
+           ${input("sigorta_turu", "Branş", p.sigorta_turu || (pdfVeri && pdfVeri.sigorta_turu), "text", true)}
+           ${input("sigorta_sirketi", "Şirket", p.sigorta_sirketi || (pdfVeri && pdfVeri.sigorta_sirketi))}
+           <div><label class="block text-xs font-bold text-slate-500 mb-2">İşlem Türü</label><select name="islem_turu" class="w-full border rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none">${["Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"].map(it => `<option ${islemTuru === it ? "selected" : ""}>${it}</option>`).join("")}</select></div>
+           ${input("baslangic_tarihi", "Başlangıç", p.baslangic_tarihi || (pdfVeri && pdfVeri.baslangic_tarihi), "date", true)}
+           ${input("bitis_tarihi", "Bitiş", p.bitis_tarihi || (pdfVeri && pdfVeri.bitis_tarihi), "date", true)}
+           ${input("prim", "Prim (₺)", p.prim != null ? p.prim : (pdfVeri && pdfVeri.prim), "number")}
+           <div><label class="block text-xs font-bold text-slate-500 mb-2">Durum</label><select name="durum" class="w-full border rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none">${["aktif", "yenilendi", "iptal"].map((d) => `<option ${p.durum === d ? "selected" : ""}>${d}</option>`).join("")}</select></div>
+         </div>`,
         async () => {
           try {
             const body = formData();
             let musteriId = body.musteri_id ? Number(body.musteri_id) : null;
-            if (yeniMusteri) {
-              const kayit = await api("/api/musteriler", {
-                method: "POST",
-                body: JSON.stringify({ ad: body.ad, soyad: body.soyad, tc_kimlik: body.tc_kimlik, telefon: body.telefon, portfoy_sorumlusu: body.portfoy_sorumlusu }),
-              });
+            if (!musteriId) {
+              const kayit = await api("/api/musteriler", { method: "POST", body: JSON.stringify({ ad: body.ad, soyad: body.soyad, tc_kimlik: body.tc_kimlik, telefon: body.telefon, portfoy_sorumlusu: body.portfoy_sorumlusu }) });
               musteriId = kayit.id;
             }
-            if (!musteriId) throw new Error("Müşteri seçin");
-            const policeGovde = {
-              musteri_id: musteriId,
-              police_no: body.police_no,
-              sigorta_turu: body.sigorta_turu,
-              sigorta_sirketi: body.sigorta_sirketi,
-              islem_turu: body.islem_turu,
-              baslangic_tarihi: body.baslangic_tarihi,
-              bitis_tarihi: body.bitis_tarihi,
-              prim: body.prim != null ? Number(body.prim) : null,
-              durum: body.durum ? body.durum.toLowerCase() : "aktif",
-              aciklama: body.aciklama,
-              pdf_dosya_adi: body.pdf_dosya_adi || null,
-            };
-            if (id) await api("/api/policeler/" + id, { method: "PUT", body: JSON.stringify(policeGovde) });
-            else await api("/api/policeler", { method: "POST", body: JSON.stringify(policeGovde) });
-            modalKapat();
-            yuklePoliceler();
-          } catch (e) {
-            const h = document.getElementById("modal-hata");
-            h.textContent = "Hata: " + e.message;
-            h.classList.remove("hidden");
-          }
+            if (!musteriId) throw new Error("Müşteri hatası");
+            const policeGovde = { musteri_id: musteriId, police_no: body.police_no, sigorta_turu: body.sigorta_turu, sigorta_sirketi: body.sigorta_sirketi, islem_turu: body.islem_turu, baslangic_tarihi: body.baslangic_tarihi, bitis_tarihi: body.bitis_tarihi, prim: body.prim ? Number(body.prim) : null, durum: body.durum, pdf_dosya_adi: body.pdf_dosya_adi, aciklama: body.aciklama };
+            await api(id ? "/api/policeler/" + id : "/api/policeler", { method: id ? "PUT" : "POST", body: JSON.stringify(policeGovde) });
+            modalKapat(); yuklePoliceler();
+          } catch (e) { const h = document.getElementById("modal-hata"); h.textContent = "Hata: " + e.message; h.classList.remove("hidden"); }
         }
       );
     }
@@ -748,199 +509,37 @@
     async function pdfGonder(file) {
       const durum = document.getElementById("pdf-durum");
       const dosyaAdi = file && (file.name || file.fileName) ? String(file.name || file.fileName) : "dosya.pdf";
-      if (!file || !dosyaAdi.toLowerCase().endsWith(".pdf")) { alert("Lütfen geçerli bir PDF seçin"); return; }
-      durum.classList.remove("hidden");
-      durum.textContent = "Yapay Zeka Okuyor, Lütfen Bekleyin...";
-      
-      // Uploading animasyonu ekle
+      if (!file || !dosyaAdi.toLowerCase().endsWith(".pdf")) { alert("Lütfen PDF seçin"); return; }
+      durum.classList.remove("hidden"); durum.textContent = "Yapay Zeka Okuyor, Bekleyin...";
       document.getElementById("pdf-drop").classList.add("animate-pulse", "border-brand-gold");
-      
       try {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch(API + "/api/upload-policy", { method: "POST", body: fd });
+        const fd = new FormData(); fd.append("file", file);
+        // HATA DÜZELTİLDİ: /api/upload-parse adresine gönderilmeli
+        const res = await fetch(API + "/api/upload-parse", { method: "POST", body: fd });
         const veri = await res.json();
-        
         document.getElementById("pdf-drop").classList.remove("animate-pulse", "border-brand-gold");
-        
         if (!res.ok) throw new Error(veri.detail || "Yükleme başarısız");
         durum.textContent = veri.mesaj;
         goster("policeler");
         await policeFormu(null, veri);
       } catch (e) {
         document.getElementById("pdf-drop").classList.remove("animate-pulse", "border-brand-gold");
-        durum.textContent = "Analiz Hatası: " + e.message;
-        alert(e.message);
+        durum.textContent = "Analiz Hatası: " + e.message; alert(e.message);
       }
     }
 
     function pdfDropKur() {
-      const drop = document.getElementById("pdf-drop");
-      const input = document.getElementById("pdf-input");
+      const drop = document.getElementById("pdf-drop"), input = document.getElementById("pdf-input");
       if (!drop || !input) return;
       input.addEventListener("change", () => { if (input.files[0]) pdfGonder(input.files[0]); input.value = ""; });
-      ["dragenter", "dragover"].forEach((ev) => { drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("border-brand-gold", "bg-brand-gold/10"); }); });
-      ["dragleave", "drop"].forEach((ev) => { drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("border-brand-gold", "bg-brand-gold/10"); }); });
+      ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("border-brand-gold", "bg-brand-gold/10"); }));
+      ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("border-brand-gold", "bg-brand-gold/10"); }));
       drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) pdfGonder(f); });
-    }
-
-    async function policeSil(id) {
-      if (!confirm("Poliçe silinsin mi?")) return;
-      await api("/api/policeler/" + id, { method: "DELETE" });
-      yuklePoliceler();
     }
 
     let araZaman;
     const musteriAraEl = document.getElementById("musteri-ara");
-    if (musteriAraEl) {
-      musteriAraEl.addEventListener("input", (e) => {
-        clearTimeout(araZaman);
-        araZaman = setTimeout(() => yukleMusteriler(e.target.value), 250);
-      });
-    }
-
-    function toggleCompareMode() {
-      const isChecked = document.getElementById("fin-compare-mode").checked;
-      const compDiv = document.getElementById("fin-compare-dates");
-      if (isChecked) compDiv.classList.remove("hidden");
-      else compDiv.classList.add("hidden");
-    }
-
-    async function yukleFinansalHazirlik() {
-      if(!policeCache.length) policeCache = await api("/api/policeler");
-      
-      const sirketler = new Set();
-      const sorumlular = new Set();
-      const branslar = new Set();
-      
-      policeCache.forEach(p => {
-        if(p.sigorta_sirketi) sirketler.add(p.sigorta_sirketi.toUpperCase());
-        if(p.musteri_portfoy_sorumlusu) sorumlular.add(p.musteri_portfoy_sorumlusu.toUpperCase());
-        if(p.sigorta_turu) branslar.add(p.sigorta_turu.toUpperCase());
-      });
-
-      const doldur = (id, setVal) => {
-        const el = document.getElementById(id);
-        el.innerHTML = '<option value="">Tümünü Göster</option>' + Array.from(setVal).sort().map(v => `<option value="${v}">${v}</option>`).join("");
-      };
-
-      doldur("fin-sirket", sirketler);
-      doldur("fin-sorumlu", sorumlular);
-      doldur("fin-brans", branslar);
-    }
-
-    function hesaplaFiltreliVeri(startDate, endDate, sirket, sorumlu, brans) {
-      let filtered = policeCache;
-      
-      if(startDate) { const d = new Date(startDate); filtered = filtered.filter(p => new Date(p.baslangic_tarihi) >= d); }
-      if(endDate) { const d = new Date(endDate); filtered = filtered.filter(p => new Date(p.baslangic_tarihi) <= d); }
-      if(sirket) filtered = filtered.filter(p => p.sigorta_sirketi && p.sigorta_sirketi.toUpperCase() === sirket);
-      if(sorumlu) filtered = filtered.filter(p => p.musteri_portfoy_sorumlusu && p.musteri_portfoy_sorumlusu.toUpperCase() === sorumlu);
-      if(brans) filtered = filtered.filter(p => p.sigorta_turu && p.sigorta_turu.toUpperCase() === brans);
-
-      let totalCiro = 0;
-      let totalKar = 0;
-      let totalAdet = filtered.length;
-      let bransDagilimi = {};
-      let sirketDagilimi = {};
-
-      filtered.forEach(p => {
-        if(p.prim) totalCiro += p.prim;
-        if(p.komisyon) totalKar += p.komisyon;
-        
-        let b = (p.sigorta_turu || "Bilinmiyor").toUpperCase();
-        if(!bransDagilimi[b]) bransDagilimi[b] = {adet: 0, ciro: 0, kar: 0};
-        bransDagilimi[b].adet += 1;
-        bransDagilimi[b].ciro += p.prim || 0;
-        bransDagilimi[b].kar += p.komisyon || 0;
-
-        let s = (p.sigorta_sirketi || "Bilinmiyor").toUpperCase();
-        if(!sirketDagilimi[s]) sirketDagilimi[s] = {adet: 0, ciro: 0, kar: 0};
-        sirketDagilimi[s].adet += 1;
-        sirketDagilimi[s].ciro += p.prim || 0;
-        sirketDagilimi[s].kar += p.komisyon || 0;
-      });
-
-      return { totalCiro, totalKar, totalAdet, bransDagilimi, sirketDagilimi };
-    }
-
-    function diffHTML(val1, val2, formatPara=false) {
-      if(!val2 && val2 !== 0) return "";
-      const diff = val1 - val2;
-      if (diff === 0) return `<span class="text-slate-400 bg-white/10 px-2 py-1 rounded text-xs">Değişim yok</span>`;
-      const isPos = diff > 0;
-      const color = isPos ? "text-emerald-400 bg-emerald-400/10" : "text-red-400 bg-red-400/10";
-      const sign = isPos ? "▲" : "▼";
-      const txt = formatPara ? para(Math.abs(diff)) : Math.abs(diff);
-      return `<span class="${color} px-2 py-1 rounded text-xs inline-flex items-center gap-1">${sign} ${txt}</span> <span class="text-white/50 text-xs font-normal ml-1">fark</span>`;
-    }
-
-    function diffHTML_Light(val1, val2) {
-      if(!val2 && val2 !== 0) return "";
-      const diff = val1 - val2;
-      if (diff === 0) return `<span class="text-slate-400 bg-slate-100 px-2 py-1 rounded text-xs">Değişim yok</span>`;
-      const isPos = diff > 0;
-      const color = isPos ? "text-emerald-600 bg-emerald-50" : "text-red-600 bg-red-50";
-      const sign = isPos ? "▲" : "▼";
-      return `<span class="${color} px-2 py-1 rounded text-xs inline-flex items-center gap-1">${sign} ${Math.abs(diff)}</span> <span class="text-slate-400 text-xs font-normal ml-1">fark</span>`;
-    }
-
-    function renderDagilimTable(dagilimObj, elementId) {
-      const arr = Object.entries(dagilimObj).sort((a,b) => b[1].kar - a[1].kar);
-      if(arr.length === 0) {
-        document.getElementById(elementId).innerHTML = '<p class="text-slate-400 italic text-sm p-4 text-center">Bu kriterlere uygun veri bulunamadı.</p>';
-        return;
-      }
-      let html = '<table class="w-full text-sm"><thead class="text-left text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100"><tr><th class="pb-3 font-bold">Dağılım</th><th class="pb-3 font-bold text-center">Adet</th><th class="pb-3 text-right font-bold">Kâr Hacmi</th></tr></thead><tbody class="divide-y divide-slate-50">';
-      arr.forEach(([isim, vals]) => {
-        html += `<tr class="hover:bg-slate-50 transition-colors"><td class="py-3.5 font-bold text-brand-black">${isim}</td><td class="py-3.5 font-medium text-center text-slate-600">${vals.adet}</td><td class="py-3.5 text-right font-serif text-brand-gold font-bold text-base">${para(vals.kar)}</td></tr>`;
-      });
-      html += '</tbody></table>';
-      document.getElementById(elementId).innerHTML = html;
-    }
-
-    function calistirFinansalRapor() {
-      const sDate = document.getElementById("fin-start").value;
-      const eDate = document.getElementById("fin-end").value;
-      const sirket = document.getElementById("fin-sirket").value;
-      const sorumlu = document.getElementById("fin-sorumlu").value;
-      const brans = document.getElementById("fin-brans").value;
-
-      const v1 = hesaplaFiltreliVeri(sDate, eDate, sirket, sorumlu, brans);
-      
-      document.getElementById("fin-metrics").classList.remove("hidden");
-      document.getElementById("fin-details").classList.remove("hidden");
-
-      document.getElementById("fin-ciro").textContent = para(v1.totalCiro);
-      document.getElementById("fin-kar").textContent = para(v1.totalKar);
-      document.getElementById("fin-adet").textContent = v1.totalAdet + " Adet";
-
-      renderDagilimTable(v1.bransDagilimi, "fin-brans-liste");
-      renderDagilimTable(v1.sirketDagilimi, "fin-sirket-liste");
-
-      const compareMode = document.getElementById("fin-compare-mode").checked;
-      const elCiroDiff = document.getElementById("fin-ciro-diff");
-      const elKarDiff = document.getElementById("fin-kar-diff");
-      const elAdetDiff = document.getElementById("fin-adet-diff");
-
-      if(compareMode) {
-        const sDate2 = document.getElementById("fin-start2").value;
-        const eDate2 = document.getElementById("fin-end2").value;
-        const v2 = hesaplaFiltreliVeri(sDate2, eDate2, sirket, sorumlu, brans);
-        
-        elCiroDiff.innerHTML = diffHTML(v1.totalCiro, v2.totalCiro, true);
-        elKarDiff.innerHTML = diffHTML(v1.totalKar, v2.totalKar, true);
-        elAdetDiff.innerHTML = diffHTML_Light(v1.totalAdet, v2.totalAdet);
-        
-        elCiroDiff.classList.remove("hidden");
-        elKarDiff.classList.remove("hidden");
-        elAdetDiff.classList.remove("hidden");
-      } else {
-        elCiroDiff.classList.add("hidden");
-        elKarDiff.classList.add("hidden");
-        elAdetDiff.classList.add("hidden");
-      }
-    }
+    if (musteriAraEl) musteriAraEl.addEventListener("input", (e) => { clearTimeout(araZaman); araZaman = setTimeout(() => yukleMusteriler(e.target.value), 250); });
 
     yukleDashboard();
     pdfDropKur();
