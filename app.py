@@ -48,8 +48,8 @@ class Police(Base):
     bitis_tarihi = Column(Date, nullable=False)
     prim = Column(Float, nullable=True)
     durum = Column(String(30), default="aktif")
-    arac_bilgisi = Column(String(255), nullable=True) # Plaka, Marka, Model
-    varlik_bilgisi = Column(Text, nullable=True)     # Adres, m2
+    arac_bilgisi = Column(String(255), nullable=True) 
+    varlik_bilgisi = Column(Text, nullable=True)     
     pdf_dosya_adi = Column(String(255), nullable=True)
 
 def init_db():
@@ -62,7 +62,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.2.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.3.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -221,8 +221,29 @@ def api_musteri_detay(id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/musteriler", status_code=201)
 def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
+    tckn = payload.get("tc_kimlik")
+    ad = (payload.get("ad") or "").strip()
+    soyad = (payload.get("soyad") or "").strip()
+
+    # Mevcut müşteri kontrolü (Tekilleştirme)
+    existing = None
+    if tckn and "**" not in str(tckn):
+        existing = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
+    
+    if not existing and ad and soyad and "**" not in ad:
+        existing = db.query(Musteri).filter(Musteri.ad.ilike(ad), Musteri.soyad.ilike(soyad)).first()
+
+    if existing:
+        for k, v in payload.items():
+            if v and not str(v).startswith("*"):
+                setattr(existing, k, v)
+        db.commit()
+        db.refresh(existing)
+        return existing
+
     if not payload.get("telefon") or not payload.get("portfoy_sorumlusu"):
         raise HTTPException(status_code=400, detail="Telefon numarası ve Portföy Sorumlusu zorunludur!")
+    
     m = Musteri(**payload)
     db.add(m); db.commit(); db.refresh(m)
     return m
@@ -262,18 +283,44 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         baslangic = parse_tarih(payload.get("baslangic_tarihi"))
         bitis = parse_tarih(payload.get("bitis_tarihi"))
         prim_deger = float(payload.get("prim") or 0) if payload.get("prim") is not None else None
+        police_no = payload.get("police_no")
+        islem_turu = payload.get("islem_turu", "Yeni Poliçe")
+        arac_yeni = payload.get("arac_bilgisi")
+
+        # Eğer bu bir Plaka Değişikliği / Zeyil / Ek Belge ise ve aynı poliçe numarası varsa, ana poliçeyi bulup ona ekle
+        ana_police = None
+        if police_no and ("plaka" in str(islem_turu).lower() or "zeyil" in str(islem_turu).lower() or "tahakkuk" in str(islem_turu).lower() or "ek" in str(islem_turu).lower()):
+            ana_police = db.query(Police).filter(Police.police_no == police_no).first()
+
+        if ana_police:
+            # Plaka güncelleniyorsa ana poliçenin arac bilgisini güncelle
+            if arac_yeni:
+                ana_police.arac_bilgisi = arac_yeni
+            # Fiyatı ana poliçeye ekle
+            if prim_deger:
+                ana_police.prim = (ana_police.prim or 0) + prim_deger
+            
+            # Açıklama veya PDF zeyil notu ekle
+            ek_not = f" | Ek Belge ({islem_turu}): Prim +{prim_deger} TL, Araç: {arac_yeni}"
+            ana_police.aciklama = (ana_police.aciklama or "") + ek_not
+            if payload.get("pdf_dosya_adi"):
+                ana_police.pdf_dosya_adi = payload.get("pdf_dosya_adi") # Son zeyil PDF'i güncel tutulsun
+            
+            db.commit()
+            db.refresh(ana_police)
+            return police_to_out(ana_police, db)
 
         police = Police(
             musteri_id=payload.get("musteri_id"),
-            police_no=payload.get("police_no"),
+            police_no=police_no,
             sigorta_turu=payload.get("sigorta_turu"),
             sigorta_sirketi=payload.get("sigorta_sirketi"),
-            islem_turu=payload.get("islem_turu", "Yeni Poliçe"),
+            islem_turu=islem_turu,
             baslangic_tarihi=baslangic,
             bitis_tarihi=bitis,
             prim=prim_deger,
             durum=str(payload.get("durum", "aktif")).lower(),
-            arac_bilgisi=payload.get("arac_bilgisi"),
+            arac_bilgisi=arac_yeni,
             varlik_bilgisi=payload.get("varlik_bilgisi"),
             pdf_dosya_adi=payload.get("pdf_dosya_adi")
         )
@@ -338,7 +385,41 @@ async def api_upload_parse(file: UploadFile = File(...)):
 
         ayiklanan = ayikla_police_pdf(icerik)
         ayiklanan["pdf_dosya_adi"] = dosya_adi
-        ayiklanan["mesaj"] = "Poliçe başarıyla okundu. Müşteri bilgilerini onaylayın."
+
+        # Müşteri veritabanında var mı kontrol et (Yıldızlı/maskeli isimleri mevcut müşterilerle akıllı eşleştir)
+        db = SessionLocal()
+        try:
+            tckn = ayiklanan.get("tckn")
+            bulunan_musteri = None
+            if tckn and "**" not in str(tckn):
+                bulunan_musteri = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
+            
+            if not bulunan_musteri:
+                # Tüm müşterileri tarayıp ad/soyad uyuşması var mı bakalım
+                tum_musteriler = db.query(Musteri).all()
+                for m in tum_musteriler:
+                    ayiklanan_ad = (ayiklanan.get("ad") or "").lower()
+                    m_ad = (m.ad or "").lower()
+                    if ayiklanan_ad and (ayiklanan_ad in m_ad or m_ad in ayiklanan_ad):
+                        bulunan_musteri = m
+                        break
+
+            if bulunan_musteri:
+                ayiklanan["musteri"] = {
+                    "id": bulunan_musteri.id,
+                    "ad": bulunan_musteri.ad,
+                    "soyad": bulunan_musteri.soyad,
+                    "telefon": bulunan_musteri.telefon,
+                    "portfoy_sorumlusu": bulunan_musteri.portfoy_sorumlusu
+                }
+                ayiklanan["musteri_eslesti"] = True
+                ayiklanan["mesaj"] = f"Mevcut müşteri bulundu: {bulunan_musteri.ad} {bulunan_musteri.soyad} ({bulunan_musteri.portfoy_sorumlusu})."
+            else:
+                ayiklanan["musteri_eslesti"] = False
+                ayiklanan["mesaj"] = "Yeni veya maskeli isim tespit edildi. Lütfen listeden mevcut müşteriyi seçin veya kaydedin."
+        finally:
+            db.close()
+
         return ayiklanan
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
