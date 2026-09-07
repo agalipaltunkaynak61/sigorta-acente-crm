@@ -48,7 +48,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     {metin[:8000]}
     """
 
-    # Uzun beklemeleri (dakikalarca takılmayı) önleyen hızlı ve akıllı deneme döngüsü
+    # Arka planda 3 kez kısa aralıklarla otomatik tekrar deneyen akıllı mekanizma
     max_deneme = 3
     response = None
     for deneme in range(max_deneme):
@@ -65,8 +65,8 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
                 break
         except Exception as e:
             if deneme == max_deneme - 1:
-                raise ValueError("Yapay zeka yoğunluk hatası (503): Sunucu şu an çok yoğun. Lütfen 10-15 saniye sonra tekrar deneyin.")
-            time.sleep(1) # Uzun uzun bekletmek yerine 1 saniye arayla hızlıca tekrar dener
+                raise ValueError("Google sunucuları şu an çok yoğun. Lütfen 5-10 saniye bekleyip tekrar deneyin.")
+            time.sleep(2) # Arka planda 2 saniye bekleyip otomatik yeniden dener
 
     if not response or not response.text:
         raise ValueError("Yapay zekadan yanıt alınamadı.")
