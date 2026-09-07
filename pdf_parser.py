@@ -6,7 +6,7 @@ from google import genai
 from google.genai import types
 
 import os
-API_KEY = os.getenv("GCP_API_KEY")
+GEMINI_API_KEY = os.getenv("GCP_API_KEY") # Veya Render'da hangi ismi verdiysen
 
 def pdf_metni_al(dosya: bytes) -> str:
     sayfalar = []
