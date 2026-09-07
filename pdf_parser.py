@@ -6,7 +6,7 @@ from google.genai import types
 import os
 
 # Render ortamındaki GCP_API_KEY değişkenini güvenli bir şekilde okuyoruz
-GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GCP_API_KEY")
 
 def pdf_metni_al(dosya: bytes) -> str:
     sayfalar = []
@@ -26,7 +26,6 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
 
     client = genai.Client(api_key=GEMINI_API_KEY)
     
-    # Metni 4000 karaktere indirerek hem token limitini koruyoruz hem de 3 kat daha hızlı okutuyoruz
     prompt = f"""
     Aşağıdaki sigorta poliçesini analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
 
@@ -49,7 +48,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
 
     try:
         response = client.models.generate_content(
-            model="gemini-3.6-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -61,8 +60,10 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
         veri = json.loads(response.text)
     except Exception as e:
         err_str = str(e)
+        if "503" in err_str or "UNAVAILABLE" in err_str:
+            raise ValueError("Google sunucuları anlık yoğunluk yaşadı. Lütfen birkaç saniye sonra tekrar deneyin.")
         if "429" in err_str or "ResourceExhausted" in err_str or "quota" in err_str.lower():
-            raise ValueError("API kota sınırı doldu! Lütfen 10-15 saniye bekleyip tekrar yükle.")
+            raise ValueError("API kota sınırına ulaşıldı. Lütfen kısa bir süre bekleyin.")
         raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
 
     ad = veri.get("ad") or ""
