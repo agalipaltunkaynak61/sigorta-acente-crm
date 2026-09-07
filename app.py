@@ -62,7 +62,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.0.6")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -168,20 +168,31 @@ def ana_sayfa():
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Altun Kardeşler CRM</title>
+  <title>Altun Kardeşler Premium CRM</title>
+  
+  <!-- Premium Fontlar -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
           colors: {
             brand: { 
-              black: "#0a0a0a", 
-              dark: "#141414", 
+              black: "#050505", 
+              dark: "#121212", 
               panel: "#1e1e1e",
               gold: "#D4AF37", 
               goldhover: "#AA8C2C",
-              light: "#f3f4f6"
+              light: "#f8f9fa",
+              muted: "#8c8c8c"
             },
           },
         },
@@ -189,117 +200,159 @@ def ana_sayfa():
     };
   </script>
   <style>
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #1e1e1e; }
-    ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #AA8C2C; }
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body class="bg-brand-light text-slate-800 min-h-screen">
+<body class="bg-brand-light text-slate-800 min-h-screen antialiased selection:bg-brand-gold selection:text-white">
   <div class="flex min-h-screen">
-    <aside class="w-64 bg-brand-black text-white flex flex-col shrink-0 border-r border-brand-gold/20 shadow-2xl">
-      <div class="px-6 py-8 border-b border-white/10 text-center">
-        <img src="/Logo.png" alt="Altun Kardeşler Logo" class="w-24 mx-auto mb-3 object-contain" onerror="this.style.display='none'">
-        <h1 class="text-xl font-bold text-brand-gold tracking-wider">ALTUN</h1>
-        <p class="text-xs uppercase tracking-widest text-slate-400 mt-1">KARDEŞLER CRM</p>
+    
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-brand-black text-white flex flex-col shrink-0 border-r border-brand-gold/10 shadow-[4px_0_24px_rgba(0,0,0,0.2)] z-20">
+      
+      <!-- Logo Alanı -->
+      <div class="px-6 pt-8 pb-6 border-b border-white/5 text-center flex flex-col items-center bg-gradient-to-b from-white/5 to-transparent">
+        <div class="relative w-36 rounded-xl p-1 bg-[#121212] border border-brand-gold/20 shadow-[0_0_25px_rgba(212,175,55,0.15)] mb-3 overflow-hidden group hover:border-brand-gold/40 transition-all duration-500">
+          <div class="absolute inset-0 bg-brand-gold/5 group-hover:bg-brand-gold/10 transition-colors"></div>
+          <img src="/Logo.png" alt="Altun Kardeşler Logo" class="w-full h-auto object-contain relative z-10 rounded-lg" onerror="this.style.display='none'">
+        </div>
+        <span class="inline-flex items-center gap-2 bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-[0.2em] px-3.5 py-1 rounded-full border border-brand-gold/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse"></span>
+          Yönetim Paneli v3.1
+        </span>
       </div>
-      <nav class="p-3 space-y-1 flex-1 mt-4">
-        <button data-view="dashboard" class="nav-btn w-full text-left px-4 py-3 rounded-lg bg-brand-gold/10 text-brand-gold font-bold transition-all">Ana Ekran</button>
-        <button data-view="musteriler" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-all text-white">Müşteriler</button>
-        <button data-view="policeler" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-all text-white">Poliçeler</button>
-        <button data-view="finansal" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-all text-white border border-transparent hover:border-brand-gold/30">Finansal Analiz</button>
+
+      <!-- Navigasyon -->
+      <nav class="p-4 space-y-2 flex-1 mt-2">
+        <button data-view="dashboard" class="nav-btn w-full text-left px-5 py-3.5 rounded-xl bg-brand-gold/10 text-brand-gold font-medium transition-all duration-300 flex items-center gap-3 group">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          Ana Ekran
+        </button>
+        <button data-view="musteriler" class="nav-btn w-full text-left px-5 py-3.5 rounded-xl hover:bg-white/5 transition-all duration-300 flex items-center gap-3 text-brand-muted hover:text-white group">
+          <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          Müşteriler
+        </button>
+        <button data-view="policeler" class="nav-btn w-full text-left px-5 py-3.5 rounded-xl hover:bg-white/5 transition-all duration-300 flex items-center gap-3 text-brand-muted hover:text-white group">
+          <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Poliçeler
+        </button>
+        <button data-view="finansal" class="nav-btn w-full text-left px-5 py-3.5 rounded-xl hover:bg-white/5 transition-all duration-300 flex items-center gap-3 text-brand-muted hover:text-white group">
+          <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          Finansal Analiz
+        </button>
       </nav>
-      <p class="px-6 py-4 text-xs text-brand-gold/50 text-center">Altun Kardeşler Sigorta v3</p>
+      <div class="px-6 py-6 border-t border-white/5">
+        <p class="text-[10px] text-brand-muted text-center uppercase tracking-widest">Altun Kardeşler Sigorta</p>
+      </div>
     </aside>
 
-    <main class="flex-1 p-6 md:p-8 bg-slate-50 overflow-y-auto max-h-screen">
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-8 md:p-12 overflow-y-auto max-h-screen relative">
+      
       <!-- DASHBOARD -->
-      <section id="view-dashboard">
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold text-brand-black">Hoş Geldiniz</h2>
-          <p class="text-sm text-slate-500 mt-1">Bitişi yaklaşan poliçeler (0–3 gün kırmızı · 3–15 gün sarı · 15–30 gün yeşil)</p>
+      <section id="view-dashboard" class="fade-in">
+        <div class="mb-8">
+          <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight mb-2">Hoş Geldiniz</h2>
+          <p class="text-sm font-medium text-slate-500">Bitişi yaklaşan poliçeler (0–3 gün <span class="text-red-500">kırmızı</span> · 3–15 gün <span class="text-amber-500">sarı</span> · 15–30 gün <span class="text-emerald-500">yeşil</span>)</p>
         </div>
-        <div id="ozet-kartlar" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
-        <div id="yaklasan-liste" class="space-y-3"></div>
+        <div id="ozet-kartlar" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10"></div>
+        <h3 class="text-xl font-serif font-bold text-brand-black mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Yaklaşan Yenilemeler
+        </h3>
+        <div id="yaklasan-liste" class="space-y-4"></div>
       </section>
 
       <!-- MÜŞTERİLER -->
-      <section id="view-musteriler" class="hidden">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h2 class="text-2xl font-bold text-brand-black">Müşteriler</h2>
-          <div class="flex gap-2">
-            <input id="musteri-ara" type="search" placeholder="Ad, telefon, TCKN…" class="border border-slate-300 rounded-lg px-3 py-2 text-sm w-72 focus:outline-none focus:border-brand-gold" />
-            <button onclick="musteriFormu()" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-sm font-semibold hover:bg-brand-dark shadow-md">Yeni Müşteri</button>
+      <section id="view-musteriler" class="hidden fade-in">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
+          <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight">Müşteri Portföyü</h2>
+          <div class="flex gap-3">
+            <input id="musteri-ara" type="search" placeholder="Ad, telefon, TCKN ara…" class="border border-slate-200 rounded-xl px-4 py-2.5 text-sm w-80 focus:outline-none focus:border-brand-gold shadow-sm" />
+            <button onclick="musteriFormu()" class="bg-brand-black text-brand-gold px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-gold hover:text-white transition-all shadow-lg">Yeni Müşteri</button>
           </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
           <table class="w-full text-sm">
-            <thead class="bg-brand-black text-left text-brand-gold">
+            <thead class="bg-slate-50/80 border-b border-slate-100 text-left text-slate-500 uppercase tracking-wider text-xs font-bold">
               <tr>
-                <th class="px-4 py-4">Ad Soyad</th>
-                <th class="px-4 py-4">Telefon</th>
-                <th class="px-4 py-4">Danışman</th>
-                <th class="px-4 py-4">TC / Vergi No</th>
-                <th class="px-4 py-4 text-right">İşlemler</th>
+                <th class="px-6 py-5">Ad Soyad</th>
+                <th class="px-6 py-5">Telefon</th>
+                <th class="px-6 py-5">Danışman</th>
+                <th class="px-6 py-5">TC / Vergi No</th>
+                <th class="px-6 py-5 text-right">İşlemler</th>
               </tr>
             </thead>
-            <tbody id="musteri-tbody" class="divide-y divide-slate-100"></tbody>
+            <tbody id="musteri-tbody" class="divide-y divide-slate-50"></tbody>
           </table>
         </div>
       </section>
 
       <!-- POLİÇELER -->
-      <section id="view-policeler" class="hidden">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h2 class="text-2xl font-bold text-brand-black">Poliçeler</h2>
+      <section id="view-policeler" class="hidden fade-in">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight">Poliçe Yönetimi</h2>
+          <button onclick="policeFormu()" class="bg-brand-black text-brand-gold px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-gold hover:text-white transition-all shadow-lg">Manuel Poliçe Ekle</button>
         </div>
-        <label id="pdf-drop" class="mb-6 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-brand-gold/50 bg-white rounded-xl p-8 text-center cursor-pointer hover:border-brand-gold">
+
+        <label id="pdf-drop" class="mb-10 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-gold/30 bg-gradient-to-b from-white to-brand-gold/5 rounded-2xl p-12 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/10 transition-all group">
           <input id="pdf-input" type="file" accept="application/pdf" class="hidden" />
-          <p class="font-bold text-brand-black text-lg">PDF poliçe sürükleyin veya tıklayın</p>
-          <p class="text-sm text-slate-500">Yapay zeka okuduktan sonra telefon ve danışman sorulacaktır.</p>
-          <p id="pdf-durum" class="text-sm text-brand-gold hidden font-semibold mt-2"></p>
+          <div class="w-16 h-16 rounded-full bg-brand-gold/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          </div>
+          <p class="font-serif font-bold text-brand-black text-2xl">Akıllı PDF Yükleme</p>
+          <p class="text-sm text-slate-500 font-medium">Poliçe PDF'ini sürükleyin veya seçin. Yapay zeka otomatik okuyacaktır.</p>
+          <p id="pdf-durum" class="text-sm bg-brand-black text-brand-gold rounded-full px-4 py-1.5 hidden font-semibold mt-2"></p>
         </label>
-        <div class="flex border-b border-slate-200 mb-4 gap-6 text-sm font-semibold">
-          <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-3 border-b-2 border-brand-gold text-brand-black">Aktif Poliçeler</button>
-          <button onclick="policeSekmeSec('eski')" id="btn-sekme-eski" class="pb-3 border-b-2 border-transparent text-slate-400">Süresi Dolanlar</button>
+
+        <!-- Sekmeler -->
+        <div class="flex border-b border-slate-200 mb-6 gap-8 text-sm font-semibold px-2">
+          <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-3 border-b-2 border-brand-gold text-brand-black font-bold relative">Aktif Poliçeler</button>
+          <button onclick="policeSekmeSec('eski')" id="btn-sekme-eski" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black transition-colors relative">Süresi Dolanlar</button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+
+        <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
           <table class="w-full text-sm">
-            <thead class="bg-brand-black text-left text-brand-gold">
+            <thead class="bg-slate-50/80 border-b border-slate-100 text-left text-slate-500 uppercase tracking-wider text-xs font-bold">
               <tr>
-                <th class="px-4 py-4">Poliçe No</th>
-                <th class="px-4 py-4">Müşteri</th>
-                <th class="px-4 py-4">Şirket / Branş</th>
-                <th class="px-4 py-4">Bitiş</th>
-                <th class="px-4 py-4">Prim</th>
-                <th class="px-4 py-4 text-right">İşlemler</th>
+                <th class="px-6 py-5">Poliçe No</th>
+                <th class="px-6 py-5">Müşteri</th>
+                <th class="px-6 py-5">Şirket / Branş</th>
+                <th class="px-6 py-5">Bitiş</th>
+                <th class="px-6 py-5">Prim</th>
+                <th class="px-6 py-5 text-right">İşlemler</th>
               </tr>
             </thead>
-            <tbody id="police-tbody" class="divide-y divide-slate-100"></tbody>
+            <tbody id="police-tbody" class="divide-y divide-slate-50"></tbody>
           </table>
         </div>
       </section>
 
       <!-- FİNANSAL ANALİZ -->
-      <section id="view-finansal" class="hidden">
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold text-brand-black">Finansal Analiz & Raporlama</h2>
-          <p class="text-sm text-slate-500 mt-1">Şirket, çalışan ve branş bazlı detaylı kar ve ciro analizi.</p>
+      <section id="view-finansal" class="hidden fade-in">
+        <div class="mb-8">
+          <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight mb-2">Finansal Analiz & Raporlama</h2>
+          <p class="text-sm font-medium text-slate-500">Şirket, çalışan ve branş bazlı detaylı kar ve ciro analizi.</p>
         </div>
 
         <!-- Filtre Paneli -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6 space-y-4">
+        <div class="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 mb-8 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başlangıç</label>
-              <input type="date" id="fin-start" class="w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-gold" />
+              <input type="date" id="fin-start" class="w-full border rounded-xl px-3 py-2 text-sm focus:border-brand-gold outline-none" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Bitiş</label>
-              <input type="date" id="fin-end" class="w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-gold" />
+              <input type="date" id="fin-end" class="w-full border rounded-xl px-3 py-2 text-sm focus:border-brand-gold outline-none" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Şirket</label>
-              <select id="fin-sirket" class="w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-gold">
+              <select id="fin-sirket" class="w-full border rounded-xl px-3 py-2 text-sm focus:border-brand-gold outline-none bg-white">
                 <option value="">Tümü</option>
                 <option value="Türkiye">Türkiye</option>
                 <option value="Axa">Axa</option>
@@ -313,7 +366,7 @@ def ana_sayfa():
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Çalışan / Danışman</label>
-              <select id="fin-sorumlu" class="w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-gold">
+              <select id="fin-sorumlu" class="w-full border rounded-xl px-3 py-2 text-sm focus:border-brand-gold outline-none bg-white">
                 <option value="">Tümü</option>
                 <option value="Muammer Altunkaynak">Muammer Altunkaynak</option>
                 <option value="İhsan Berat Altunkaynak">İhsan Berat Altunkaynak</option>
@@ -325,7 +378,7 @@ def ana_sayfa():
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sigorta Branşı</label>
-              <select id="fin-brans" class="w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-gold">
+              <select id="fin-brans" class="w-full border rounded-xl px-3 py-2 text-sm focus:border-brand-gold outline-none bg-white">
                 <option value="">Tümü</option>
                 <option value="TSS">TSS</option>
                 <option value="İş Yeri">İş Yeri</option>
@@ -342,53 +395,53 @@ def ana_sayfa():
           </div>
 
           <div class="pt-3 border-t flex items-center gap-2">
-            <input type="checkbox" id="fin-compare-mode" onchange="toggleCompareMode()" class="w-4 h-4 text-brand-gold rounded border-slate-300">
-            <label for="fin-compare-mode" class="text-sm font-semibold text-slate-700">Başka bir tarih aralığıyla karşılaştır (Geçen yılla kıyaslama vb.)</label>
+            <input type="checkbox" id="fin-compare-mode" onchange="toggleCompareMode()" class="w-4 h-4 text-brand-gold rounded border-slate-300 accent-brand-gold">
+            <label for="fin-compare-mode" class="text-sm font-semibold text-slate-700 cursor-pointer">Başka bir tarih aralığıyla karşılaştır</label>
           </div>
 
-          <div id="fin-compare-dates" class="hidden grid-cols-1 md:grid-cols-5 gap-4 pt-2">
+          <div id="fin-compare-dates" class="hidden grid-cols-1 md:grid-cols-5 gap-4 pt-2 p-4 bg-slate-50 rounded-xl">
             <div>
               <label class="block text-xs font-bold text-sky-600 uppercase mb-1">Karşılaştırma Başlangıç</label>
-              <input type="date" id="fin-start2" class="w-full border border-sky-300 bg-sky-50 rounded-lg px-3 py-2 text-sm" />
+              <input type="date" id="fin-start2" class="w-full border border-sky-300 bg-white rounded-lg px-3 py-2 text-sm" />
             </div>
             <div>
               <label class="block text-xs font-bold text-sky-600 uppercase mb-1">Karşılaştırma Bitiş</label>
-              <input type="date" id="fin-end2" class="w-full border border-sky-300 bg-sky-50 rounded-lg px-3 py-2 text-sm" />
+              <input type="date" id="fin-end2" class="w-full border border-sky-300 bg-white rounded-lg px-3 py-2 text-sm" />
             </div>
           </div>
 
           <div class="flex justify-end pt-2">
-            <button onclick="calistirFinansalRapor()" class="bg-brand-black text-brand-gold px-6 py-2.5 rounded-lg text-sm font-bold shadow-md hover:bg-brand-dark">Raporu Oluştur</button>
+            <button onclick="calistirFinansalRapor()" class="bg-brand-black text-brand-gold px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:bg-brand-gold hover:text-white transition-all">Raporu Oluştur</button>
           </div>
         </div>
 
         <!-- Ana Metrikler -->
-        <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 hidden">
-          <div class="bg-brand-black text-white rounded-xl p-6 shadow-lg border border-brand-gold/30">
+        <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden">
+          <div class="bg-brand-black text-white rounded-2xl p-6 shadow-xl border border-brand-gold/30">
             <p class="text-xs text-brand-gold font-bold uppercase tracking-wider mb-1">Toplam Üretim (Ciro)</p>
-            <p id="fin-ciro" class="text-3xl font-bold">₺0,00</p>
+            <p id="fin-ciro" class="text-3xl font-serif font-bold">₺0,00</p>
             <p id="fin-ciro-diff" class="text-xs mt-2 hidden"></p>
           </div>
-          <div class="bg-gradient-to-br from-brand-gold to-brand-goldhover text-brand-black rounded-xl p-6 shadow-lg">
+          <div class="bg-gradient-to-br from-brand-gold to-brand-goldhover text-brand-black rounded-2xl p-6 shadow-xl">
             <p class="text-xs font-black uppercase tracking-wider opacity-80 mb-1">Tahmini Net Komisyon Karı</p>
-            <p id="fin-kar" class="text-3xl font-black">₺0,00</p>
+            <p id="fin-kar" class="text-3xl font-serif font-black">₺0,00</p>
             <p id="fin-kar-diff" class="text-xs mt-2 font-bold hidden"></p>
           </div>
-          <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+          <div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
             <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Toplam Poliçe Adedi</p>
-            <p id="fin-adet" class="text-3xl font-bold text-brand-black">0 Adet</p>
+            <p id="fin-adet" class="text-3xl font-serif font-bold text-brand-black">0 Adet</p>
             <p id="fin-adet-diff" class="text-xs mt-2 hidden"></p>
           </div>
         </div>
 
         <!-- Detay Tabloları -->
-        <div id="fin-details" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-50 px-5 py-3 border-b font-bold text-sm text-brand-black">Branşlara Göre Dağılım</div>
+        <div id="fin-details" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
+          <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b font-bold text-sm text-brand-black">Branşlara Göre Dağılım</div>
             <div class="p-4 max-h-80 overflow-y-auto" id="fin-brans-liste"></div>
           </div>
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-50 px-5 py-3 border-b font-bold text-sm text-brand-black">Şirketlere Göre Dağılım</div>
+          <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b font-bold text-sm text-brand-black">Şirketlere Göre Dağılım</div>
             <div class="p-4 max-h-80 overflow-y-auto" id="fin-sirket-liste"></div>
           </div>
         </div>
@@ -397,14 +450,14 @@ def ana_sayfa():
   </div>
 
   <!-- MODAL -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto border-t-4 border-brand-gold">
-      <h3 id="modal-baslik" class="text-xl font-bold mb-4 text-brand-black"></h3>
+  <div id="modal" class="hidden fixed inset-0 bg-brand-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto border-t-4 border-brand-gold relative">
+      <h3 id="modal-baslik" class="text-2xl font-serif font-bold mb-6 text-brand-black"></h3>
       <form id="modal-form" class="space-y-4"></form>
-      <p id="modal-hata" class="hidden text-sm font-semibold text-red-600 bg-red-50 p-3 rounded-lg mt-4"></p>
-      <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-        <button type="button" onclick="document.getElementById('modal').classList.add('hidden')" class="px-4 py-2 border rounded-lg text-sm font-medium">Kapat</button>
-        <button type="button" id="modal-kaydet" class="px-4 py-2 bg-brand-black text-brand-gold font-bold rounded-lg text-sm shadow-md">Kaydet</button>
+      <p id="modal-hata" class="hidden text-sm font-semibold text-red-600 bg-red-50 p-4 rounded-xl mt-4 border border-red-100"></p>
+      <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+        <button type="button" onclick="document.getElementById('modal').classList.add('hidden')" class="px-6 py-2.5 border rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Kapat</button>
+        <button type="button" id="modal-kaydet" class="px-8 py-2.5 bg-brand-black text-brand-gold font-bold rounded-xl text-sm shadow-lg hover:bg-brand-gold hover:text-white transition-all">Kaydet</button>
       </div>
     </div>
   </div>
@@ -424,10 +477,10 @@ def ana_sayfa():
       document.querySelectorAll(".nav-btn").forEach(b => {
         if(b.dataset.view === ad) {
           b.classList.add("bg-brand-gold/10", "text-brand-gold", "font-bold");
-          b.classList.remove("text-white", "hover:bg-white/5");
+          b.classList.remove("text-brand-muted", "hover:bg-white/5", "hover:text-white");
         } else {
           b.classList.remove("bg-brand-gold/10", "text-brand-gold", "font-bold");
-          b.classList.add("text-white", "hover:bg-white/5");
+          b.classList.add("text-brand-muted", "hover:bg-white/5", "hover:text-white");
         }
       });
       if(ad === "dashboard") yukleDashboard();
@@ -449,23 +502,23 @@ def ana_sayfa():
     async function yukleDashboard() {
       const ozet = await api("/api/ozet");
       document.getElementById("ozet-kartlar").innerHTML = [
-        ["Müşteri", ozet.musteri_sayisi], ["Poliçe", ozet.police_sayisi], ["Aktif", ozet.aktif_police], ["30 Gün", ozet.yaklasan_30_gun]
-      ].map(([t,v])=>`<div class="bg-white border rounded-xl p-4 border-l-4 border-brand-gold shadow-sm"><p class="text-xs text-slate-400 font-bold">${t}</p><p class="text-2xl font-black">${v}</p></div>`).join("");
+        ["Müşteri Portföyü", ozet.musteri_sayisi], ["Toplam Poliçe", ozet.police_sayisi], ["Aktif Poliçe", ozet.aktif_police], ["30 Günde Biten", ozet.yaklasan_30_gun]
+      ].map(([t,v])=>`<div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 border-l-4 border-brand-gold"><p class="text-xs font-bold text-slate-400 uppercase">${t}</p><p class="text-4xl font-serif font-bold text-brand-black mt-2">${v}</p></div>`).join("");
       
       const liste = await api("/api/policeler/yaklasan");
-      document.getElementById("yaklasan-liste").innerHTML = liste.length === 0 ? '<p class="text-slate-500">Yaklaşan poliçe yok.</p>' :
-        liste.map(p => `<div class="bg-white border p-4 rounded-xl flex justify-between items-center shadow-sm"><div><b>${p.police_no}</b> - ${p.sigorta_turu} (${p.sigorta_sirketi||''})</div><span class="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">${p.kalan_gun} gün</span></div>`).join("");
+      document.getElementById("yaklasan-liste").innerHTML = liste.length === 0 ? '<div class="bg-white rounded-2xl p-8 text-center text-slate-500 border border-slate-100 shadow-sm font-medium">Önümüzdeki 30 günde biten poliçe yok.</div>' :
+        liste.map(p => `<div class="bg-white border border-slate-100 p-5 rounded-2xl flex justify-between items-center shadow-sm"><div class="font-bold text-brand-black"><b>${p.police_no}</b> <span class="font-normal text-slate-500 ml-2">- ${p.sigorta_turu} (${p.sigorta_sirketi||''})</span></div><span class="bg-red-50 text-red-600 border border-red-200 text-xs px-3 py-1.5 rounded-lg font-bold">${p.kalan_gun} gün kaldı</span></div>`).join("");
     }
 
     async function yukleMusteriler(q="") {
       musteriCache = await api("/api/musteriler" + (q ? "?q="+q : ""));
       document.getElementById("musteri-tbody").innerHTML = musteriCache.map(m => `
-        <tr class="hover:bg-brand-gold/5">
-          <td class="px-4 py-3 font-bold">${m.ad} ${m.soyad}</td>
-          <td class="px-4 py-3">${m.telefon || '—'}</td>
-          <td class="px-4 py-3"><span class="bg-slate-100 px-2 py-1 rounded text-xs font-bold">${m.portfoy_sorumlusu || 'Atanmadı'}</span></td>
-          <td class="px-4 py-3">${m.tc_kimlik || '—'}</td>
-          <td class="px-4 py-3 text-right"><button onclick="musteriSil(${m.id})" class="text-red-600 text-xs font-bold">Sil</button></td>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-4 font-bold text-brand-black">${m.ad} ${m.soyad}</td>
+          <td class="px-6 py-4 font-medium text-slate-700">${m.telefon || '—'}</td>
+          <td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg font-semibold">${m.portfoy_sorumlusu || 'Atanmadı'}</span></td>
+          <td class="px-6 py-4 text-slate-500 font-medium">${m.tc_kimlik || '—'}</td>
+          <td class="px-6 py-4 text-right"><button onclick="musteriSil(${m.id})" class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Sil</button></td>
         </tr>`).join("");
     }
 
@@ -476,37 +529,41 @@ def ana_sayfa():
 
     function renderPoliceListesi() {
       const filtrelenmis = policeCache.filter(p => aktifSekme === 'aktif' ? !p.suresi_dolmus : p.suresi_dolmus);
-      document.getElementById("police-tbody").innerHTML = filtrelenmis.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-400">Kayıt yok</td></tr>' :
+      document.getElementById("police-tbody").innerHTML = filtrelenmis.length === 0 ? '<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 font-medium italic bg-slate-50">Kayıt bulunmuyor</td></tr>' :
         filtrelenmis.map(p => `
-          <tr class="hover:bg-brand-gold/5">
-            <td class="px-4 py-3 font-bold">${p.police_no}</td>
-            <td class="px-4 py-3">${p.musteri_ad||''} ${p.musteri_soyad||''}</td>
-            <td class="px-4 py-3">${p.sigorta_sirketi||''} <span class="text-xs bg-brand-black text-brand-gold px-1 rounded">${p.sigorta_turu}</span></td>
-            <td class="px-4 py-3">${p.bitis_tarihi}</td>
-            <td class="px-4 py-3 font-bold">₺${p.prim||0}</td>
-            <td class="px-4 py-3 text-right"><button onclick="policeSil(${p.id})" class="text-red-600 text-xs font-bold">Sil</button></td>
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-6 py-4 font-bold text-brand-black">${p.police_no}</td>
+            <td class="px-6 py-4 font-semibold text-slate-700">${p.musteri_ad||''} ${p.musteri_soyad||''}</td>
+            <td class="px-6 py-4 font-medium text-slate-600">${p.sigorta_sirketi||''} <span class="text-[10px] font-bold uppercase tracking-wider text-brand-gold bg-brand-black px-2 py-0.5 rounded ml-1">${p.sigorta_turu}</span></td>
+            <td class="px-6 py-4 font-bold text-slate-700">${p.bitis_tarihi}</td>
+            <td class="px-6 py-4 font-serif font-bold text-lg text-brand-black">${para(p.prim)}</td>
+            <td class="px-6 py-4 text-right"><button onclick="policeSil(${p.id})" class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Sil</button></td>
           </tr>`).join("");
     }
 
     function policeSekmeSec(sekme) {
       aktifSekme = sekme;
+      const aktifStyle = "pb-3 border-b-2 border-brand-gold text-brand-black font-bold relative";
+      const inaktifStyle = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-brand-black transition-colors relative";
+      document.getElementById("btn-sekme-aktif").className = sekme === 'aktif' ? aktifStyle : inaktifStyle;
+      document.getElementById("btn-sekme-eski").className = sekme === 'eski' ? aktifStyle : inaktifStyle;
       renderPoliceListesi();
     }
 
     function danismanSelect(secili) {
-      return `<label class="block text-sm font-bold mb-1">Portföy Sorumlusu / Danışman <span class="text-brand-gold">*</span></label>
-              <select name="portfoy_sorumlusu" required class="w-full border rounded-lg p-2.5 text-sm bg-slate-50 focus:border-brand-gold">
+      return `<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Portföy Sorumlusu / Danışman <span class="text-red-500">*</span></label>
+              <select name="portfoy_sorumlusu" required class="w-full border rounded-xl px-4 py-2.5 text-sm font-semibold focus:border-brand-gold outline-none bg-slate-50">
                 ${DANISMANLAR.map(d=>`<option ${d===secili?'selected':''}>${d}</option>`).join("")}
-              </select>`;
+              </select></div>`;
     }
 
     function musteriFormu(id) {
       const m = id ? musteriCache.find(x=>x.id===id) : {};
       document.getElementById("modal-baslik").textContent = id ? "Müşteri Düzenle" : "Yeni Müşteri";
       document.getElementById("modal-form").innerHTML = `
-        <label class="block text-sm font-bold mb-1">Ad *</label><input name="ad" value="${m.ad||''}" required class="w-full border rounded-lg p-2.5 text-sm" />
-        <label class="block text-sm font-bold mb-1">Soyad *</label><input name="soyad" value="${m.soyad||''}" required class="w-full border rounded-lg p-2.5 text-sm" />
-        <label class="block text-sm font-bold mb-1">Telefon Numarası *</label><input name="telefon" type="tel" value="${m.telefon||''}" required class="w-full border rounded-lg p-2.5 text-sm" placeholder="05XXXXXXXXX" />
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ad *</label><input name="ad" value="${m.ad||''}" required class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none bg-slate-50" /></div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Soyad *</label><input name="soyad" value="${m.soyad||''}" required class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none bg-slate-50" /></div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon Numarası *</label><input name="telefon" type="tel" value="${m.telefon||''}" required class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none bg-slate-50" placeholder="05XXXXXXXXX" /></div>
         ${danismanSelect(m.portfoy_sorumlusu)}
       `;
       document.getElementById("modal-kaydet").onclick = async () => {
@@ -540,7 +597,7 @@ def ana_sayfa():
         
         document.getElementById("modal-baslik").textContent = "Poliçe Müşteri Bilgileri Onayı";
         document.getElementById("modal-form").innerHTML = `
-          <div class="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-lg text-xs font-semibold mb-3">
+          <div class="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl text-xs font-semibold mb-3">
             Yapay Zeka Okudu: <b>${veri.ad} ${veri.soyad}</b> (TC: ${veri.tckn || 'Yok'})<br>Poliçe No: ${veri.police_no}
           </div>
           <input type="hidden" name="pdf_dosya_adi" value="${veri.pdf_dosya_adi}">
@@ -552,10 +609,10 @@ def ana_sayfa():
           <input type="hidden" name="bitis_tarihi" value="${veri.bitis_tarihi}">
           <input type="hidden" name="prim" value="${veri.brut_prim || veri.net_prim || 0}">
           
-          <label class="block text-sm font-bold mb-1">Müşteri Adı *</label><input name="ad" value="${veri.ad || ''}" required class="w-full border rounded-lg p-2.5 text-sm" />
-          <label class="block text-sm font-bold mb-1">Müşteri Soyadı *</label><input name="soyad" value="${veri.soyad || ''}" required class="w-full border rounded-lg p-2.5 text-sm" />
-          <label class="block text-sm font-bold mb-1">TC / Vergi No</label><input name="tc_kimlik" value="${veri.tckn || ''}" class="w-full border rounded-lg p-2.5 text-sm" />
-          <label class="block text-sm font-bold mb-1">Telefon Numarası (Zorunlu) *</label><input name="telefon" type="tel" required class="w-full border rounded-lg p-2.5 text-sm" placeholder="05XXXXXXXXX" />
+          <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Müşteri Adı *</label><input name="ad" value="${veri.ad || ''}" required class="w-full border rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none" /></div>
+          <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Müşteri Soyadı *</label><input name="soyad" value="${veri.soyad || ''}" required class="w-full border rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none" /></div>
+          <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">TC / Vergi No</label><input name="tc_kimlik" value="${veri.tckn || ''}" class="w-full border rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none" /></div>
+          <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon Numarası *</label><input name="telefon" type="tel" required class="w-full border rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none" placeholder="05XXXXXXXXX" /></div>
           ${danismanSelect("")}
         `;
         
@@ -605,10 +662,8 @@ def ana_sayfa():
 
     function hesaplaFiltreliVeri(startDate, endDate, sirket, sorumlu, brans) {
       let filtered = policeCache;
-      
       if(startDate) { const d = new Date(startDate); filtered = filtered.filter(p => new Date(p.baslangic_tarihi) >= d); }
       if(endDate) { const d = new Date(endDate); filtered = filtered.filter(p => new Date(p.baslangic_tarihi) <= d); }
-      
       if(sirket) {
         if(sirket === "Diğer") {
           const anlasmali = ["türkiye", "turkiye", "axa", "ak", "hepiyi", "neova", "doğa", "doga", "quick"];
@@ -620,7 +675,6 @@ def ana_sayfa():
           filtered = filtered.filter(p => p.sigorta_sirketi && p.sigorta_sirketi.toLowerCase().includes(sirket.toLowerCase()));
         }
       }
-
       if(sorumlu) {
         if(sorumlu === "Diğer") {
           filtered = filtered.filter(p => !DANISMANLAR.includes(p.musteri_portfoy_sorumlusu));
@@ -628,14 +682,10 @@ def ana_sayfa():
           filtered = filtered.filter(p => p.musteri_portfoy_sorumlusu === sorumlu);
         }
       }
-
       if(brans) filtered = filtered.filter(p => p.sigorta_turu && p.sigorta_turu.toLowerCase().includes(brans.toLowerCase()));
 
-      let totalCiro = 0;
-      let totalKar = 0;
-      let totalAdet = filtered.length;
-      let bransDagilimi = {};
-      let sirketDagilimi = {};
+      let totalCiro = 0, totalKar = 0, totalAdet = filtered.length;
+      let bransDagilimi = {}, sirketDagilimi = {};
 
       filtered.forEach(p => {
         if(p.prim) totalCiro += p.prim;
@@ -676,12 +726,12 @@ def ana_sayfa():
     function renderDagilimTable(dagilimObj, elementId) {
       const arr = Object.entries(dagilimObj).sort((a,b) => b[1].kar - a[1].kar);
       if(arr.length === 0) {
-        document.getElementById(elementId).innerHTML = '<p class="text-slate-400 italic text-sm">Veri bulunamadı.</p>';
+        document.getElementById(elementId).innerHTML = '<p class="text-slate-400 italic text-sm p-4">Veri bulunamadı.</p>';
         return;
       }
-      let html = '<table class="w-full text-sm"><thead class="text-left text-slate-500 border-b"><tr><th class="pb-2">İsim</th><th class="pb-2">Adet</th><th class="pb-2 text-right">Kar</th></tr></thead><tbody class="divide-y divide-slate-100">';
+      let html = '<table class="w-full text-sm"><thead class="text-left text-slate-500 border-b"><tr><th class="pb-3 px-4">İsim</th><th class="pb-3 px-4">Adet</th><th class="pb-3 px-4 text-right">Kar</th></tr></thead><tbody class="divide-y divide-slate-50">';
       arr.forEach(([isim, vals]) => {
-        html += `<tr><td class="py-2 font-bold text-brand-black">${isim}</td><td class="py-2 font-medium">${vals.adet}</td><td class="py-2 text-right text-brand-gold font-bold">${para(vals.kar)}</td></tr>`;
+        html += `<tr><td class="py-3 px-4 font-bold text-brand-black">${isim}</td><td class="py-3 px-4 font-medium">${vals.adet}</td><td class="py-3 px-4 text-right text-brand-gold font-bold">${para(vals.kar)}</td></tr>`;
       });
       html += '</tbody></table>';
       document.getElementById(elementId).innerHTML = html;
@@ -689,7 +739,6 @@ def ana_sayfa():
 
     async function calistirFinansalRapor() {
       if(!policeCache.length) policeCache = await api("/api/policeler");
-
       const sDate = document.getElementById("fin-start").value;
       const eDate = document.getElementById("fin-end").value;
       const sirket = document.getElementById("fin-sirket").value;
@@ -697,7 +746,6 @@ def ana_sayfa():
       const brans = document.getElementById("fin-brans").value;
 
       const v1 = hesaplaFiltreliVeri(sDate, eDate, sirket, sorumlu, brans);
-      
       document.getElementById("fin-metrics").classList.remove("hidden");
       document.getElementById("fin-details").classList.remove("hidden");
 
@@ -717,11 +765,9 @@ def ana_sayfa():
         const sDate2 = document.getElementById("fin-start2").value;
         const eDate2 = document.getElementById("fin-end2").value;
         const v2 = hesaplaFiltreliVeri(sDate2, eDate2, sirket, sorumlu, brans);
-        
         elCiroDiff.innerHTML = diffHTML(v1.totalCiro, v2.totalCiro, true);
         elKarDiff.innerHTML = diffHTML(v1.totalKar, v2.totalKar, true);
         elAdetDiff.innerHTML = diffHTML(v1.totalAdet, v2.totalAdet, false);
-        
         elCiroDiff.classList.remove("hidden");
         elKarDiff.classList.remove("hidden");
         elAdetDiff.classList.remove("hidden");
