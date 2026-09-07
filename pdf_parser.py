@@ -47,7 +47,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     {metin[:12000]}
     """
 
-    max_deneme = 3
+    max_deneme = 5
     for deneme in range(max_deneme):
         try:
             response = client.models.generate_content(
@@ -62,7 +62,8 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
         except Exception as e:
             if deneme == max_deneme - 1:
                 raise e
-            time.sleep(2)
+            # Sunucu yoğunluklarında (503) kademeli olarak artan bekleme süresi
+            time.sleep(4 + (deneme * 2))
 
     ad = veri.get("ad") or ""
     soyad = veri.get("soyad") or ""
