@@ -18,8 +18,22 @@ BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-DB_PATH = BASE_DIR / "acente_crm.db"
-engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
+# ==================== VERİTABANI BAĞLANTISI (SUPABASE POSTGRESQL) ====================
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    # Lokal testler için fallback (istenirse local sqlite kalabilir)
+    DB_PATH = BASE_DIR / "acente_crm.db"
+    DATABASE_URL = f"sqlite:///{DB_PATH}"
+
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    engine_args["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -49,7 +63,7 @@ class Police(Base):
     prim = Column(Float, nullable=True)
     durum = Column(String(30), default="aktif")
     arac_bilgisi = Column(String(255), nullable=True) 
-    varlik_bilgisi = Column(Text, nullable=True)     
+    varlik_bilgisi = Column(Text, nullable=True)    
     aciklama = Column(Text, nullable=True)
     pdf_dosya_adi = Column(String(255), nullable=True)
 

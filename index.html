@@ -585,7 +585,7 @@
       }, 50);
     }
 
-    // --- FİNANSAL ANALİZ FONKSİYONLARI ---
+    // --- İSTEMCİ TARAFI FİNANSAL ANALİZ (404 HATASINI ÖNLER) ---
     async function yukleFinansalHazirlik() {
       try {
         if (!policeCache.length) policeCache = await api("/api/policeler");
@@ -614,37 +614,60 @@
 
     async function calistirFinansalRapor() {
       try {
+        if (!policeCache.length) policeCache = await api("/api/policeler");
+
         const start = document.getElementById("fin-start").value;
         const end = document.getElementById("fin-end").value;
         const sirket = document.getElementById("fin-sirket").value;
         const sorumlu = document.getElementById("fin-sorumlu").value;
         const brans = document.getElementById("fin-brans").value;
 
-        let query = `?start_date=${start}&end_date=${end}`;
-        if (sirket) query += `&sigorta_sirketi=${encodeURIComponent(sirket)}`;
-        if (sorumlu) query += `&portfoy_sorumlusu=${encodeURIComponent(sorumlu)}`;
-        if (brans) query += `&sigorta_turu=${encodeURIComponent(brans)}`;
+        const filtrelenmis = policeCache.filter(p => {
+          if (!p.baslangic_tarihi) return false;
+          if (start && p.baslangic_tarihi < start) return false;
+          if (end && p.baslangic_tarihi > end) return false;
+          if (sirket && p.sigorta_sirketi !== sirket) return false;
+          if (sorumlu && p.musteri_portfoy_sorumlusu !== sorumlu) return false;
+          if (brans && p.sigorta_turu !== brans) return false;
+          return true;
+        });
 
-        const rapor = await api("/api/finansal/rapor" + query);
-        
+        let toplamCiro = 0;
+        let toplamAdet = filtrelenmis.length;
+        const bransDagilimi = {};
+        const sirketDagilimi = {};
+
+        filtrelenmis.forEach(p => {
+          const prim = Number(p.prim) || 0;
+          toplamCiro += prim;
+
+          const b = p.sigorta_turu || "Diğer";
+          bransDagilimi[b] = (bransDagilimi[b] || 0) + prim;
+
+          const s = p.sigorta_sirketi || "Diğer";
+          sirketDagilimi[s] = (sirketDagilimi[s] || 0) + prim;
+        });
+
+        const tahminiKomisyon = toplamCiro * 0.15;
+
         document.getElementById("fin-metrics").classList.remove("hidden");
         document.getElementById("fin-details").classList.remove("hidden");
 
-        document.getElementById("fin-ciro").textContent = para(rapor.toplam_ciro);
-        document.getElementById("fin-kar").textContent = para(rapor.tahmini_komisyon);
-        document.getElementById("fin-adet").textContent = (rapor.toplam_adet || 0) + " Adet";
+        document.getElementById("fin-ciro").textContent = para(toplamCiro);
+        document.getElementById("fin-kar").textContent = para(tahminiKomisyon);
+        document.getElementById("fin-adet").textContent = toplamAdet + " Adet";
 
         const bransListe = document.getElementById("fin-brans-liste");
         const sirketListe = document.getElementById("fin-sirket-liste");
 
-        bransListe.innerHTML = Object.entries(rapor.brans_dagilimi || {}).map(([k, v]) => `
+        bransListe.innerHTML = Object.entries(bransDagilimi).map(([k, v]) => `
           <div class="flex justify-between items-center p-3 border-b border-slate-100 text-sm">
             <span class="font-semibold text-slate-700">${k}</span>
             <span class="font-bold text-brand-black">${para(v)}</span>
           </div>
         `).join("") || '<p class="p-4 text-sm text-slate-400 italic text-center">Veri bulunamadı</p>';
 
-        sirketListe.innerHTML = Object.entries(rapor.sirket_dagilimi || {}).map(([k, v]) => `
+        sirketListe.innerHTML = Object.entries(sirketDagilimi).map(([k, v]) => `
           <div class="flex justify-between items-center p-3 border-b border-slate-100 text-sm">
             <span class="font-semibold text-slate-700">${k}</span>
             <span class="font-bold text-brand-black">${para(v)}</span>

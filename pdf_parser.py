@@ -6,7 +6,7 @@ from google import genai
 from google.genai import types
 import pdfplumber
 
-GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GCP_API_KEY")
+GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GEMINI_API_KEY")
 
 
 def pdf_metni_al(dosya: bytes) -> str:
@@ -57,7 +57,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     for deneme in range(max_deneme):
         try:
             response = client.models.generate_content(
-                model="gemini-3.1-flash-lite",
+                model="gemini-3.5-flash-lite",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json", temperature=0.1

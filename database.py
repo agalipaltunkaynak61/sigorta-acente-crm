@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -15,29 +16,41 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-DATABASE_PATH = Path(__file__).resolve().parent / "acente_crm.db"
-DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
+# Çevre değişkeninden (Render / Supabase) URL al, yoksa lokal SQLite kullan
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={
+if not DATABASE_URL:
+    DATABASE_PATH = Path(__file__).resolve().parent / "acente_crm.db"
+    DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
+
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# Bağlantı argümanları (SQLite için ayrı, PostgreSQL için ayrı)
+engine_args = {
+    "pool_pre_ping": True,
+}
+
+if DATABASE_URL.startswith("sqlite"):
+    engine_args["connect_args"] = {
         "check_same_thread": False,
         "timeout": 30,
-    },
-    pool_pre_ping=True,
-)
+    }
+
+engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
-@event.listens_for(engine, "connect")
-def configure_sqlite(connection, _connection_record):
-    cursor = connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.execute("PRAGMA busy_timeout=30000")
-    cursor.close()
+# SQLite için özel ayarlar (Sadece lokalde çalışır, PostgreSQL'de hata vermez)
+if DATABASE_URL.startswith("sqlite"):
+    @event.listens_for(engine, "connect")
+    def configure_sqlite(connection, _connection_record):
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.close()
 
 
 class Musteri(Base):
