@@ -120,15 +120,15 @@
           <button onclick="policeFormu()" class="bg-brand-black text-brand-gold px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-gold hover:text-white transition-all duration-300 shadow-lg shadow-black/10">Manuel Poliçe Ekle</button>
         </div>
 
-        <label id="pdf-drop" class="mb-10 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-gold/30 bg-gradient-to-b from-white to-brand-gold/5 rounded-2xl p-12 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/10 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-300 group">
-          <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" />
-          <div class="w-16 h-16 rounded-full bg-brand-gold/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+        <div id="pdf-drop" class="mb-10 relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-gold/30 bg-gradient-to-b from-white to-brand-gold/5 rounded-2xl p-12 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/10 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-300 group">
+          <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
+          <div class="w-16 h-16 rounded-full bg-brand-gold/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 pointer-events-none">
             <svg class="w-8 h-8 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
           </div>
-          <p class="font-serif font-bold text-brand-black text-2xl">Akıllı PDF Yükleme</p>
-          <p class="text-sm text-slate-500 font-medium">Poliçe PDF'ini sürükleyin veya bilgisayardan seçin. Yapay zeka tüm verileri otomatik işler.</p>
-          <p id="pdf-durum" class="text-sm bg-brand-black text-brand-gold rounded-full px-4 py-1.5 hidden font-semibold mt-2 shadow-lg"></p>
-        </label>
+          <p class="font-serif font-bold text-brand-black text-2xl pointer-events-none">Akıllı PDF Yükleme</p>
+          <p class="text-sm text-slate-500 font-medium pointer-events-none">Poliçe PDF'ini sürükleyin veya bilgisayardan seçin. Yapay zeka tüm verileri otomatik işler.</p>
+          <p id="pdf-durum" class="text-sm bg-brand-black text-brand-gold rounded-full px-4 py-1.5 hidden font-semibold mt-2 shadow-lg relative z-20"></p>
+        </div>
 
         <div class="flex border-b border-slate-200 mb-6 gap-8 text-sm font-semibold px-2">
           <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-3 border-b-2 border-brand-gold text-brand-black font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-brand-gold">Mevcut / Aktif Poliçeler</button>
@@ -370,8 +370,8 @@
                       </div>
                       ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="bg-brand-black text-brand-gold px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-gold hover:text-white transition-colors opacity-0 group-hover:opacity-100">PDF Aç</a>` : `<span class='text-[10px] text-slate-400 font-bold border px-2 py-1 rounded bg-slate-50'>PDF YOK</span>`}
                     </div>
-                    ${p.arac_bilgisi ? `<div class="bg-sky-50 border border-sky-100 p-2.5 rounded-lg text-xs text-sky-900 font-medium mt-2 flex items-center gap-2"><svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg><span><strong>Araç Bilgisi:</strong> ${p.arac_bilgisi}</span></div>` : ''}
-                    ${p.varlik_bilgisi ? `<div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-lg text-xs text-emerald-900 font-medium mt-2 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><span><strong>Gayrimenkul / DASK Bilgisi:</strong> ${p.varlik_bilgisi}</span></div>` : ''}
+                    ${p.arac_bilgisi ? `<div class="bg-sky-50 border border-sky-100 p-2.5 rounded-lg text-xs text-sky-900 font-medium mt-2 flex items-center gap-2"><span><strong>Araç Bilgisi:</strong> ${p.arac_bilgisi}</span></div>` : ''}
+                    ${p.varlik_bilgisi ? `<div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-lg text-xs text-emerald-900 font-medium mt-2 flex items-center gap-2"><span><strong>Gayrimenkul / DASK Bilgisi:</strong> ${p.varlik_bilgisi}</span></div>` : ''}
                   </div>
                 `).join("")}
               </div>
@@ -524,7 +524,7 @@
     async function pdfGonder(file) {
       const durum = document.getElementById("pdf-durum");
       const dosyaAdi = file && (file.name || file.fileName) ? String(file.name || file.fileName) : "dosya.pdf";
-      if (!file || !dosyaAdi.toLowerCase().endswith(".pdf")) { alert("Lütfen PDF seçin"); return; }
+      if (!file || !dosyaAdi.toLowerCase().endsWith(".pdf")) { alert("Lütfen PDF seçin"); return; }
       durum.classList.remove("hidden"); durum.textContent = "Yapay Zeka Okuyor, Bekleyin...";
       document.getElementById("pdf-drop").classList.add("animate-pulse", "border-brand-gold");
       try {
@@ -545,10 +545,14 @@
     function pdfDropKur() {
       const drop = document.getElementById("pdf-drop"), input = document.getElementById("pdf-input");
       if (!drop || !input) return;
-      input.addEventListener("change", () => { if (input.files[0]) pdfGonder(input.files[0]); input.value = ""; });
+      input.addEventListener("change", (e) => { if (e.target.files && e.target.files[0]) { pdfGonder(e.target.files[0]); input.value = ""; } });
       ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("border-brand-gold", "bg-brand-gold/10"); }));
       ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("border-brand-gold", "bg-brand-gold/10"); }));
-      drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) pdfGonder(f); });
+      drop.addEventListener("drop", (e) => { 
+        e.preventDefault();
+        const f = e.dataTransfer.files[0]; 
+        if (f) pdfGonder(f); 
+      });
     }
 
     let araZaman;
