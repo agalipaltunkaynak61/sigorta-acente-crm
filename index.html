@@ -120,15 +120,15 @@
           <button onclick="policeFormu()" class="bg-brand-black text-brand-gold px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-gold hover:text-white transition-all duration-300 shadow-lg shadow-black/10">Manuel Poliçe Ekle</button>
         </div>
 
-        <div id="pdf-drop" class="mb-10 relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-gold/30 bg-gradient-to-b from-white to-brand-gold/5 rounded-2xl p-12 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/10 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-300 group">
-          <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
+        <label for="pdf-input" id="pdf-drop" class="mb-10 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-gold/30 bg-gradient-to-b from-white to-brand-gold/5 rounded-2xl p-12 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/10 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)] transition-all duration-300 group block">
+          <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" onchange="pdfSecildi(event)" />
           <div class="w-16 h-16 rounded-full bg-brand-gold/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 pointer-events-none">
             <svg class="w-8 h-8 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
           </div>
           <p class="font-serif font-bold text-brand-black text-2xl pointer-events-none">Akıllı PDF Yükleme</p>
-          <p class="text-sm text-slate-500 font-medium pointer-events-none">Poliçe veya Zeyilname/Tahakkuk PDF'ini sürükleyin ya da seçin.</p>
+          <p class="text-sm text-slate-500 font-medium pointer-events-none">Poliçe veya Zeyilname/Tahakkuk PDF'ini seçmek için tıklayın veya sürükleyin.</p>
           <p id="pdf-durum" class="text-sm bg-brand-black text-brand-gold rounded-full px-4 py-1.5 hidden font-semibold mt-2 shadow-lg relative z-20"></p>
-        </div>
+        </label>
 
         <div class="flex border-b border-slate-200 mb-6 gap-8 text-sm font-semibold px-2">
           <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-3 border-b-2 border-brand-gold text-brand-black font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-brand-gold">Mevcut / Aktif Poliçeler</button>
@@ -516,6 +516,14 @@
       );
     }
 
+    function pdfSecildi(event) {
+      const file = event.target.files[0];
+      if (file) {
+        pdfGonder(file);
+        event.target.value = "";
+      }
+    }
+
     async function pdfGonder(file) {
       const durum = document.getElementById("pdf-durum");
       const dosyaAdi = file && (file.name || file.fileName) ? String(file.name || file.fileName) : "dosya.pdf";
@@ -538,9 +546,8 @@
     }
 
     function pdfDropKur() {
-      const drop = document.getElementById("pdf-drop"), input = document.getElementById("pdf-input");
-      if (!drop || !input) return;
-      input.addEventListener("change", (e) => { if (e.target.files && e.target.files[0]) { pdfGonder(e.target.files[0]); input.value = ""; } });
+      const drop = document.getElementById("pdf-drop");
+      if (!drop) return;
       ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("border-brand-gold", "bg-brand-gold/10"); }));
       ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("border-brand-gold", "bg-brand-gold/10"); }));
       drop.addEventListener("drop", (e) => { 

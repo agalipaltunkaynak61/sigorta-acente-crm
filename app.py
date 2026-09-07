@@ -50,6 +50,7 @@ class Police(Base):
     durum = Column(String(30), default="aktif")
     arac_bilgisi = Column(String(255), nullable=True) 
     varlik_bilgisi = Column(Text, nullable=True)     
+    aciklama = Column(Text, nullable=True)
     pdf_dosya_adi = Column(String(255), nullable=True)
 
 def init_db():
@@ -144,6 +145,7 @@ def police_to_out(p: Police, db_session: Session) -> dict:
         "durum": p.durum,
         "arac_bilgisi": p.arac_bilgisi,
         "varlik_bilgisi": p.varlik_bilgisi,
+        "aciklama": p.aciklama,
         "pdf_dosya_adi": p.pdf_dosya_adi,
         "kalan_gun": 0 if suresi_dolmus else kalan,
         "suresi_dolmus": suresi_dolmus,
@@ -225,7 +227,6 @@ def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
     ad = (payload.get("ad") or "").strip()
     soyad = (payload.get("soyad") or "").strip()
 
-    # Mevcut müşteri kontrolü (Tekilleştirme)
     existing = None
     if tckn and "**" not in str(tckn):
         existing = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
@@ -287,24 +288,20 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         islem_turu = payload.get("islem_turu", "Yeni Poliçe")
         arac_yeni = payload.get("arac_bilgisi")
 
-        # Eğer bu bir Plaka Değişikliği / Zeyil / Ek Belge ise ve aynı poliçe numarası varsa, ana poliçeyi bulup ona ekle
         ana_police = None
         if police_no and ("plaka" in str(islem_turu).lower() or "zeyil" in str(islem_turu).lower() or "tahakkuk" in str(islem_turu).lower() or "ek" in str(islem_turu).lower()):
             ana_police = db.query(Police).filter(Police.police_no == police_no).first()
 
         if ana_police:
-            # Plaka güncelleniyorsa ana poliçenin arac bilgisini güncelle
             if arac_yeni:
                 ana_police.arac_bilgisi = arac_yeni
-            # Fiyatı ana poliçeye ekle
             if prim_deger:
                 ana_police.prim = (ana_police.prim or 0) + prim_deger
             
-            # Açıklama veya PDF zeyil notu ekle
             ek_not = f" | Ek Belge ({islem_turu}): Prim +{prim_deger} TL, Araç: {arac_yeni}"
             ana_police.aciklama = (ana_police.aciklama or "") + ek_not
             if payload.get("pdf_dosya_adi"):
-                ana_police.pdf_dosya_adi = payload.get("pdf_dosya_adi") # Son zeyil PDF'i güncel tutulsun
+                ana_police.pdf_dosya_adi = payload.get("pdf_dosya_adi")
             
             db.commit()
             db.refresh(ana_police)
@@ -322,6 +319,7 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
             durum=str(payload.get("durum", "aktif")).lower(),
             arac_bilgisi=arac_yeni,
             varlik_bilgisi=payload.get("varlik_bilgisi"),
+            aciklama=payload.get("aciklama"),
             pdf_dosya_adi=payload.get("pdf_dosya_adi")
         )
         db.add(police)
@@ -386,7 +384,6 @@ async def api_upload_parse(file: UploadFile = File(...)):
         ayiklanan = ayikla_police_pdf(icerik)
         ayiklanan["pdf_dosya_adi"] = dosya_adi
 
-        # Müşteri veritabanında var mı kontrol et (Yıldızlı/maskeli isimleri mevcut müşterilerle akıllı eşleştir)
         db = SessionLocal()
         try:
             tckn = ayiklanan.get("tckn")
@@ -395,7 +392,6 @@ async def api_upload_parse(file: UploadFile = File(...)):
                 bulunan_musteri = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
             
             if not bulunan_musteri:
-                # Tüm müşterileri tarayıp ad/soyad uyuşması var mı bakalım
                 tum_musteriler = db.query(Musteri).all()
                 for m in tum_musteriler:
                     ayiklanan_ad = (ayiklanan.get("ad") or "").lower()

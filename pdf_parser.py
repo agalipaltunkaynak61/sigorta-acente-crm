@@ -1,12 +1,13 @@
 import io
 import json
+import os
 import time
-import pdfplumber
 from google import genai
 from google.genai import types
-import os
+import pdfplumber
 
 GEMINI_API_KEY = os.getenv("GCP_API_KEY") or os.getenv("GCP_API_KEY")
+
 
 def pdf_metni_al(dosya: bytes) -> str:
     sayfalar = []
@@ -16,16 +17,19 @@ def pdf_metni_al(dosya: bytes) -> str:
             sayfalar.append(parca)
     return "\n".join(sayfalar)
 
+
 def ayikla_police_pdf(dosya: bytes) -> dict:
     metin = pdf_metni_al(dosya)
     if not metin.strip():
         raise ValueError("PDF dosyasından metin okunamadı!")
 
     if not GEMINI_API_KEY:
-        raise ValueError("API anahtarı bulunamadı! Lütfen Render çevre değişkenlerini kontrol edin.")
+        raise ValueError(
+            "API anahtarı bulunamadı! Lütfen Render çevre değişkenlerini kontrol edin."
+        )
 
     client = genai.Client(api_key=GEMINI_API_KEY)
-    
+
     prompt = f"""
     Aşağıdaki sigorta poliçesini dikkatlice analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
 
@@ -53,24 +57,31 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     for deneme in range(max_deneme):
         try:
             response = client.models.generate_content(
-                model="gemini-3.6-flash",
+                model="gemini-2.5-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.1
-                )
+                    response_mime_type="application/json", temperature=0.1
+                ),
             )
             if response and response.text:
                 break
         except Exception as e:
             err_str = str(e)
             if deneme == max_deneme - 1:
-                if "429" in err_str or "ResourceExhausted" in err_str or "quota" in err_str.lower():
-                    raise ValueError("Ücretsiz API dakika sınırı (5 istek/dk) doldu. Lütfen 10-15 saniye bekleyip tekrar deneyin.")
+                if (
+                    "429" in err_str
+                    or "ResourceExhausted" in err_str
+                    or "quota" in err_str.lower()
+                ):
+                    raise ValueError(
+                        "Ücretsiz API dakika sınırı (5 istek/dk) doldu. Lütfen 10-15 saniye bekleyip tekrar deneyin."
+                    )
                 if "503" in err_str or "UNAVAILABLE" in err_str:
-                    raise ValueError("Google sunucuları yoğun. Birkaç saniye sonra tekrar deneyin.")
+                    raise ValueError(
+                        "Google sunucuları yoğun. Birkaç saniye sonra tekrar deneyin."
+                    )
                 raise ValueError(f"Yapay zeka okuma hatası: {err_str}")
-            time.sleep(12) 
+        time.sleep(12)
 
     if not response or not response.text:
         raise ValueError("Yapay zekadan yanıt alınamadı.")
@@ -86,7 +97,11 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
         "ad": ad,
         "soyad": soyad,
         "tckn": veri.get("tckn"),
-        "vergi_no": veri.get("tckn") if veri.get("tckn") and len(str(veri.get("tckn"))) == 10 else None,
+        "vergi_no": (
+            veri.get("tckn")
+            if veri.get("tckn") and len(str(veri.get("tckn"))) == 10
+            else None
+        ),
         "police_no": str(veri.get("police_no") or ""),
         "sigorta_sirketi": veri.get("sigorta_sirketi") or "Bilinmeyen Sigorta",
         "sigorta_turu": veri.get("sigorta_turu") or "Diğer",
@@ -97,5 +112,5 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
         "brut_prim": brut,
         "prim": brut,
         "arac_bilgisi": veri.get("arac_bilgisi"),
-        "varlik_bilgisi": veri.get("varlik_bilgisi")
+        "varlik_bilgisi": veri.get("varlik_bilgisi"),
     }
