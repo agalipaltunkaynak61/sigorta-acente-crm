@@ -465,6 +465,24 @@
     async function musteriSil(id) { if (confirm("Müşteri ve poliçeleri SİLİNECEK. Emin misiniz?")) { await api("/api/musteriler/" + id, { method: "DELETE" }); yukleMusteriler(); } }
     async function policeSil(id) { if (confirm("Poliçe silinsin mi?")) { await api("/api/policeler/" + id, { method: "DELETE" }); yuklePoliceler(); } }
 
+    function musteriSecimDegisti(el) {
+      const yeniAlanlar = document.getElementById("yeni-musteri-alanlari");
+      const telInput = document.getElementById("yeni-telefon-input");
+      const danismanInput = document.getElementById("yeni-danisman-input");
+      
+      if (el.value) {
+        // Mevcut müşteri seçildi -> Yeni müşteri alanlarını tamamen gizle ve zorunlulukları kaldır
+        yeniAlanlar.classList.add("hidden");
+        telInput.removeAttribute("required");
+        danismanInput.removeAttribute("required");
+      } else {
+        // Boş bırakıldı -> Yeni müşteri oluşturulacak, alanları aç ve zorunlu yap
+        yeniAlanlar.classList.remove("hidden");
+        telInput.setAttribute("required", "true");
+        danismanInput.setAttribute("required", "true");
+      }
+    }
+
     async function policeFormu(id, pdfVeri) {
       if (!musteriCache.length) musteriCache = await api("/api/musteriler");
       const p = id ? policeCache.find((x) => x.id === id) || (await api("/api/policeler/" + id)) : {};
@@ -473,7 +491,7 @@
       const pdfTc = pdfVeri && pdfVeri.tckn ? pdfVeri.tckn : '';
 
       const eslesenId = pdfVeri && pdfVeri.musteri ? pdfVeri.musteri.id : p.musteri_id;
-      const opts = `<option value="">-- Yeni Müşteri Oluşturulsun --</option>` + musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Atanmadı'})</option>`).join("");
+      const opts = `<option value="">-- Yeni Müşteri Oluştur --</option>` + musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad} (${m.portfoy_sorumlusu || 'Atanmadı'})</option>`).join("");
       const islemTuru = p.islem_turu || (pdfVeri && pdfVeri.islem_turu) || "Yeni Poliçe";
 
       const danismanOpts = DANISMANLAR.map(d => `<option value="${d}">${d}</option>`).join("");
@@ -482,21 +500,20 @@
         <div class="mb-6 p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-2 uppercase">Müşteri Seçimi</label>
-            <select name="musteri_id" class="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-white">${opts}</select>
-            <p class="text-[11px] text-slate-500 mt-1">Seçim yapmazsanız alttaki bilgilerle <strong>yeni müşteri</strong> otomatik oluşturulur.</p>
+            <select name="musteri_id" onchange="musteriSecimDegisti(this)" class="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-white">${opts}</select>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
+          <div id="yeni-musteri-alanlari" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">Yeni Müşteri Adı / Soyadı</label>
               <input type="text" name="pdf_gelen_ad" value="${pdfAdSoyad}" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" placeholder="Ad Soyad" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">Telefon Numarası <span class="text-red-500">*</span></label>
-              <input type="tel" name="yeni_telefon" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" placeholder="05XXXXXXXXX" required />
+              <input type="tel" name="yeni_telefon" id="yeni-telefon-input" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" placeholder="05XXXXXXXXX" required />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">Portföy Sorumlusu (Danışman) <span class="text-red-500">*</span></label>
-              <select name="yeni_danisman" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none">${danismanOpts}</select>
+              <select name="yeni_danisman" id="yeni-danisman-input" class="w-full border rounded-xl px-3 py-2 text-sm bg-white outline-none" required>${danismanOpts}</select>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">TC / Vergi No</label>
@@ -526,7 +543,6 @@
             const body = formData();
             let musteriId = body.musteri_id ? Number(body.musteri_id) : null;
 
-            // Eğer müşteri seçilmediyse, yeni müşteri oluştur
             if (!musteriId) {
               const adSoyadParca = (body.pdf_gelen_ad || "Bilinmeyen Müşteri").trim().split(" ");
               const soyad = adSoyadParca.length > 1 ? adSoyadParca.pop() : "Müşteri";
@@ -564,6 +580,12 @@
           } catch (e) { const h = document.getElementById("modal-hata"); h.textContent = "Hata: " + e.message; h.classList.remove("hidden"); }
         }
       );
+
+      // Modal açıldıktan hemen sonra mevcut müşteri seçiliyse alanları gizle
+      setTimeout(() => {
+        const selectEl = document.querySelector('select[name="musteri_id"]');
+        if (selectEl) musteriSecimDegisti(selectEl);
+      }, 50);
     }
 
     function pdfSecildi(event) {
@@ -603,7 +625,7 @@
       drop.addEventListener("drop", (e) => { 
         e.preventDefault();
         const f = e.dataTransfer.files[0]; 
-        if (f) pdfGonder(f); 
+        if (f) pdfGond(f); 
       });
     }
 
