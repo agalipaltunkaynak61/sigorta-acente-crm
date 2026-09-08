@@ -33,12 +33,18 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     prompt = f"""
     Aşağıdaki sigorta poliçesini dikkatlice analiz et ve tam olarak şu alanları içeren geçerli bir JSON nesnesi döndür. Başka hiçbir açıklama yazma.
 
+    ÖNEMLİ KURALLAR:
+    1. Belgede "Sigorta Ettiren" (kurum/şirket olabilir) ile "Sigortalı" (gerçek kişi) farklı olabilir. Sen daima "Sigortalı" bölümündeki kişinin adını, soyadını ve TCKN'sini bul.
+    2. TCKN veya isimlerde yıldız (*) ile gizleme (maskeleme) yapılmışsa (Örn: 1***1***7**), bu değerleri yok sayma, olduğu gibi yıldızlı haliyle al.
+    3. Poliçenin asıl bilgileri ilk sayfadaki reklamlardan sonra (örneğin 3. veya 4. sayfada) başlıyor olabilir, metnin sonuna kadar dikkatlice tara.
+    4. Prim tutarlarını (Örn: 23.824,49 TL) temizleyerek sadece sayısal float değere çevir (Örn: 23824.49).
+
     Alanlar:
-    - ad: Müşterinin adı
-    - soyad: Müşterinin soyadı
-    - tckn: TC Kimlik veya Vergi No
+    - ad: Sigortalının adı
+    - soyad: Sigortalının soyadı
+    - tckn: TC Kimlik veya Vergi No (Yıldızlıysa yıldızlı haliyle yaz)
     - police_no: Poliçe numarası
-    - sigorta_sirketi: Sigorta şirketinin tam adı (Örn: AXA SİGORTA A.Ş.)
+    - sigorta_sirketi: Sigorta şirketinin tam adı (Örn: TÜRKİYE SİGORTA A.Ş.)
     - sigorta_turu: Poliçe türü (Örn: Trafik, Kasko, DASK, Konut, TSS, İş Yeri)
     - islem_turu: Poliçenin mahiyeti: "Yeni Poliçe", "Zeyilname (Ek Sözleşme)", "İptal", "Plaka Değişikliği", "Yenileme"
     - baslangic_tarihi: YYYY-MM-DD formatında başlangıç tarihi
@@ -49,7 +55,7 @@ def ayikla_police_pdf(dosya: bytes) -> dict:
     - varlik_bilgisi: Eğer poliçe DASK veya Konut/İş Yeri ise, adres ve metrekare (m2) bilgilerini yaz (Örn: "Atatürk Mah. No:12 D:3, 110 m2"). Değilse boş bırakın (null).
 
     Poliçe Metni:
-    {metin[:4000]}
+    {metin}
     """
 
     max_deneme = 3
