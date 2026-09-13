@@ -27,7 +27,7 @@ DERSLER_DIR.mkdir(exist_ok=True)
 # ==================== GEMINI AI YAPILANDIRMASI ====================
 API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 if API_KEY:
-    genai.configure(api_key=API_KEY)
+    genai.configure(api_key=API_KEY.strip())
 
 # ==================== VERİTABANI BAĞLANTISI (SUPABASE POSTGRESQL) ====================
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -481,7 +481,7 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
-# ==================== AKILLI ASİSTAN (GEMINI 1.5 / 2.5 FLASH) ====================
+# ==================== AKILLI ASİSTAN (GEMINI 2.5 FLASH) ====================
 @app.post("/api/ai-asistan")
 async def api_ai_asistan(payload: dict):
     soru = payload.get("soru")
@@ -491,8 +491,19 @@ async def api_ai_asistan(payload: dict):
     if not soru:
         raise HTTPException(status_code=400, detail="Soru alanı boş bırakılamaz.")
     
+    # API anahtarını istek anında güvenli şekilde al ve yapılandır
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=500, 
+            detail="API Anahtarı (GOOGLE_API_KEY) Render ortam değişkenlerinde bulunamadı!"
+        )
+    
+    genai.configure(api_key=api_key.strip())
+    
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # En güncel ve hızlı model olan Gemini 2.5 Flash tercih edilmiştir
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""
         Sen Türkiye sigorta sektöründe 20+ yıl tecrübeye sahip, kıdemli bir teknik sigorta danışmanı ve uzmansın.
@@ -517,7 +528,8 @@ async def api_ai_asistan(payload: dict):
         return {"cevap": response.text}
     except Exception as e:
         try:
-            model = genai.GenerativeModel('gemini-2.5-flash')
+            # Yedek model olarak Gemini 1.5 Flash denenir
+            model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content(
                 prompt,
                 generation_config={"temperature": 0.1}
