@@ -59,6 +59,10 @@
           <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
           Finansal Analiz
         </button>
+        <button data-view="dersler" class="nav-btn w-full text-left px-5 py-3.5 rounded-xl hover:bg-white/5 transition-all duration-300 flex items-center gap-3 text-brand-muted hover:text-white group border border-transparent">
+          <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          Eğitim ve Sunumlar
+        </button>
       </nav>
       <div class="px-6 py-6 border-t border-white/5">
         <p class="text-[10px] text-brand-muted text-center uppercase tracking-widest">© 2026 Altun Kardeşler</p>
@@ -201,6 +205,29 @@
           <div class="bg-white rounded-2xl shadow-sm border overflow-hidden"><div class="bg-slate-50/80 px-6 py-4 border-b font-bold text-sm text-brand-black uppercase">Şirketlere Göre Üretim</div><div class="p-2 max-h-96 overflow-y-auto" id="fin-sirket-liste"></div></div>
         </div>
       </section>
+
+      <!-- DERSLER (EĞİTİM VE SUNUMLAR) -->
+      <section id="view-dersler" class="hidden fade-in h-[calc(100vh-8rem)]">
+        <div class="mb-8">
+          <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight mb-2">Eğitim ve Şirket Sunumları</h2>
+          <p class="text-sm font-medium text-slate-500">Aşağıdaki menüden ilgili branşı seçerek şirketlerin güncel sunumlarına ve karşılaştırmalara anında ulaşabilirsiniz.</p>
+        </div>
+        
+        <div class="flex gap-8 h-full pb-10">
+          <!-- Kategoriler (Sol) -->
+          <div class="w-1/4 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm h-full overflow-y-auto">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Sigorta Türleri</h3>
+            <div id="ders-kategoriler" class="flex flex-col gap-2"></div>
+          </div>
+          
+          <!-- Sunum Kartları (Sağ) -->
+          <div class="w-3/4">
+            <h3 id="secilen-kategori-baslik" class="text-xl font-bold text-slate-800 mb-6 border-b pb-4"></h3>
+            <div id="ders-icerik" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-full overflow-y-auto content-start pb-20"></div>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -223,10 +250,76 @@
     let musteriCache = [], policeCache = [], aktifPoliceSekmesi = 'aktif';
     const DANISMANLAR = ["Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Serhat Altunkaynak", "Ahmet Galip Altunkaynak", "Sezai Karakoç", "Diğer"];
 
+    // KULLANICININ DOSYA İSİMLENDİRMESİNE GÖRE TAM UYUMLU DERS VERİ SETİ
+    const DERSLER_DATA = {
+      "İş Yeri Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_İŞYERİ.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_İŞYERİ.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_İŞYERİ.pdf" },
+        { ad: "QUİCK", dosya: "QUICK_İŞYERİ.pdf" },
+        { ad: "Türkiye Sigorta", dosya: "TÜRKİYE_İŞYERİ.pdf" },
+        { ad: "Karşılaştırma", dosya: "İŞYERİ_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Kasko": [
+        { ad: "AK Sigorta", dosya: "AK_KASKO.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_KASKO.pdf" },
+        { ad: "HEPİYİ", dosya: "HEPİYİ_KASKO.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_KASKO.pdf" },
+        { ad: "QUİCK", dosya: "QUICK_KASKO.pdf" },
+        { ad: "TÜRKİYE", dosya: "TÜRKİYE_KASKO.pdf" },
+        { ad: "Karşılaştırma", dosya: "KASKO_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Konut Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_KONUT.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_KONUT.pdf" },
+        { ad: "HEPİYİ Sigorta", dosya: "HEPİYİ_KONUT.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_KONUT.pdf" },
+        { ad: "QUİCK", dosya: "QUICK_KONUT.pdf" },
+        { ad: "Türkiye Sigorta", dosya: "TÜRKİYE_KONUT.pdf" },
+        { ad: "Karşılaştırma", dosya: "KONUT_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Allrisk (Mühendislik) Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_ALLRISK.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_ALLRISK.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_ALLRISK.pdf" },
+        { ad: "Türkiye", dosya: "TÜRKİYE_ALLRISK.pdf" },
+        { ad: "Karşılaştırma", dosya: "ALLRISK_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Nakliyat Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_NAKLİYAT.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_NAKLİYAT.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_NAKLİYAT.pdf" },
+        { ad: "Türkiye Sigorta", dosya: "TÜRKİYE_NAKLİYAT.pdf" },
+        { ad: "Karşılaştırma", dosya: "NAKLİYAT_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Özel Sağlık Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_ÖSS.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_ÖSS.pdf" },
+        { ad: "Türkiye Sigorta", dosya: "TÜRKİYE_ÖSS.pdf" },
+        { ad: "Karşılaştırma", dosya: "ÖSS_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Site Apartman Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_SİTE.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_SİTE.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_SİTE.pdf" },
+        { ad: "Türkiye Sigorta", dosya: "TÜRKİYE_SİTE.pdf" },
+        { ad: "Karşılaştırma", dosya: "SİTE_KARŞILAŞTIRMA.pdf" }
+      ],
+      "Tamamlayıcı Sağlık Sigortası": [
+        { ad: "AK Sigorta", dosya: "AK_TSS.pdf" },
+        { ad: "AXA Sigorta", dosya: "AXA_TSS.pdf" },
+        { ad: "HEPİYİ", dosya: "HEPİYİ_TSS.pdf" },
+        { ad: "NEOVA", dosya: "NEOVA_TSS.pdf" },
+        { ad: "QUİCK", dosya: "QUICK_TSS.pdf" },
+        { ad: "TÜRKİYE", dosya: "TÜRKİYE_TSS.pdf" },
+        { ad: "Karşılaştırma", dosya: "TSS_KARŞILAŞTIRMA.pdf" }
+      ]
+    };
+
     document.querySelectorAll(".nav-btn").forEach((btn) => btn.addEventListener("click", () => goster(btn.dataset.view)));
 
     function goster(ad) {
-      ["dashboard", "musteriler", "policeler", "finansal"].forEach((v) => document.getElementById("view-" + v).classList.toggle("hidden", v !== ad));
+      ["dashboard", "musteriler", "policeler", "finansal", "dersler"].forEach((v) => document.getElementById("view-" + v).classList.toggle("hidden", v !== ad));
       document.querySelectorAll(".nav-btn").forEach((b) => {
         const svg = b.querySelector('svg');
         if(b.dataset.view === ad) {
@@ -243,7 +336,63 @@
       if (ad === "musteriler") yukleMusteriler();
       if (ad === "policeler") yuklePoliceler();
       if (ad === "finansal") yukleFinansalHazirlik();
+      if (ad === "dersler") yukleDerslerUI();
     }
+
+    // --- DERSLER FONKSİYONLARI ---
+    function yukleDerslerUI() {
+      const catContainer = document.getElementById('ders-kategoriler');
+      if(catContainer.innerHTML === "") { // Sadece ilk girişte oluştur
+        catContainer.innerHTML = Object.keys(DERSLER_DATA).map((kategori) => `
+            <button onclick="dersKategoriSec('${kategori}')" class="ders-cat-btn w-full text-left px-4 py-3 rounded-xl font-bold transition-all text-sm text-slate-600 hover:bg-slate-50 border border-transparent">
+                ${kategori}
+            </button>
+        `).join("");
+        // İlk sekmeyi otomatik seç
+        dersKategoriSec(Object.keys(DERSLER_DATA)[0]);
+      }
+    }
+
+    function dersKategoriSec(secilenKategori) {
+      document.getElementById('secilen-kategori-baslik').textContent = secilenKategori;
+      
+      // Buton renklerini güncelle
+      document.querySelectorAll('.ders-cat-btn').forEach(btn => {
+        if (btn.innerText.trim() === secilenKategori) {
+          btn.className = "ders-cat-btn w-full text-left px-4 py-3 rounded-xl font-bold transition-all text-sm bg-brand-black text-brand-gold shadow-md";
+        } else {
+          btn.className = "ders-cat-btn w-full text-left px-4 py-3 rounded-xl font-bold transition-all text-sm text-slate-600 hover:bg-slate-50 border border-transparent";
+        }
+      });
+
+      // Kartları oluştur
+      const sirketler = DERSLER_DATA[secilenKategori];
+      document.getElementById('ders-icerik').innerHTML = sirketler.map(item => {
+        const isKarsilastirma = item.ad.includes("Karşılaştırma");
+        
+        return `
+        <div class="bg-white border ${isKarsilastirma ? 'border-brand-gold/50 shadow-md' : 'border-slate-100 shadow-sm'} rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition-all flex flex-col justify-between group">
+            <div>
+              <div class="w-12 h-12 ${isKarsilastirma ? 'bg-brand-gold text-brand-black' : 'bg-brand-black text-brand-gold'} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${isKarsilastirma 
+                      ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' 
+                      : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>'}
+                  </svg>
+              </div>
+              <h3 class="font-bold text-slate-800 text-lg mb-2">${item.ad}</h3>
+              <p class="text-xs text-slate-400 font-medium mb-6">${secilenKategori} sunumu</p>
+            </div>
+            
+            <a href="/dersler/${encodeURIComponent(item.dosya)}" target="_blank" class="w-full text-center ${isKarsilastirma ? 'bg-brand-gold text-white hover:bg-brand-black hover:text-brand-gold' : 'bg-slate-50 text-slate-600 hover:bg-brand-black hover:text-brand-gold'} font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                Sunumu Aç
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+        </div>
+        `;
+      }).join("");
+    }
+    // ----------------------------
 
     function policeSekmeSec(sekme) {
       aktifPoliceSekmesi = sekme;

@@ -7,6 +7,7 @@ from typing import Optional
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles # BURA EKLENDİ
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, create_engine
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
@@ -17,6 +18,10 @@ from pdf_parser import ayikla_police_pdf
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
+
+# DERSLER KLASÖRÜ (BURA EKLENDİ)
+DERSLER_DIR = BASE_DIR / "dersler"
+DERSLER_DIR.mkdir(exist_ok=True)
 
 # ==================== VERİTABANI BAĞLANTISI (SUPABASE POSTGRESQL) ====================
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -86,6 +91,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# DERSLER KLASÖRÜNÜ DIŞARI AÇIYORUZ (BURA EKLENDİ)
+app.mount("/dersler", StaticFiles(directory=DERSLER_DIR), name="dersler")
 
 @app.on_event("startup")
 def on_startup():
