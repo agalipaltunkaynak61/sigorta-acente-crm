@@ -25,7 +25,6 @@ DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
 # ==================== GEMINI AI YAPILANDIRMASI ====================
-# Güvenlik gereği API anahtarı koda yazılmamıştır, Render ortamından (Environment Variables) çekilir.
 API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 if API_KEY:
     genai.configure(api_key=API_KEY.strip())
@@ -482,17 +481,15 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
-# ==================== AKILLI ASİSTAN (YÜKSEK LİMİTLİ MODEL: GEMINI 3.5 FLASH LITE) ====================
+# ==================== AKILLI ASİSTAN (GEMINI 3.5 FLASH LITE + GOOGLE SEARCH) ====================
 @app.post("/api/ai-asistan")
 async def api_ai_asistan(payload: dict):
     soru = payload.get("soru")
-    sirket = payload.get("sirket", "Genel")
-    brans = payload.get("brans", "Genel")
+    gecmis = payload.get("gecmis", [])
     
     if not soru:
         raise HTTPException(status_code=400, detail="Soru alanı boş bırakılamaz.")
     
-    # API anahtarı Render ortam değişkenlerinden güvenle çekiliyor
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise HTTPException(
@@ -502,39 +499,37 @@ async def api_ai_asistan(payload: dict):
         
     genai.configure(api_key=api_key.strip())
     
+    system_instruction = """
+    Sen sigorta acentelerine teknik danışmanlık veren doğrudan, net ve hızlı bir yapay zekasın. 
+    YASAKLAR: '20 yıllık tecrübeme dayanarak', 'Bir yapay zeka olarak', 'Size yardımcı olmaktan memnuniyet duyarım', 'Uzman bir asistan olarak' gibi saçma, robotik veya laf kalabalığı yapan hiçbir giriş cümlesi KULLANMAYACAKSIN. Doğrudan konuya girip cevabı ver. 
+    KURAL: Eğer kullanıcı DASK metrekare fiyatları, trafik sigortası güncel primleri, kasko değer listeleri, enflasyon oranları veya spesifik sigorta şartları soruyorsa (örn: "DASK metrekare başına kaç TL verir?"), mutlaka en güncel resmi kaynakları ve verileri bularak yanıtla ve net sayılar kullan. Konuşma geçmişini dikkate alarak devam sorularına mantıklı yanıtlar ver.
+    """
+    
     try:
-        # Günlük 500 istek limiti olan (RPD) Lite modeli birincil olarak ayarlandı.
-        model = genai.GenerativeModel('gemini-3.5-flash-lite')
-        
-        prompt = f"""
-        Sen Türkiye sigorta sektöründe 20+ yıl tecrübeye sahip, kıdemli bir teknik sigorta danışmanı ve uzmansın.
-        Kullanıcının sigorta branşları, poliçe teminatları, şirket şartları ve ek teminat detaylarıyla ilgili sorduğu soruyu; 
-        ilgili sigorta şirketinin resmi uygulamalarını, ürün şartlarını ve Türkiye Sigorta Birliği (TSB) mevzuatını baz alarak eksiksiz yanıtla.
-        
-        Hedef Şirket: {sirket}
-        Sigorta Branşı: {brans}
-        Soru / Konu: {soru}
-        
-        Lütfen yanıtı hazırlarken şu kriterlere sıkı sıkıya uy:
-        1. Şirketin teminat limitlerini, istisnaları ve ek faydaları nokta atışı açıkla.
-        2. Bilgileri maddeler halinde, profesyonel acente diliyle net ve eksiksiz sun.
-        3. Varsa poliçe özel şartları ile genel şartlar arasındaki kritik farkları vurgula.
-        """
-        
-        response = model.generate_content(
-            prompt,
-            generation_config={"temperature": 0.1}
+        model = genai.GenerativeModel(
+            model_name='gemini-3.5-flash-lite',
+            system_instruction=system_instruction,
+            tools='google_search_retrieval'
         )
         
+        formatted_history = []
+        for msg in gecmis:
+            role = "user" if msg.get("role") == "user" else "model"
+            formatted_history.append({"role": role, "parts": [msg.get("content")]})
+            
+        chat = model.start_chat(history=formatted_history)
+        response = chat.send_message(soru)
+        
         return {"cevap": response.text}
+        
     except Exception as e:
         try:
-            # Lite modeli bir sebeple yanıt vermezse standart yüksek kapasiteli modele düşer
-            model = genai.GenerativeModel('gemini-3.5-flash')
-            response = model.generate_content(
-                prompt,
-                generation_config={"temperature": 0.1}
+            model = genai.GenerativeModel(
+                model_name='gemini-3.5-flash-lite',
+                system_instruction=system_instruction
             )
+            chat = model.start_chat(history=formatted_history)
+            response = chat.send_message(soru)
             return {"cevap": response.text}
         except Exception as e2:
             raise HTTPException(status_code=500, detail=f"Analiz sırasında hata oluştu: {str(e2)}")

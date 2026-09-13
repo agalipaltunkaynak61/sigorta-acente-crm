@@ -232,58 +232,41 @@
           </div>
         </div>
 
-        <!-- 2. DERİN YAPAY ZEKA ASİSTAN ALANI (CANLI WEB & PDF TARAYICI) -->
+        <!-- 2. DERİN YAPAY ZEKA ASİSTAN ALANI (WHATSAPP TARZI SOHBET) -->
         <div id="egitim-alan-asistan" class="hidden h-[calc(100%-5rem)] pb-10">
-          <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm h-full flex flex-col justify-between">
-            <div>
-              <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+          <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm h-full flex flex-col">
+            
+            <!-- Header Kısmı -->
+            <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 shrink-0">
+              <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-brand-black text-brand-gold flex items-center justify-center font-bold">AI</div>
                 <div>
-                  <h3 class="font-bold text-brand-black text-lg">Derin Araştırmalı Acente Bilgi & Mevzuat Asistanı</h3>
-                  <p class="text-xs text-slate-400">Şirketlerin resmi web sitelerini, ürün PDF broşürlerini ve TSB genel şartlarını canlı tarayarak nokta atışı yanıtlar.</p>
+                  <h3 class="font-bold text-brand-black text-lg">Derin Araştırmalı Sigorta Asistanı</h3>
+                  <p class="text-xs text-slate-400">İnternette güncel arama yaparak en kesin ve doğru cevapları verir.</p>
                 </div>
               </div>
+              <button onclick="yeniKonuBaslat()" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                Farklı Konuya Geç (Temizle)
+              </button>
+            </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sigorta Şirketi</label>
-                  <select id="ai-soru-sirket" class="w-full border rounded-xl px-4 py-2 text-sm bg-slate-50 outline-none">
-                    <option value="Genel / Tüm Şirketler">Genel / Tüm Şirketler</option>
-                    <option value="Quick Sigorta">Quick Sigorta</option>
-                    <option value="AXA Sigorta">AXA Sigorta</option>
-                    <option value="AK Sigorta">AK Sigorta</option>
-                    <option value="Türkiye Sigorta">Türkiye Sigorta</option>
-                    <option value="Neova Sigorta">Neova Sigorta</option>
-                    <option value="Hepiyi Sigorta">Hepiyi Sigorta</option>
-                  </select>
+            <!-- Sohbet / Mesajlaşma Alanı (Yukarıdan Aşağı) -->
+            <div id="ai-chat-gecmisi" class="flex-1 bg-[#F0F2F5] rounded-xl p-4 overflow-y-auto mb-4 flex flex-col gap-4 border border-slate-200">
+              <!-- Başlangıç Mesajı -->
+              <div class="flex justify-start">
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-slate-700 shadow-sm max-w-[85%]">
+                  Merhaba, ben acente asistanınız. DASK fiyatları, güncel poliçe şartları veya genel sigortacılık konularında ne öğrenmek istersiniz?
                 </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Branş / Sigorta Türü</label>
-                  <select id="ai-soru-brans" class="w-full border rounded-xl px-4 py-2 text-sm bg-slate-50 outline-none">
-                    <option value="Genel">Genel</option>
-                    <option value="Kasko">Kasko</option>
-                    <option value="İş Yeri Sigortası">İş Yeri Sigortası</option>
-                    <option value="Konut Sigortası">Konut Sigortası</option>
-                    <option value="Tamamlayıcı Sağlık (TSS)">Tamamlayıcı Sağlık (TSS)</option>
-                    <option value="Allrisk Sigortası">Allrisk Sigortası</option>
-                  </select>
-                </div>
-                <div class="flex items-end">
-                  <button onclick="aiSoruGonder()" id="ai-gonder-btn" class="w-full bg-brand-black text-brand-gold py-2.5 rounded-xl font-bold text-sm hover:bg-brand-gold hover:text-white transition-all shadow-md">Derin Analiz Başlat</button>
-                </div>
-              </div>
-
-              <div class="mb-4">
-                <textarea id="ai-soru-metin" rows="3" class="w-full border border-slate-200 rounded-xl p-4 text-sm focus:border-brand-gold outline-none bg-slate-50" placeholder="Örn: Quick Sigorta kasko poliçesinde mini onarım ve ek teminatlar neleri kapsıyor? Detaylıca açıklar mısın?"></textarea>
               </div>
             </div>
 
-            <div class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-6 overflow-y-auto mt-2">
-              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Asistan Derin Analiz Yanıtı:</p>
-              <div id="ai-cevap-alani" class="text-sm text-slate-700 leading-relaxed space-y-2">
-                <span class="text-slate-400 italic">Henüz bir soru sorulmadı. Şirket ve branş seçerek detaylı araştırma başlatabilirsiniz.</span>
-              </div>
+            <!-- Mesaj Yazma Alanı -->
+            <div class="relative shrink-0 flex gap-2">
+              <textarea id="ai-soru-metin" rows="1" style="min-height: 50px; max-height: 120px;" class="flex-1 border border-slate-200 rounded-xl p-3 pr-4 text-sm focus:border-brand-gold outline-none bg-slate-50 resize-none overflow-y-auto" placeholder="Sorunuzu yazın... (Göndermek için Enter, alt satır için Shift+Enter)"></textarea>
+              <button onclick="aiSoruGonder()" id="ai-gonder-btn" class="bg-brand-black text-brand-gold px-6 py-2 rounded-xl font-bold text-sm hover:bg-brand-gold hover:text-white transition-all shadow-md self-end mb-1">Gönder</button>
             </div>
+
           </div>
         </div>
       </section>
@@ -430,39 +413,127 @@
       }
     }
 
-    async function aiSoruGonder() {
-      const soru = document.getElementById('ai-soru-metin').value.trim();
-      const sirket = document.getElementById('ai-soru-sirket').value;
-      const brans = document.getElementById('ai-soru-brans').value;
-      const cevapDiv = document.getElementById('ai-cevap-alani');
-      const btn = document.getElementById('ai-gonder-btn');
+    // ==========================================
+    // AI ASİSTAN KODLARI (WhatsApp Tarzı, Hafızalı)
+    // ==========================================
+    let sohbetGecmisi = [];
 
-      if (!soru) {
-        alert("Lütfen bir soru yazın.");
-        return;
-      }
+    // Enter ve Shift+Enter ayarı (ve yüksekliğin yazarken otomatik uzaması)
+    const asistanInputEl = document.getElementById('ai-soru-metin');
+    if(asistanInputEl) {
+      asistanInputEl.addEventListener("keydown", function(e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); 
+              aiSoruGonder();
+          }
+      });
+      asistanInputEl.addEventListener("input", function() {
+          this.style.height = "auto";
+          this.style.height = (this.scrollHeight) + "px";
+          if (this.value === "") this.style.height = "50px";
+      });
+    }
+
+    function yeniKonuBaslat() {
+      sohbetGecmisi = [];
+      const chatAlan = document.getElementById('ai-chat-gecmisi');
+      chatAlan.innerHTML = `
+        <div class="flex justify-start">
+          <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-slate-700 shadow-sm max-w-[85%]">
+            Hafıza temizlendi. Yepyeni bir konuya başlayabiliriz. Sizi dinliyorum.
+          </div>
+        </div>
+      `;
+    }
+
+    async function aiSoruGonder() {
+      const inputEl = document.getElementById('ai-soru-metin');
+      const soru = inputEl.value.trim();
+      const btn = document.getElementById('ai-gonder-btn');
+      const chatAlan = document.getElementById('ai-chat-gecmisi');
+
+      if (!soru) return;
+
+      // Kullanıcının mesajını ekrana ekle
+      chatAlan.innerHTML += `
+        <div class="flex justify-end">
+          <div class="bg-brand-black text-brand-gold border border-brand-gold/20 rounded-2xl rounded-tr-none px-5 py-3 text-sm shadow-sm max-w-[85%]">
+            ${soru.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+      `;
+      
+      // İnputu temizle
+      inputEl.value = "";
+      inputEl.style.height = "50px";
+      chatAlan.scrollTop = chatAlan.scrollHeight;
 
       btn.disabled = true;
-      btn.textContent = "Derin Aratılıyor...";
-      cevapDiv.innerHTML = `<div class="flex items-center gap-2 text-brand-gold font-medium"><span class="animate-pulse">●</span> Yapay zeka internetteki resmi kaynakları, PDF broşürleri ve şirket şartlarını derinlemesine tarıyor...</div>`;
+      btn.textContent = "...";
+
+      // Yükleniyor animasyon div'i
+      const loadingId = "loading-" + Date.now();
+      chatAlan.innerHTML += `
+        <div id="${loadingId}" class="flex justify-start">
+          <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-slate-500 shadow-sm max-w-[85%] flex items-center gap-2">
+            <span class="animate-pulse text-brand-gold text-lg">●</span> <span class="italic text-xs">Derin araştırılıyor...</span>
+          </div>
+        </div>
+      `;
+      chatAlan.scrollTop = chatAlan.scrollHeight;
 
       try {
         const res = await fetch(API + "/api/ai-asistan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ soru, sirket, brans })
+          body: JSON.stringify({ 
+            soru: soru, 
+            gecmis: sohbetGecmisi 
+          })
         });
         const data = await res.json();
+        
+        // Yükleniyor'u kaldır
+        document.getElementById(loadingId).remove();
+
         if (!res.ok) throw new Error(data.detail || "Bir hata oluştu");
 
-        cevapDiv.innerHTML = `<div class="whitespace-pre-line">${data.cevap}</div>`;
+        // AI Cevabını html formatına hazırla (Gemini markdown döner)
+        let formatliCevap = data.cevap
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // AI mesajını ekrana ekle
+        chatAlan.innerHTML += `
+          <div class="flex justify-start fade-in">
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-slate-700 shadow-sm max-w-[85%] leading-relaxed">
+              ${formatliCevap}
+            </div>
+          </div>
+        `;
+
+        // Hafızaya ekle
+        sohbetGecmisi.push({ role: "user", content: soru });
+        sohbetGecmisi.push({ role: "model", content: data.cevap });
+
       } catch (e) {
-        cevapDiv.innerHTML = `<span class="text-red-600 font-semibold">Hata: ${e.message}</span>`;
+        document.getElementById(loadingId)?.remove();
+        chatAlan.innerHTML += `
+          <div class="flex justify-start">
+            <div class="bg-red-50 text-red-600 border border-red-200 rounded-2xl rounded-tl-none px-5 py-3 text-sm shadow-sm max-w-[85%] font-bold">
+              Bağlantı Hatası: ${e.message}
+            </div>
+          </div>
+        `;
       } finally {
         btn.disabled = false;
-        btn.textContent = "Derin Analiz Başlat";
+        btn.textContent = "Gönder";
+        chatAlan.scrollTop = chatAlan.scrollHeight;
+        inputEl.focus();
       }
     }
+    // ==========================================
+
 
     function dersKategoriSec(secilenKategori) {
       document.getElementById('secilen-kategori-baslik').textContent = secilenKategori;
