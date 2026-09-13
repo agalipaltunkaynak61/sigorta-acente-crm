@@ -481,7 +481,7 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
-# ==================== AKILLI ASİSTAN (GEMINI 3.5 FLASH LITE + GOOGLE SEARCH) ====================
+# ==================== AKILLI ASİSTAN (GEMINI 3.5 FLASH LITE + GÜÇLÜ KAYNAK KURALLARI) ====================
 @app.post("/api/ai-asistan")
 async def api_ai_asistan(payload: dict):
     soru = payload.get("soru")
@@ -499,10 +499,21 @@ async def api_ai_asistan(payload: dict):
         
     genai.configure(api_key=api_key.strip())
     
-    system_instruction = """
+    # Bugünün tarihini dinamik olarak alıyoruz ki AI zaman algısına sahip olsun
+    bugun_tarihi = datetime.now().strftime("%d %B %Y")
+    
+    # Sistemi spesifik bir kurala sabitlemek yerine, "doğru ve güncel olanı bulma mantığını" öğreten güçlü prompt
+    system_instruction = f"""
     Sen sigorta acentelerine teknik danışmanlık veren doğrudan, net ve hızlı bir yapay zekasın. 
+    Bugünün tarihi: {bugun_tarihi}.
+    
     YASAKLAR: '20 yıllık tecrübeme dayanarak', 'Bir yapay zeka olarak', 'Size yardımcı olmaktan memnuniyet duyarım', 'Uzman bir asistan olarak' gibi saçma, robotik veya laf kalabalığı yapan hiçbir giriş cümlesi KULLANMAYACAKSIN. Doğrudan konuya girip cevabı ver. 
-    KURAL: Eğer kullanıcı DASK metrekare fiyatları, trafik sigortası güncel primleri, kasko değer listeleri, enflasyon oranları veya spesifik sigorta şartları soruyorsa (örn: "DASK metrekare başına kaç TL verir?"), mutlaka en güncel resmi kaynakları ve verileri bularak yanıtla ve net sayılar kullan. Konuşma geçmişini dikkate alarak devam sorularına mantıklı yanıtlar ver.
+    
+    GÜNCELLİK VE KAYNAK KURALLARI (ÇOK ÖNEMLİ):
+    1. İnternette arama yaparken her zaman EN YENİ TARİHLİ ve GÜNCEL kaynakları baz al. Sigortacılıkta ve mevzuatta eski tarihli yazılar, mahkeme kararları veya blog yazıları geçersiz olabilir. Arama sonuçlarındaki tarihleri kontrol et ve eski bilgileri eleyip her zaman en son yürürlüğe giren kuralı söyle.
+    2. Eğer bir kanun, mevzuat, teminat tutarı veya kural yakın zamanda değişmişse, bunu fark et ve KESİNLİKLE güncel olan durumu (yeni mevzuatı) aktar.
+    3. Verdiğin yasal veya finansal bilgilerin kaynağını ve tarihini cevabının içinde mutlaka açıkça belirt (Örn: "1 Temmuz 2026 tarihli Resmî Gazete'de yayımlanan mevzuata göre..." veya "SEDDK'nın son yayınladığı genelgeye göre...").
+    4. Konuşma geçmişini dikkate alarak devam sorularına mantıklı yanıtlar ver ve net sayılar kullan.
     """
     
     try:
