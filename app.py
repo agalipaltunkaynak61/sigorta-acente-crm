@@ -481,7 +481,7 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
-# ==================== DERİN ARAŞTIRMALI YAPAY ZEKA ASİSTANI (GOOGLE SEARCH GROUNDING) ====================
+# ==================== AKILLI ASİSTAN (GEMINI 1.5 / 2.5 FLASH) ====================
 @app.post("/api/ai-asistan")
 async def api_ai_asistan(payload: dict):
     soru = payload.get("soru")
@@ -492,39 +492,36 @@ async def api_ai_asistan(payload: dict):
         raise HTTPException(status_code=400, detail="Soru alanı boş bırakılamaz.")
     
     try:
-        model_name = 'gemini-2.5-flash'
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""
         Sen Türkiye sigorta sektöründe 20+ yıl tecrübeye sahip, kıdemli bir teknik sigorta danışmanı ve uzmansın.
         Kullanıcının sigorta branşları, poliçe teminatları, şirket şartları ve ek teminat detaylarıyla ilgili sorduğu soruyu; 
-        ilgili sigorta şirketinin (örneğin Quick Sigorta, AXA, vb.) resmi internet sitesindeki ürün detaylarını, PDF broşürlerini, 
-        genel şartlarını ve Türkiye Sigorta Birliği (TSB) mevzuatını canlı web aramaları yaparak en ince detayına kadar derinlemesine araştır.
+        ilgili sigorta şirketinin resmi uygulamalarını, ürün şartlarını ve Türkiye Sigorta Birliği (TSB) mevzuatını baz alarak eksiksiz yanıtla.
         
         Hedef Şirket: {sirket}
         Sigorta Branşı: {brans}
         Soru / Konu: {soru}
         
         Lütfen yanıtı hazırlarken şu kriterlere sıkı sıkıya uy:
-        1. Sadece genel geçer bilgiler verme; şirketin resmi web sitelerindeki ürün sayfa içeriklerini, teminat limitlerini, istisnaları ve ek faydaları nokta atışı bul ve aktar.
-        2. Bilgileri maddeler halinde, profesyonel acente diliyle, net, eksiksiz ve en küçük detayları bile kaçırmayacak şekilde açıkla.
+        1. Şirketin teminat limitlerini, istisnaları ve ek faydaları nokta atışı açıkla.
+        2. Bilgileri maddeler halinde, profesyonel acente diliyle net ve eksiksiz sun.
         3. Varsa poliçe özel şartları ile genel şartlar arasındaki kritik farkları vurgula.
         """
         
-        response = genai.GenerativeModel(model_name).generate_content(
+        response = model.generate_content(
             prompt,
-            tools=[{"google_search": {}}],
             generation_config={"temperature": 0.1}
         )
         
         return {"cevap": response.text}
     except Exception as e:
         try:
-            model_name = 'gemini-1.5-flash'
-            response = genai.GenerativeModel(model_name).generate_content(
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            response = model.generate_content(
                 prompt,
-                tools=[{"google_search": {}}],
                 generation_config={"temperature": 0.1}
             )
             return {"cevap": response.text}
         except Exception as e2:
-            raise HTTPException(status_code=500, detail=f"Derin analiz sırasında hata oluştu: {str(e2)}")
+            raise HTTPException(status_code=500, detail=f"Analiz sırasında hata oluştu: {str(e2)}")
