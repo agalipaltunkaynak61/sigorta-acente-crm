@@ -25,9 +25,9 @@ DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
 # ==================== GEMINI AI YAPILANDIRMASI ====================
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+if API_KEY:
+    genai.configure(api_key=API_KEY)
 
 # ==================== VERİTABANI BAĞLANTISI (SUPABASE POSTGRESQL) ====================
 DATABASE_URL = os.getenv("DATABASE_URL")
