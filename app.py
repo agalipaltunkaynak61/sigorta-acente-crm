@@ -12,6 +12,8 @@ from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, Lar
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 from sqlalchemy.orm.session import Session
 
+import google.generativeai as genai
+
 from pdf_parser import ayikla_police_pdf
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -22,11 +24,15 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
+# ==================== GEMINI AI YAPILANDIRMASI ====================
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
 # ==================== VERİTABANI BAĞLANTISI (SUPABASE POSTGRESQL) ====================
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    # Lokal testler için fallback (istenirse local sqlite kalabilir)
     DB_PATH = BASE_DIR / "acente_crm.db"
     DATABASE_URL = f"sqlite:///{DB_PATH}"
 
@@ -71,7 +77,6 @@ class Police(Base):
     aciklama = Column(Text, nullable=True)
     pdf_dosya_adi = Column(String(255), nullable=True)
 
-# YENİ: Poliçe PDF dosyalarının sunucuda silinmesini önlemek için veritabanı deposu
 class DosyaDepo(Base):
     __tablename__ = "dosya_depo"
     id = Column(Integer, primary_key=True, index=True)
@@ -88,7 +93,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.3.1")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.4.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -102,7 +107,6 @@ app.add_middleware(
 def on_startup():
     init_db()
 
-# YENİ: Türkçe karakter ve harf uyumsuzluklarını otomatik çözen akıllı ders bulucu fonksiyonu
 def normalize_string(s: str) -> str:
     s = s.replace("İ", "I").replace("ı", "i").replace("Ş", "S").replace("ş", "s")
     s = s.replace("Ğ", "G").replace("ğ", "g").replace("Ü", "U").replace("ü", "u")
@@ -113,17 +117,14 @@ def normalize_string(s: str) -> str:
 def get_ders_pdf(dosya_adi: str):
     dosya_adi = urllib.parse.unquote(dosya_adi)
     
-    # 1. Tam eşleşme
     hedef = DERSLER_DIR / dosya_adi
     if hedef.exists() and hedef.is_file():
         return FileResponse(hedef, media_type="application/pdf")
         
-    # 2. Büyük/Küçük harf duyarsız arama
     for f in DERSLER_DIR.iterdir():
         if f.is_file() and f.name.lower() == dosya_adi.lower():
             return FileResponse(f, media_type="application/pdf")
             
-    # 3. Türkçe karakter esnek arama
     hedef_norm = normalize_string(dosya_adi)
     for f in DERSLER_DIR.iterdir():
         if f.is_file() and normalize_string(f.name) == hedef_norm:
@@ -410,7 +411,6 @@ def api_police_sil(id: int, db: Session = Depends(get_db)):
     db.delete(p); db.commit()
     return {"ok": True}
 
-# YENİ: PDF dosyalarını geçici klasör yerine Supabase veritabanından güvenle okur, asla silinmez.
 @app.get("/api/policeler/{id}/pdf")
 def api_pdf_goster(id: int, db: Session = Depends(get_db)):
     p = db.query(Police).filter(Police.id == id).first()
@@ -434,7 +434,6 @@ async def api_upload_parse(file: UploadFile = File(...)):
         
         dosya_adi = f"{int(datetime.utcnow().timestamp())}_{file.filename}"
         
-        # YENİ: Yüklenen PDF dosyasını kalıcı veritabanı deposuna kaydediyoruz
         db = SessionLocal()
         try:
             yeni_dosya = DosyaDepo(dosya_adi=dosya_adi, veri=icerik)
@@ -481,3 +480,51 @@ async def api_upload_parse(file: UploadFile = File(...)):
         return ayiklanan
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
+
+# ==================== DERİN ARAŞTIRMALI YAPAY ZEKA ASİSTANI (GOOGLE SEARCH GROUNDING) ====================
+@app.post("/api/ai-asistan")
+async def api_ai_asistan(payload: dict):
+    soru = payload.get("soru")
+    sirket = payload.get("sirket", "Genel")
+    brans = payload.get("brans", "Genel")
+    
+    if not soru:
+        raise HTTPException(status_code=400, detail="Soru alanı boş bırakılamaz.")
+    
+    try:
+        model_name = 'gemini-2.5-flash'
+        
+        prompt = f"""
+        Sen Türkiye sigorta sektöründe 20+ yıl tecrübeye sahip, kıdemli bir teknik sigorta danışmanı ve uzmansın.
+        Kullanıcının sigorta branşları, poliçe teminatları, şirket şartları ve ek teminat detaylarıyla ilgili sorduğu soruyu; 
+        ilgili sigorta şirketinin (örneğin Quick Sigorta, AXA, vb.) resmi internet sitesindeki ürün detaylarını, PDF broşürlerini, 
+        genel şartlarını ve Türkiye Sigorta Birliği (TSB) mevzuatını canlı web aramaları yaparak en ince detayına kadar derinlemesine araştır.
+        
+        Hedef Şirket: {sirket}
+        Sigorta Branşı: {brans}
+        Soru / Konu: {soru}
+        
+        Lütfen yanıtı hazırlarken şu kriterlere sıkı sıkıya uy:
+        1. Sadece genel geçer bilgiler verme; şirketin resmi web sitelerindeki ürün sayfa içeriklerini, teminat limitlerini, istisnaları ve ek faydaları nokta atışı bul ve aktar.
+        2. Bilgileri maddeler halinde, profesyonel acente diliyle, net, eksiksiz ve en küçük detayları bile kaçırmayacak şekilde açıkla.
+        3. Varsa poliçe özel şartları ile genel şartlar arasındaki kritik farkları vurgula.
+        """
+        
+        response = genai.GenerativeModel(model_name).generate_content(
+            prompt,
+            tools=[{"google_search": {}}],
+            generation_config={"temperature": 0.1}
+        )
+        
+        return {"cevap": response.text}
+    except Exception as e:
+        try:
+            model_name = 'gemini-1.5-flash'
+            response = genai.GenerativeModel(model_name).generate_content(
+                prompt,
+                tools=[{"google_search": {}}],
+                generation_config={"temperature": 0.1}
+            )
+            return {"cevap": response.text}
+        except Exception as e2:
+            raise HTTPException(status_code=500, detail=f"Derin analiz sırasında hata oluştu: {str(e2)}")

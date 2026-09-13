@@ -206,24 +206,84 @@
         </div>
       </section>
 
-      <!-- DERSLER (EĞİTİM VE SUNUMLAR) -->
+      <!-- DERSLER (EĞİTİM, SUNUMLAR VE DERİN YAPAY ZEKA ASİSTANI) -->
       <section id="view-dersler" class="hidden fade-in h-[calc(100vh-8rem)]">
-        <div class="mb-8">
-          <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight mb-2">Eğitim ve Şirket Sunumları</h2>
-          <p class="text-sm font-medium text-slate-500">Aşağıdaki menüden ilgili branşı seçerek şirketlerin güncel sunumlarına ve karşılaştırmalara anında ulaşabilirsiniz.</p>
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-4xl font-serif font-bold text-brand-black tracking-tight mb-2">Eğitim ve Şirket Sunumları</h2>
+            <p class="text-sm font-medium text-slate-500">Güncel sunumlara göz atın veya derin araştırmalı sigorta yapay zeka asistanına sorular sorun.</p>
+          </div>
+          <!-- Sekme Değiştirici Butonlar -->
+          <div class="flex bg-slate-200 p-1 rounded-xl">
+            <button onclick="egitimSekmeDegis('sunumlar')" id="btn-sunum-sekme" class="px-5 py-2 rounded-lg text-xs font-bold bg-white text-brand-black shadow-sm transition-all">Şirket Sunumları</button>
+            <button onclick="egitimSekmeDegis('asistan')" id="btn-asistan-sekme" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-brand-black transition-all">🤖 Derin AI Asistan</button>
+          </div>
         </div>
         
-        <div class="flex gap-8 h-full pb-10">
-          <!-- Kategoriler (Sol) -->
+        <!-- 1. SUNUMLAR ALANI -->
+        <div id="egitim-alan-sunumlar" class="flex gap-8 h-[calc(100%-5rem)] pb-10">
           <div class="w-1/4 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm h-full overflow-y-auto">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Sigorta Türleri</h3>
             <div id="ders-kategoriler" class="flex flex-col gap-2"></div>
           </div>
-          
-          <!-- Sunum Kartları (Sağ) -->
           <div class="w-3/4">
             <h3 id="secilen-kategori-baslik" class="text-xl font-bold text-slate-800 mb-6 border-b pb-4"></h3>
             <div id="ders-icerik" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-full overflow-y-auto content-start pb-20"></div>
+          </div>
+        </div>
+
+        <!-- 2. DERİN YAPAY ZEKA ASİSTAN ALANI (CANLI WEB & PDF TARAYICI) -->
+        <div id="egitim-alan-asistan" class="hidden h-[calc(100%-5rem)] pb-10">
+          <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                <div class="w-10 h-10 rounded-xl bg-brand-black text-brand-gold flex items-center justify-center font-bold">AI</div>
+                <div>
+                  <h3 class="font-bold text-brand-black text-lg">Derin Araştırmalı Acente Bilgi & Mevzuat Asistanı</h3>
+                  <p class="text-xs text-slate-400">Şirketlerin resmi web sitelerini, ürün PDF broşürlerini ve TSB genel şartlarını canlı tarayarak nokta atışı yanıtlar.</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sigorta Şirketi</label>
+                  <select id="ai-soru-sirket" class="w-full border rounded-xl px-4 py-2 text-sm bg-slate-50 outline-none">
+                    <option value="Genel / Tüm Şirketler">Genel / Tüm Şirketler</option>
+                    <option value="Quick Sigorta">Quick Sigorta</option>
+                    <option value="AXA Sigorta">AXA Sigorta</option>
+                    <option value="AK Sigorta">AK Sigorta</option>
+                    <option value="Türkiye Sigorta">Türkiye Sigorta</option>
+                    <option value="Neova Sigorta">Neova Sigorta</option>
+                    <option value="Hepiyi Sigorta">Hepiyi Sigorta</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Branş / Sigorta Türü</label>
+                  <select id="ai-soru-brans" class="w-full border rounded-xl px-4 py-2 text-sm bg-slate-50 outline-none">
+                    <option value="Genel">Genel</option>
+                    <option value="Kasko">Kasko</option>
+                    <option value="İş Yeri Sigortası">İş Yeri Sigortası</option>
+                    <option value="Konut Sigortası">Konut Sigortası</option>
+                    <option value="Tamamlayıcı Sağlık (TSS)">Tamamlayıcı Sağlık (TSS)</option>
+                    <option value="Allrisk Sigortası">Allrisk Sigortası</option>
+                  </select>
+                </div>
+                <div class="flex items-end">
+                  <button onclick="aiSoruGonder()" id="ai-gonder-btn" class="w-full bg-brand-black text-brand-gold py-2.5 rounded-xl font-bold text-sm hover:bg-brand-gold hover:text-white transition-all shadow-md">Derin Analiz Başlat</button>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <textarea id="ai-soru-metin" rows="3" class="w-full border border-slate-200 rounded-xl p-4 text-sm focus:border-brand-gold outline-none bg-slate-50" placeholder="Örn: Quick Sigorta kasko poliçesinde mini onarım ve ek teminatlar neleri kapsıyor? Detaylıca açıklar mısın?"></textarea>
+              </div>
+            </div>
+
+            <div class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-6 overflow-y-auto mt-2">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Asistan Derin Analiz Yanıtı:</p>
+              <div id="ai-cevap-alani" class="text-sm text-slate-700 leading-relaxed space-y-2">
+                <span class="text-slate-400 italic">Henüz bir soru sorulmadı. Şirket ve branş seçerek detaylı araştırma başlatabilirsiniz.</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -250,7 +310,6 @@
     let musteriCache = [], policeCache = [], aktifPoliceSekmesi = 'aktif';
     const DANISMANLAR = ["Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Serhat Altunkaynak", "Ahmet Galip Altunkaynak", "Sezai Karakoç", "Diğer"];
 
-    // KULLANICININ DOSYA İSİMLENDİRMESİNE GÖRE TAM UYUMLU DERS VERİ SETİ
     const DERSLER_DATA = {
       "İş Yeri Sigortası": [
         { ad: "AK Sigorta", dosya: "AK_İŞYERİ.pdf" },
@@ -339,24 +398,75 @@
       if (ad === "dersler") yukleDerslerUI();
     }
 
-    // --- DERSLER FONKSİYONLARI ---
+    // --- DERSLER VE SEKME FONKSİYONLARI ---
     function yukleDerslerUI() {
       const catContainer = document.getElementById('ders-kategoriler');
-      if(catContainer.innerHTML === "") { // Sadece ilk girişte oluştur
+      if(catContainer.innerHTML === "") {
         catContainer.innerHTML = Object.keys(DERSLER_DATA).map((kategori) => `
             <button onclick="dersKategoriSec('${kategori}')" class="ders-cat-btn w-full text-left px-4 py-3 rounded-xl font-bold transition-all text-sm text-slate-600 hover:bg-slate-50 border border-transparent">
                 ${kategori}
             </button>
         `).join("");
-        // İlk sekmeyi otomatik seç
         dersKategoriSec(Object.keys(DERSLER_DATA)[0]);
+      }
+    }
+
+    function egitimSekmeDegis(tip) {
+      const sunumAlan = document.getElementById('egitim-alan-sunumlar');
+      const asistanAlan = document.getElementById('egitim-alan-asistan');
+      const btnSunum = document.getElementById('btn-sunum-sekme');
+      const btnAsistan = document.getElementById('btn-asistan-sekme');
+
+      if (tip === 'sunumlar') {
+        sunumAlan.classList.remove('hidden');
+        asistanAlan.classList.add('hidden');
+        btnSunum.className = "px-5 py-2 rounded-lg text-xs font-bold bg-white text-brand-black shadow-sm transition-all";
+        btnAsistan.className = "px-5 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-brand-black transition-all";
+      } else {
+        sunumAlan.classList.add('hidden');
+        asistanAlan.classList.remove('hidden');
+        btnAsistan.className = "px-5 py-2 rounded-lg text-xs font-bold bg-white text-brand-black shadow-sm transition-all";
+        btnSunum.className = "px-5 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-brand-black transition-all";
+      }
+    }
+
+    async function aiSoruGonder() {
+      const soru = document.getElementById('ai-soru-metin').value.trim();
+      const sirket = document.getElementById('ai-soru-sirket').value;
+      const brans = document.getElementById('ai-soru-brans').value;
+      const cevapDiv = document.getElementById('ai-cevap-alani');
+      const btn = document.getElementById('ai-gonder-btn');
+
+      if (!soru) {
+        alert("Lütfen bir soru yazın.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Derin Aratılıyor...";
+      cevapDiv.innerHTML = `<div class="flex items-center gap-2 text-brand-gold font-medium"><span class="animate-pulse">●</span> Yapay zeka internetteki resmi kaynakları, PDF broşürleri ve şirket şartlarını derinlemesine tarıyor...</div>`;
+
+      try {
+        const res = await fetch(API + "/api/ai-asistan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ soru, sirket, brans })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Bir hata oluştu");
+
+        cevapDiv.innerHTML = `<div class="whitespace-pre-line">${data.cevap}</div>`;
+      } catch (e) {
+        cevapDiv.innerHTML = `<span class="text-red-600 font-semibold">Hata: ${e.message}</span>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Derin Analiz Başlat";
       }
     }
 
     function dersKategoriSec(secilenKategori) {
       document.getElementById('secilen-kategori-baslik').textContent = secilenKategori;
       
-      // Buton renklerini güncelle
       document.querySelectorAll('.ders-cat-btn').forEach(btn => {
         if (btn.innerText.trim() === secilenKategori) {
           btn.className = "ders-cat-btn w-full text-left px-4 py-3 rounded-xl font-bold transition-all text-sm bg-brand-black text-brand-gold shadow-md";
@@ -365,7 +475,6 @@
         }
       });
 
-      // Kartları oluştur
       const sirketler = DERSLER_DATA[secilenKategori];
       document.getElementById('ders-icerik').innerHTML = sirketler.map(item => {
         const isKarsilastirma = item.ad.includes("Karşılaştırma");
@@ -392,7 +501,6 @@
         `;
       }).join("");
     }
-    // ----------------------------
 
     function policeSekmeSec(sekme) {
       aktifPoliceSekmesi = sekme;
@@ -734,7 +842,6 @@
       }, 50);
     }
 
-    // --- İSTEMCİ TARAFI FİNANSAL ANALİZ (404 HATASINI ÖNLER) ---
     async function yukleFinansalHazirlik() {
       try {
         if (!policeCache.length) policeCache = await api("/api/policeler");
