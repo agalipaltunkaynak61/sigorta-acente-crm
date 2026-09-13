@@ -1,15 +1,14 @@
 import os
-import re
+import urllib.parse
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles # BURA EKLENDİ
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, create_engine
+from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, LargeBinary, create_engine
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 from sqlalchemy.orm.session import Session
 
@@ -19,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-# DERSLER KLASÖRÜ (BURA EKLENDİ)
+# DERSLER KLASÖRÜ
 DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
@@ -72,6 +71,13 @@ class Police(Base):
     aciklama = Column(Text, nullable=True)
     pdf_dosya_adi = Column(String(255), nullable=True)
 
+# YENİ: Poliçe PDF dosyalarının sunucuda silinmesini önlemek için veritabanı deposu
+class DosyaDepo(Base):
+    __tablename__ = "dosya_depo"
+    id = Column(Integer, primary_key=True, index=True)
+    dosya_adi = Column(String(255), unique=True, nullable=False)
+    veri = Column(LargeBinary, nullable=False)
+
 def init_db():
     Base.metadata.create_all(bind=engine)
 
@@ -82,7 +88,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.3.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.3.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -92,12 +98,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# DERSLER KLASÖRÜNÜ DIŞARI AÇIYORUZ (BURA EKLENDİ)
-app.mount("/dersler", StaticFiles(directory=DERSLER_DIR), name="dersler")
-
 @app.on_event("startup")
 def on_startup():
     init_db()
+
+# YENİ: Türkçe karakter ve harf uyumsuzluklarını otomatik çözen akıllı ders bulucu fonksiyonu
+def normalize_string(s: str) -> str:
+    s = s.replace("İ", "I").replace("ı", "i").replace("Ş", "S").replace("ş", "s")
+    s = s.replace("Ğ", "G").replace("ğ", "g").replace("Ü", "U").replace("ü", "u")
+    s = s.replace("Ö", "O").replace("ö", "o").replace("Ç", "C").replace("ç", "c")
+    return s.lower()
+
+@app.get("/dersler/{dosya_adi}")
+def get_ders_pdf(dosya_adi: str):
+    dosya_adi = urllib.parse.unquote(dosya_adi)
+    
+    # 1. Tam eşleşme
+    hedef = DERSLER_DIR / dosya_adi
+    if hedef.exists() and hedef.is_file():
+        return FileResponse(hedef, media_type="application/pdf")
+        
+    # 2. Büyük/Küçük harf duyarsız arama
+    for f in DERSLER_DIR.iterdir():
+        if f.is_file() and f.name.lower() == dosya_adi.lower():
+            return FileResponse(f, media_type="application/pdf")
+            
+    # 3. Türkçe karakter esnek arama
+    hedef_norm = normalize_string(dosya_adi)
+    for f in DERSLER_DIR.iterdir():
+        if f.is_file() and normalize_string(f.name) == hedef_norm:
+            return FileResponse(f, media_type="application/pdf")
+            
+    raise HTTPException(status_code=404, detail="Not Found")
 
 def parse_tarih(val) -> date:
     if isinstance(val, date):
@@ -378,17 +410,18 @@ def api_police_sil(id: int, db: Session = Depends(get_db)):
     db.delete(p); db.commit()
     return {"ok": True}
 
+# YENİ: PDF dosyalarını geçici klasör yerine Supabase veritabanından güvenle okur, asla silinmez.
 @app.get("/api/policeler/{id}/pdf")
 def api_pdf_goster(id: int, db: Session = Depends(get_db)):
     p = db.query(Police).filter(Police.id == id).first()
     if not p or not p.pdf_dosya_adi:
         raise HTTPException(status_code=404, detail="Bu poliçeye ait PDF bulunamadı.")
     
-    hedef_yol = UPLOAD_DIR / p.pdf_dosya_adi
-    if not hedef_yol.exists():
+    dosya = db.query(DosyaDepo).filter(DosyaDepo.dosya_adi == p.pdf_dosya_adi).first()
+    if not dosya:
         raise HTTPException(status_code=404, detail="Dosya sunucuda bulunamadı.")
         
-    return FileResponse(hedef_yol, media_type="application/pdf", filename=p.pdf_dosya_adi)
+    return Response(content=dosya.veri, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{p.pdf_dosya_adi}"'})
 
 @app.post("/api/upload-parse")
 async def api_upload_parse(file: UploadFile = File(...)):
@@ -400,13 +433,20 @@ async def api_upload_parse(file: UploadFile = File(...)):
             return JSONResponse(status_code=400, content={"detail": "Dosya boş"})
         
         dosya_adi = f"{int(datetime.utcnow().timestamp())}_{file.filename}"
-        hedef_yol = UPLOAD_DIR / dosya_adi
-        hedef_yol.write_bytes(icerik)
+        
+        # YENİ: Yüklenen PDF dosyasını kalıcı veritabanı deposuna kaydediyoruz
+        db = SessionLocal()
+        try:
+            yeni_dosya = DosyaDepo(dosya_adi=dosya_adi, veri=icerik)
+            db.add(yeni_dosya)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            return JSONResponse(status_code=500, content={"detail": f"Dosya veritabanına kaydedilemedi: {str(e)}"})
 
         ayiklanan = ayikla_police_pdf(icerik)
         ayiklanan["pdf_dosya_adi"] = dosya_adi
 
-        db = SessionLocal()
         try:
             tckn = ayiklanan.get("tckn")
             bulunan_musteri = None
