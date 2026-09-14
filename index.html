@@ -6,7 +6,7 @@
   <title>Altun Kardeşler Sigorta CRM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -60,9 +60,9 @@
   <!-- SOL DAR PANEL (SIDEBAR) -->
   <aside class="w-20 bg-brand-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-sm relative h-screen">
     
-    <!-- Logo Alanı -->
+    <!-- Logo Alanı (Eski logoya dönme kaldırıldı, sadece SVG arayacak) -->
     <div class="h-20 flex items-center justify-center border-b border-slate-100 p-3">
-      <img src="vektorel_logo.svg" alt="Altun Kardeşler Logo" class="w-full h-auto object-contain drop-shadow-sm" onerror="this.src='Logo.png'">
+      <img src="vektorel_logo.svg" alt="Altun Kardeşler Logo" class="w-full h-auto object-contain drop-shadow-sm">
     </div>
 
     <!-- Navigasyon -->
@@ -223,15 +223,15 @@
       <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 hidden">
         <div class="bg-brand-navy text-white rounded-xl p-6 shadow-sm relative overflow-hidden">
           <p class="text-xs font-bold mb-1 text-slate-300">Toplam Üretim (Ciro)</p>
-          <p id="fin-ciro" class="text-3xl font-serif font-bold text-brand-gold">₺0,00</p>
+          <p id="fin-ciro" class="text-3xl font-sans font-black tracking-tight text-brand-gold">₺0,00</p>
         </div>
         <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
           <p class="text-xs font-bold mb-1 text-slate-500">Tahmini Net Komisyon Karı</p>
-          <p id="fin-kar" class="text-3xl font-serif font-bold text-brand-navy">₺0,00</p>
+          <p id="fin-kar" class="text-3xl font-sans font-black tracking-tight text-brand-navy">₺0,00</p>
         </div>
         <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
           <p class="text-xs font-bold mb-1 text-slate-500">Toplam Satış Adedi</p>
-          <p id="fin-adet" class="text-3xl font-serif font-bold text-brand-navy">0 Adet</p>
+          <p id="fin-adet" class="text-3xl font-sans font-black tracking-tight text-brand-navy">0 Adet</p>
         </div>
       </div>
 
@@ -501,7 +501,7 @@
         { t: "Aktif Poliçe", v: ozet.aktif_police, icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
         { t: "Yaklaşan (30G)", v: ozet.yaklasan_30_gun, icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
       ];
-      document.getElementById("ozet-kartlar").innerHTML = ozetData.map(d => `<div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between"><div class="flex items-center justify-between mb-2"><p class="text-[11px] font-bold text-slate-400 uppercase">${d.t}</p><div class="w-7 h-7 rounded bg-brand-navy/5 flex items-center justify-center text-brand-navy"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${d.icon}"></path></svg></div></div><p class="text-2xl font-serif font-bold text-brand-navy">${d.v}</p></div>`).join("");
+      document.getElementById("ozet-kartlar").innerHTML = ozetData.map(d => `<div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between"><div class="flex items-center justify-between mb-2"><p class="text-[11px] font-bold text-slate-400 uppercase">${d.t}</p><div class="w-7 h-7 rounded bg-brand-navy/5 flex items-center justify-center text-brand-navy"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${d.icon}"></path></svg></div></div><p class="text-2xl font-sans font-black tracking-tight text-brand-navy">${d.v}</p></div>`).join("");
 
       const el = document.getElementById("yaklasan-liste");
       if (!liste.length) { el.innerHTML = `<p class="text-sm text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200">Yaklaşan poliçe yok.</p>`; return; }
@@ -610,6 +610,7 @@
             <td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity text-xs space-x-2">
               ${pdfBtn}
               <button class="text-slate-400 hover:text-brand-navy font-bold" onclick="policeFormu(${p.id})">Düzenle</button>
+              <button class="text-red-400 hover:text-red-600 font-bold" onclick="policeSil(${p.id})">Sil</button>
             </td>
           </tr>`;
         }).join("");
