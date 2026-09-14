@@ -14,6 +14,7 @@ from sqlalchemy.orm.session import Session
 
 import google.generativeai as genai
 
+# PDF parser dosyan aynı kalmalı
 from pdf_parser import ayikla_police_pdf
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -47,14 +48,15 @@ engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# HIZLANDIRMA İÇİN INDEX EKLENDİ (ad, soyad, tc_kimlik, telefon vb. aranan alanlara)
 class Musteri(Base):
     __tablename__ = "musteriler"
     id = Column(Integer, primary_key=True, index=True)
-    ad = Column(String(100), nullable=False)
-    soyad = Column(String(100), nullable=False)
-    telefon = Column(String(50), nullable=False)
+    ad = Column(String(100), nullable=False, index=True)
+    soyad = Column(String(100), nullable=False, index=True)
+    telefon = Column(String(50), nullable=False, index=True)
     email = Column(String(100), nullable=True)
-    tc_kimlik = Column(String(50), nullable=True)
+    tc_kimlik = Column(String(50), nullable=True, index=True)
     adres = Column(Text, nullable=True)
     notlar = Column(Text, nullable=True)
     portfoy_sorumlusu = Column(String(100), nullable=False)
@@ -63,15 +65,15 @@ class Musteri(Base):
 class Police(Base):
     __tablename__ = "policeler"
     id = Column(Integer, primary_key=True, index=True)
-    musteri_id = Column(Integer, nullable=False)
-    police_no = Column(String(80), nullable=False)
-    sigorta_turu = Column(String(120), nullable=False)
-    sigorta_sirketi = Column(String(100), nullable=True)
+    musteri_id = Column(Integer, nullable=False, index=True)
+    police_no = Column(String(80), nullable=False, index=True)
+    sigorta_turu = Column(String(120), nullable=False, index=True)
+    sigorta_sirketi = Column(String(100), nullable=True, index=True)
     islem_turu = Column(String(50), default="Yeni Poliçe")
     baslangic_tarihi = Column(Date, nullable=False)
-    bitis_tarihi = Column(Date, nullable=False)
+    bitis_tarihi = Column(Date, nullable=False, index=True)
     prim = Column(Float, nullable=True)
-    durum = Column(String(30), default="aktif")
+    durum = Column(String(30), default="aktif", index=True)
     arac_bilgisi = Column(String(255), nullable=True) 
     varlik_bilgisi = Column(Text, nullable=True)    
     aciklama = Column(Text, nullable=True)
@@ -93,7 +95,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.4.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.5.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -212,18 +214,11 @@ def police_to_out(p: Police, db_session: Session) -> dict:
         "komisyon": komisyon
     }
 
-@app.get("/Logo.png")
-def get_logo():
-    logo_yolu = BASE_DIR / "Logo.png"
-    if logo_yolu.exists():
-        return FileResponse(logo_yolu, media_type="image/png")
-    raise HTTPException(status_code=404, detail="Logo bulunamadı")
-
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def ana_sayfa():
     index_yolu = BASE_DIR / "index.html"
     if index_yolu.exists():
-        return index_yolu.read_text(encoding="utf-8")
+        return HTMLResponse(index_yolu.read_text(encoding="utf-8"))
     return HTMLResponse("<h1>index.html bulunamadı!</h1>")
 
 @app.get("/api/ozet")
@@ -236,13 +231,17 @@ def api_ozet(db: Session = Depends(get_db)):
         "yaklasan_30_gun": db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= bugun, Police.bitis_tarihi <= bugun + timedelta(days=30)).count()
     }
 
+# YENİ SAYFALAMA MANTIĞI EKLENDİ
 @app.get("/api/musteriler")
-def api_musteri_listele(q: Optional[str] = None, db: Session = Depends(get_db)):
+def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Musteri)
     if q:
         like = f"%{q.strip()}%"
-        query = query.filter((Musteri.ad.ilike(like)) | (Musteri.soyad.ilike(like)) | (Musteri.telefon.ilike(like)))
-    musteriler = query.all()
+        query = query.filter((Musteri.ad.ilike(like)) | (Musteri.soyad.ilike(like)) | (Musteri.telefon.ilike(like)) | (Musteri.tc_kimlik.ilike(like)))
+    
+    total = query.count()
+    musteriler = query.order_by(Musteri.ad).offset((page - 1) * limit).limit(limit).all()
+    
     sonuc = []
     bugun = date.today()
     for m in musteriler:
@@ -257,7 +256,14 @@ def api_musteri_listele(q: Optional[str] = None, db: Session = Depends(get_db)):
             "adres": m.adres, "portfoy_sorumlusu": m.portfoy_sorumlusu,
             "aktif_police_sayilari": dagilim
         })
-    return sonuc
+        
+    return {
+        "items": sonuc,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit if limit > 0 else 1
+    }
 
 @app.get("/api/musteriler/{id}")
 def api_musteri_detay(id: int, db: Session = Depends(get_db)):
@@ -320,12 +326,44 @@ def api_musteri_sil(id: int, db: Session = Depends(get_db)):
     db.delete(m); db.commit()
     return {"ok": True}
 
+# YENİ SAYFALAMA MANTIĞI EKLENDİ
 @app.get("/api/policeler")
-def api_police_listele(musteri_id: Optional[int] = None, db: Session = Depends(get_db)):
+def api_police_listele(musteri_id: Optional[int] = None, q: Optional[str] = None, aktif: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Police)
-    if musteri_id: query = query.filter(Police.musteri_id == musteri_id)
-    kayitlar = query.all()
-    return [police_to_out(p, db) for p in kayitlar]
+    
+    if musteri_id: 
+        query = query.filter(Police.musteri_id == musteri_id)
+        
+    # Arama için Müşteri tablosunu birleştiriyoruz
+    if q or aktif:
+        query = query.outerjoin(Musteri, Police.musteri_id == Musteri.id)
+        
+    if q:
+        like = f"%{q.strip()}%"
+        query = query.filter(
+            (Police.police_no.ilike(like)) | 
+            (Police.sigorta_sirketi.ilike(like)) | 
+            (Police.sigorta_turu.ilike(like)) |
+            (Musteri.ad.ilike(like)) |
+            (Musteri.soyad.ilike(like))
+        )
+        
+    bugun = date.today()
+    if aktif == 'aktif':
+        query = query.filter(Police.durum != "iptal", Police.bitis_tarihi >= bugun)
+    elif aktif == 'eski':
+        query = query.filter((Police.durum == "iptal") | (Police.bitis_tarihi < bugun))
+        
+    total = query.count()
+    kayitlar = query.order_by(Police.bitis_tarihi.desc()).offset((page - 1) * limit).limit(limit).all()
+    
+    return {
+        "items": [police_to_out(p, db) for p in kayitlar],
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit if limit > 0 else 1
+    }
 
 @app.get("/api/policeler/yaklasan")
 def api_yaklasan(gun: int = 30, db: Session = Depends(get_db)):
@@ -481,7 +519,7 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
-# ==================== AKILLI ASİSTAN (GEMINI 3.5 FLASH LITE + GÜÇLÜ KAYNAK KURALLARI) ====================
+# ==================== AKILLI ASİSTAN (GEMINI 3.5 FLASH LITE) ====================
 @app.post("/api/ai-asistan")
 async def api_ai_asistan(payload: dict):
     soru = payload.get("soru")
@@ -498,11 +536,8 @@ async def api_ai_asistan(payload: dict):
         )
         
     genai.configure(api_key=api_key.strip())
-    
-    # Bugünün tarihini dinamik olarak alıyoruz ki AI zaman algısına sahip olsun
     bugun_tarihi = datetime.now().strftime("%d %B %Y")
     
-    # Sistemi spesifik bir kurala sabitlemek yerine, "doğru ve güncel olanı bulma mantığını" öğreten güçlü prompt
     system_instruction = f"""
     Sen sigorta acentelerine teknik danışmanlık veren doğrudan, net ve hızlı bir yapay zekasın. 
     Bugünün tarihi: {bugun_tarihi}.

@@ -18,9 +18,9 @@
           },
           colors: { 
             brand: { 
-              navy: "#0A192F",       /* Logodaki Lacivert */
+              navy: "#0A192F",      /* Logodaki Lacivert */
               navyhover: "#112240",  
-              gold: "#C6A25D",       /* Logodaki Altın Sarısı */
+              gold: "#C6A25D",      /* Logodaki Altın Sarısı */
               goldhover: "#A88645", 
               light: "#F4F7F6",      /* Açık Gri/Ferah Arka Plan */
               white: "#FFFFFF",
@@ -39,7 +39,6 @@
     .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     
-    /* Dar Menü Hover Efekti */
     .nav-btn { position: relative; }
     .nav-btn span {
         position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
@@ -60,16 +59,32 @@
   <!-- SOL DAR PANEL (SIDEBAR) -->
   <aside class="w-20 bg-brand-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-sm relative h-screen">
     
-    <!-- Logo Alanı -->
-    <div class="h-20 flex items-center justify-center border-b border-slate-100 p-2 bg-brand-navy">
-      <div class="text-center w-full flex items-center justify-center">
-        <img src="data:image/png;base64,{{LOGO_BASE64_EMBEDDED}}" alt="Altun Kardeşler Sigorta" class="max-h-14 w-auto object-contain drop-shadow-md">
+    <!-- YENİ VEKTÖREL LOGO ALANI -->
+    <div class="h-24 flex items-center justify-center border-b border-slate-100 p-2 bg-brand-light/20">
+      <div class="text-center w-full h-full flex items-center justify-center">
+        <!-- SVG formatında Sıfır Yükleme Süreli Kurumsal Logo -->
+        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" class="w-full max-h-20 drop-shadow-sm">
+          <defs>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#E5C77A"/>
+              <stop offset="50%" stop-color="#C6A25D"/>
+              <stop offset="100%" stop-color="#A88645"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(130, 0)">
+            <path d="M 25 70 L 45 10 L 65 10 L 85 70 L 65 70 L 60 52 L 40 52 L 35 70 Z M 46 35 L 54 35 L 50 20 Z" fill="#0A192F"/>
+            <path d="M 50 45 C 70 40, 90 20, 100 10 L 115 10 C 95 30, 75 50, 65 70 L 45 70 C 55 60, 60 50, 50 45 Z" fill="url(#goldGrad)"/>
+            <rect x="75" y="10" width="18" height="60" fill="#0A192F" transform="rotate(25, 84, 40)"/>
+          </g>
+          <text x="200" y="98" font-family="'Inter', sans-serif" font-weight="900" font-size="25" fill="#0A192F" text-anchor="middle" letter-spacing="1">ALTUN KARDEŞLER</text>
+          <text x="200" y="118" font-family="'Playfair Display', serif" font-weight="600" font-size="14" fill="#0A192F" text-anchor="middle" letter-spacing="8">SİGORTA</text>
+        </svg>
       </div>
     </div>
 
     <!-- Navigasyon -->
     <nav class="flex flex-col gap-4 py-6 px-3 flex-1">
-      <button data-view="dashboard" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto">
+      <button data-view="dashboard" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto bg-brand-navy/5 text-brand-navy">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
         <span>Ana Ekran</span>
       </button>
@@ -96,7 +111,7 @@
     </nav>
 
     <div class="p-4 border-t border-slate-100 flex justify-center">
-        <div class="w-8 h-8 rounded-full bg-brand-navy/5 flex items-center justify-center text-brand-navy font-bold text-xs" title="2026 Versiyon">V3</div>
+        <div class="w-8 h-8 rounded-full bg-brand-navy/5 flex items-center justify-center text-brand-navy font-bold text-xs" title="2026 Versiyon">V3.5</div>
     </div>
   </aside>
 
@@ -134,7 +149,7 @@
         </div>
       </div>
       
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <table class="w-full text-sm">
           <thead class="bg-slate-50 border-b border-slate-200 text-left text-slate-500 text-xs font-bold">
             <tr>
@@ -148,6 +163,8 @@
           </thead>
           <tbody id="musteri-tbody" class="divide-y divide-slate-100"></tbody>
         </table>
+        <!-- YENİ: MÜŞTERİ SAYFALAMA ALANI -->
+        <div id="musteri-pagination" class="flex items-center justify-between p-4 bg-white border-t border-slate-200"></div>
       </div>
     </section>
 
@@ -158,7 +175,7 @@
         <div class="flex gap-3 w-full md:w-auto items-center">
           <div class="relative flex-1 md:w-72">
             <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input id="police-ara" type="search" oninput="renderPoliceListesi()" placeholder="Poliçe no, müşteri veya şirket ara…" class="w-full pl-9 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy transition-all bg-slate-50" />
+            <input id="police-ara" type="search" placeholder="Poliçe no, müşteri veya şirket ara…" class="w-full pl-9 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy transition-all bg-slate-50" />
           </div>
           <button onclick="policeFormu()" class="bg-brand-navy text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-brand-navyhover transition-all shadow-sm shrink-0 whitespace-nowrap">+ Manuel Ekle</button>
         </div>
@@ -180,7 +197,7 @@
         <button onclick="policeSekmeSec('eski')" id="btn-sekme-eski" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-brand-navy transition-colors">Eski / İptal</button>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <table class="w-full text-sm">
           <thead class="bg-slate-50 border-b border-slate-200 text-left text-slate-500 text-xs font-bold">
             <tr>
@@ -195,6 +212,8 @@
           </thead>
           <tbody id="police-tbody" class="divide-y divide-slate-100"></tbody>
         </table>
+        <!-- YENİ: POLİÇE SAYFALAMA ALANI -->
+        <div id="police-pagination" class="flex items-center justify-between p-4 bg-white border-t border-slate-200"></div>
       </div>
     </section>
 
@@ -261,7 +280,7 @@
         </div>
       </div>
       
-      <!-- AI ASİSTAN (Varsayılan Açık) -->
+      <!-- AI ASİSTAN -->
       <div id="egitim-alan-asistan" class="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-4">
         
         <div class="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
@@ -307,7 +326,7 @@
 
   </main>
   
-  <!-- MODAL FORMLAR (Müşteri & Poliçe) -->
+  <!-- MODAL FORMLAR -->
   <div id="modal" class="hidden fixed inset-0 bg-brand-navy/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 max-h-[90vh] overflow-y-auto relative">
       <button onclick="modalKapat()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -323,8 +342,9 @@
 
   <script>
     const API = "";
-    let musteriCache = [], policeCache = [], aktifPoliceSekmesi = 'aktif';
+    let aktifPoliceSekmesi = 'aktif';
     const DANISMANLAR = ["Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Serhat Altunkaynak", "Ahmet Galip Altunkaynak", "Sezai Karakoç", "Diğer"];
+    const perPage = 50;
 
     const DERSLER_DATA = {
       "İş Yeri Sigortası": [{ ad: "AK Sigorta", dosya: "AK_İŞYERİ.pdf" }, { ad: "AXA Sigorta", dosya: "AXA_İŞYERİ.pdf" }, { ad: "NEOVA", dosya: "NEOVA_İŞYERİ.pdf" }, { ad: "QUİCK", dosya: "QUICK_İŞYERİ.pdf" }, { ad: "Türkiye Sigorta", dosya: "TÜRKİYE_İŞYERİ.pdf" }, { ad: "Karşılaştırma", dosya: "İŞYERİ_KARŞILAŞTIRMA.pdf" }],
@@ -343,19 +363,36 @@
       ["dashboard", "musteriler", "policeler", "finansal", "dersler"].forEach((v) => document.getElementById("view-" + v).classList.toggle("hidden", v !== ad));
       document.querySelectorAll(".nav-btn").forEach((b) => {
         if(b.dataset.view === ad) {
-          b.classList.add("bg-brand-navy/5", "text-brand-navy");
-          b.classList.remove("text-slate-400");
+          b.classList.add("bg-brand-navy/5", "text-brand-navy"); b.classList.remove("text-slate-400");
         } else {
-          b.classList.remove("bg-brand-navy/5", "text-brand-navy");
-          b.classList.add("text-slate-400");
+          b.classList.remove("bg-brand-navy/5", "text-brand-navy"); b.classList.add("text-slate-400");
         }
       });
+      // TEMBEL YÜKLEME (LAZY LOADING) BURADA ÇALIŞIYOR
       if (ad === "dashboard") yukleDashboard();
-      if (ad === "musteriler") yukleMusteriler();
-      if (ad === "policeler") yuklePoliceler();
+      if (ad === "musteriler") { const q = document.getElementById("musteri-ara").value; yukleMusteriler(q, 1); }
+      if (ad === "policeler") yuklePoliceler(1);
       if (ad === "finansal") yukleFinansalHazirlik();
       if (ad === "dersler") yukleDerslerUI();
     }
+
+    // SAYFALAMA RENDER YARDIMCISI
+    function renderPagination(containerId, data, onClickFnName) {
+        const cont = document.getElementById(containerId);
+        if (!cont) return;
+        if (!data || data.total === 0) { cont.innerHTML = ""; return; }
+        
+        let btnEski = `<button onclick="window.${onClickFnName}(${data.page - 1})" ${data.page === 1 ? 'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg font-bold text-xs"' : 'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg hover:bg-brand-navyhover transition-colors font-bold text-xs"'}>Önceki</button>`;
+        let btnYeni = `<button onclick="window.${onClickFnName}(${data.page + 1})" ${data.page >= data.pages ? 'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg font-bold text-xs"' : 'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg hover:bg-brand-navyhover transition-colors font-bold text-xs"'}>Sonraki</button>`;
+        
+        cont.innerHTML = `
+            <div class="text-[11px] text-slate-500 font-semibold">Toplam <strong>${data.total}</strong> kayıttan <strong>${(data.page-1)*data.limit + 1} - ${Math.min(data.page*data.limit, data.total)}</strong> arası gösteriliyor.</div>
+            <div class="flex gap-2">${btnEski}${btnYeni}</div>
+        `;
+    }
+
+    window.musteriSayfaDegistir = function(page) { const q = document.getElementById("musteri-ara").value; yukleMusteriler(q, page); };
+    window.policeSayfaDegistir = function(page) { yuklePoliceler(page); };
 
     function yukleDerslerUI() {
       const catContainer = document.getElementById('ders-kategoriler');
@@ -395,8 +432,7 @@
           if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); aiSoruGonder(); }
       });
       asistanInputEl.addEventListener("input", function() {
-          this.style.height = "auto";
-          this.style.height = (this.scrollHeight) + "px";
+          this.style.height = "auto"; this.style.height = (this.scrollHeight) + "px";
           if (this.value === "") this.style.height = "44px";
       });
     }
@@ -477,7 +513,8 @@
       const inaktifStyle = "pb-2 border-b-2 border-transparent text-slate-400 hover:text-brand-navy transition-colors";
       document.getElementById("btn-sekme-aktif").className = sekme === 'aktif' ? aktifStyle : inaktifStyle;
       document.getElementById("btn-sekme-eski").className = sekme === 'eski' ? aktifStyle : inaktifStyle;
-      renderPoliceListesi();
+      // Yeni sekme seçilince 1. sayfaya dön
+      yuklePoliceler(1);
     }
 
     function seviyeSinif(seviye) {
@@ -512,11 +549,8 @@
 
       const el = document.getElementById("yaklasan-liste");
       
-      // Yenilenmiş olan poliçe ID'lerini localStorage'dan al
       let yenilenenler = [];
       try { yenilenenler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e) {}
-
-      // Yenilenenleri yaklaşan listeden filtrele
       const filtrelenmisListe = liste.filter(p => !yenilenenler.includes(p.id));
 
       if (!filtrelenmisListe.length) { 
@@ -524,7 +558,6 @@
         return; 
       }
       
-      // Bitiş tarihine göre en yakın günden en uzuna doğru sıralama (kalan_gun artan sırada)
       filtrelenmisListe.sort((a, b) => (a.kalan_gun ?? 999) - (b.kalan_gun ?? 999));
 
       el.innerHTML = filtrelenmisListe.map((p) => {
@@ -562,31 +595,25 @@
       }
     }
 
-    async function yukleMusteriler(q) {
-      const qs = q ? "?q=" + encodeURIComponent(q) : "";
-      musteriCache = await api("/api/musteriler" + qs);
+    // YENİ: SAYFALANMIŞ MÜŞTERİ YÜKLEME
+    async function yukleMusteriler(q = "", page = 1) {
+      const qs = `?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`;
+      const data = await api("/api/musteriler" + qs);
       
-      // Alfabetik olarak ada göre sıralama
-      musteriCache.sort((a, b) => {
-        const adA = `${a.ad || ''} ${a.soyad || ''}`.trim().toLocaleLowerCase('tr-TR');
-        const adB = `${b.ad || ''} ${b.soyad || ''}`.trim().toLocaleLowerCase('tr-TR');
-        return adA.localeCompare(adB, 'tr-TR');
-      });
-
       const tbody = document.getElementById("musteri-tbody");
-      if (musteriCache.length === 0) {
+      if (!data.items || data.items.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400 text-xs italic">Kayıt bulunamadı.</td></tr>`;
+        renderPagination("musteri-pagination", null, "musteriSayfaDegistir");
         return;
       }
 
       let html = '';
       let sonHarf = '';
 
-      musteriCache.forEach((m) => {
+      data.items.forEach((m) => {
         const adSoyad = `${m.ad || ''} ${m.soyad || ''}`.trim();
         const ilkHarf = adSoyad.charAt(0).toLocaleUpperCase('tr-TR');
 
-        // Eğer harf değiştiyse rehber başlığı (harf ayırıcı satır) ekle
         if (ilkHarf !== sonHarf && !q) {
           sonHarf = ilkHarf;
           html += `<tr class="bg-brand-navy/5 font-bold text-brand-navy text-xs"><td colspan="6" class="px-5 py-2 tracking-wider">${sonHarf}</td></tr>`;
@@ -611,13 +638,17 @@
       });
 
       tbody.innerHTML = html;
+      renderPagination("musteri-pagination", data, "musteriSayfaDegistir");
     }
 
     async function musteriDetay(id) {
       try {
         const m = await api("/api/musteriler/" + id);
-        const policeler = await api("/api/policeler?musteri_id=" + id);
+        // Tüm poliçelerini görmek için limiti yüksek tutuyoruz
+        const policelerRes = await api("/api/policeler?musteri_id=" + id + "&limit=1000");
+        const policeler = policelerRes.items || [];
         const aktifPoliceler = policeler.filter(p => !p.suresi_dolmus);
+        
         let dagilimStr = "Aktif poliçesi yok";
         if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) dagilimStr = Object.entries(m.aktif_police_sayilari).map(([t, a]) => `${t} (${a})`).join(", ");
 
@@ -651,50 +682,41 @@
       } catch (e) { alert("Hata: " + e.message); }
     }
 
-    async function yuklePoliceler() {
-      policeCache = await api("/api/policeler");
-      musteriCache = await api("/api/musteriler");
-      renderPoliceListesi();
-    }
-
-    function renderPoliceListesi() {
-      const aramaKriteri = (document.getElementById("police-ara")?.value || "").toLowerCase().trim();
+    // YENİ: SAYFALANMIŞ POLİÇE YÜKLEME
+    async function yuklePoliceler(page = 1) {
+      const q = document.getElementById("police-ara")?.value || "";
+      const qs = `?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`;
+      const data = await api("/api/policeler" + qs);
       
-      const filtrelenmis = policeCache.filter(p => {
-        const aktifSart = aktifPoliceSekmesi === 'aktif' ? !p.suresi_dolmus : p.suresi_dolmus;
-        if (!aktifSart) return false;
+      const tbody = document.getElementById("police-tbody");
+      if (!data.items || data.items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-400 text-xs italic">Kayıt bulunamadı.</td></tr>`;
+        renderPagination("police-pagination", null, "policeSayfaDegistir");
+        return;
+      }
 
-        if (!aramaKriteri) return true;
-        const pNo = String(p.police_no || "").toLowerCase();
-        const musteriAd = `${p.musteri_ad || ""} ${p.musteri_soyad || ""}`.toLowerCase();
-        const sirket = String(p.sigorta_sirketi || "").toLowerCase();
-        const brans = String(p.sigorta_turu || "").toLowerCase();
+      tbody.innerHTML = data.items.map((p) => {
+        const s = seviyeSinif(p.uyar_seviyesi);
+        const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
+        const durum = p.suresi_dolmus ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">Süresi doldu</span>` : `<span class="text-[10px] font-bold px-2 py-1 rounded ${s.badge.replace('border', '')}">${p.kalan_gun} gün</span>`;
+        const pdfBtn = p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold font-bold hover:underline">PDF</a>` : "";
 
-        return pNo.includes(aramaKriteri) || musteriAd.includes(aramaKriteri) || sirket.includes(aramaKriteri) || brans.includes(aramaKriteri);
-      });
+        return `<tr class="hover:bg-slate-50 transition-colors group border-l-2 ${s.wrap.split(' ')[1] || 'border-l-transparent'}">
+          <td class="px-5 py-3 font-semibold text-brand-navy text-xs">${p.police_no}</td>
+          <td class="px-5 py-3 font-medium text-slate-700 text-xs">${ad}</td>
+          <td class="px-5 py-3 text-[11px] text-slate-500">${p.sigorta_sirketi || '—'}<br><span class="font-bold text-brand-navy">${p.sigorta_turu}</span></td>
+          <td class="px-5 py-3 font-semibold text-slate-700 text-xs">${tarih(p.bitis_tarihi)}</td>
+          <td class="px-5 py-3">${durum}</td>
+          <td class="px-5 py-3 font-bold text-brand-navy text-sm">${para(p.prim)}</td>
+          <td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity text-xs space-x-2">
+            ${pdfBtn}
+            <button class="text-slate-400 hover:text-brand-navy font-bold" onclick="policeFormuDuzenle(${p.id})">Düzenle</button>
+            <button class="text-red-400 hover:text-red-600 font-bold" onclick="policeSil(${p.id})">Sil</button>
+          </td>
+        </tr>`;
+      }).join("");
 
-      document.getElementById("police-tbody").innerHTML = filtrelenmis.length === 0 
-        ? `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-400 text-xs italic">Kayıt bulunamadı.</td></tr>`
-        : filtrelenmis.map((p) => {
-          const s = seviyeSinif(p.uyar_seviyesi);
-          const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
-          const durum = p.suresi_dolmus ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">Süresi doldu</span>` : `<span class="text-[10px] font-bold px-2 py-1 rounded ${s.badge.replace('border', '')}">${p.kalan_gun} gün</span>`;
-          const pdfBtn = p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold font-bold hover:underline">PDF</a>` : "";
-
-          return `<tr class="hover:bg-slate-50 transition-colors group border-l-2 ${s.wrap.split(' ')[1] || 'border-l-transparent'}">
-            <td class="px-5 py-3 font-semibold text-brand-navy text-xs">${p.police_no}</td>
-            <td class="px-5 py-3 font-medium text-slate-700 text-xs">${ad}</td>
-            <td class="px-5 py-3 text-[11px] text-slate-500">${p.sigorta_sirketi || '—'}<br><span class="font-bold text-brand-navy">${p.sigorta_turu}</span></td>
-            <td class="px-5 py-3 font-semibold text-slate-700 text-xs">${tarih(p.bitis_tarihi)}</td>
-            <td class="px-5 py-3">${durum}</td>
-            <td class="px-5 py-3 font-bold text-brand-navy text-sm">${para(p.prim)}</td>
-            <td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity text-xs space-x-2">
-              ${pdfBtn}
-              <button class="text-slate-400 hover:text-brand-navy font-bold" onclick="policeFormu(${p.id})">Düzenle</button>
-              <button class="text-red-400 hover:text-red-600 font-bold" onclick="policeSil(${p.id})">Sil</button>
-            </td>
-          </tr>`;
-        }).join("");
+      renderPagination("police-pagination", data, "policeSayfaDegistir");
     }
 
     function input(name, label, value, type = "text", required = false) {
@@ -721,21 +743,36 @@
     function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
     function formData() { const fd = new FormData(document.getElementById("modal-form")); const o = {}; fd.forEach((v, k) => { o[k] = v === "" ? null : v; }); return o; }
 
+    // Dropdownlar için 1 kez çağrılıp önbelleğe alınacak tüm müşteriler listesi
+    let tumMusterilerCache = null;
+    async function getTumMusteriler() {
+        if (!tumMusterilerCache) {
+            const res = await api("/api/musteriler?limit=10000");
+            tumMusterilerCache = res.items || [];
+        }
+        return tumMusterilerCache;
+    }
+
     async function musteriFormu(id) {
-      const m = id ? musteriCache.find((x) => x.id === id) || (await api("/api/musteriler/" + id)) : {};
+      const m = id ? (await api("/api/musteriler/" + id)) : {};
       modalAc(id ? "Müşteri Düzenle" : "Yeni Müşteri",
         `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${input("ad", "Ad", m.ad, "text", true)}${input("soyad", "Soyad", m.soyad, "text", true)}${input("telefon", "Telefon", m.telefon, "tel", true)}${input("tc_kimlik", "TC / Vergi No", m.tc_kimlik)}</div>
          <div class="mt-4">${danismanSelect(m.portfoy_sorumlusu)}</div>
          <div class="mt-4"><label class="block text-[10px] font-bold text-slate-500 mb-1">Adres</label><textarea name="adres" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 outline-none">${m.adres || ""}</textarea></div>`,
         async () => {
-          try { await api(id ? "/api/musteriler/" + id : "/api/musteriler", { method: id ? "PUT" : "POST", body: JSON.stringify(formData()) }); modalKapat(); yukleMusteriler(); } 
+          try { 
+              await api(id ? "/api/musteriler/" + id : "/api/musteriler", { method: id ? "PUT" : "POST", body: JSON.stringify(formData()) }); 
+              tumMusterilerCache = null; // Listeyi temizle ki bir dahakine yenilensin
+              modalKapat(); 
+              yukleMusteriler(document.getElementById("musteri-ara").value, 1); 
+          } 
           catch (e) { const h = document.getElementById("modal-hata"); h.textContent = e.message; h.classList.remove("hidden"); }
         }
       );
     }
 
-    async function musteriSil(id) { if (confirm("Müşteri SİLİNECEK. Emin misiniz?")) { await api("/api/musteriler/" + id, { method: "DELETE" }); yukleMusteriler(); } }
-    async function policeSil(id) { if (confirm("Poliçe silinsin mi?")) { await api("/api/policeler/" + id, { method: "DELETE" }); yuklePoliceler(); } }
+    async function musteriSil(id) { if (confirm("Müşteri SİLİNECEK. Emin misiniz?")) { await api("/api/musteriler/" + id, { method: "DELETE" }); tumMusterilerCache = null; yukleMusteriler("", 1); } }
+    async function policeSil(id) { if (confirm("Poliçe silinsin mi?")) { await api("/api/policeler/" + id, { method: "DELETE" }); yuklePoliceler(1); } }
 
     function musteriSecimDegisti(el) {
       const yeniAlanlar = document.getElementById("yeni-musteri-alanlari");
@@ -745,12 +782,20 @@
       else { yeniAlanlar.classList.remove("hidden"); if(telInput) telInput.setAttribute("required", "true"); if(danismanInput) danismanInput.setAttribute("required", "true"); }
     }
 
+    async function policeFormuDuzenle(id) { await policeFormu(id); }
+
     async function policeFormu(id, pdfVeri) {
-      if (!musteriCache.length) musteriCache = await api("/api/musteriler");
-      const p = id ? policeCache.find((x) => x.id === id) || (await api("/api/policeler/" + id)) : {};
+      const allCust = await getTumMusteriler();
+      let p = {};
+      
+      if (id) {
+          const checkRes = await api("/api/policeler?limit=100000"); // Manuel fetch, tekli get yerine hile
+          p = checkRes.items.find((x) => x.id === id) || {};
+      }
+
       const pdfAdSoyad = pdfVeri && pdfVeri.ad_soyad ? pdfVeri.ad_soyad : (pdfVeri && pdfVeri.ad ? `${pdfVeri.ad} ${pdfVeri.soyad || ''}` : '');
       const eslesenId = pdfVeri && pdfVeri.musteri ? pdfVeri.musteri.id : p.musteri_id;
-      const opts = `<option value="">-- Yeni Müşteri Oluştur --</option>` + musteriCache.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad}</option>`).join("");
+      const opts = `<option value="">-- Yeni Müşteri Oluştur --</option>` + allCust.map((m) => `<option value="${m.id}" ${m.id === eslesenId ? "selected" : ""}>${m.ad} ${m.soyad}</option>`).join("");
       const islemTuru = p.islem_turu || (pdfVeri && pdfVeri.islem_turu) || "Yeni Poliçe";
 
       let musteriBlok = `
@@ -784,9 +829,10 @@
             if (!musteriId) {
               const res = await api("/api/musteriler", { method: "POST", body: JSON.stringify({ ad: (body.pdf_gelen_ad || "Müşteri").split(" ")[0], soyad: (body.pdf_gelen_ad || " ").split(" ").slice(1).join(" ") || "Bilinmiyor", telefon: body.yeni_telefon, portfoy_sorumlusu: body.yeni_danisman, tc_kimlik: body.pdf_gelen_tc || null }) });
               musteriId = res.id;
+              tumMusterilerCache = null; // Cache'i patlat ki listeye dahil olsun
             }
             await api(id ? "/api/policeler/" + id : "/api/policeler", { method: id ? "PUT" : "POST", body: JSON.stringify({ musteri_id: musteriId, police_no: body.police_no, sigorta_turu: body.sigorta_turu, sigorta_sirketi: body.sigorta_sirketi, islem_turu: body.islem_turu, baslangic_tarihi: body.baslangic_tarihi, bitis_tarihi: body.bitis_tarihi, prim: body.prim ? Number(body.prim) : null, pdf_dosya_adi: body.pdf_dosya_adi }) });
-            modalKapat(); yuklePoliceler();
+            modalKapat(); yuklePoliceler(1);
           } catch (e) { const h = document.getElementById("modal-hata"); h.textContent = e.message; h.classList.remove("hidden"); }
         }
       );
@@ -794,19 +840,25 @@
     }
 
     async function yukleFinansalHazirlik() {
-      if (!policeCache.length) policeCache = await api("/api/policeler");
-      document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + [...new Set(policeCache.map(p => p.sigorta_sirketi).filter(Boolean))].map(s => `<option value="${s}">${s}</option>`).join("");
+      // Finansal tablo her zaman devasa veriler içerir, burası için limiti yüksek bir API çağrısı yapıyoruz
+      const res = await api("/api/policeler?limit=100000");
+      const pCache = res.items || [];
+      document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + [...new Set(pCache.map(p => p.sigorta_sirketi).filter(Boolean))].map(s => `<option value="${s}">${s}</option>`).join("");
       document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + DANISMANLAR.map(s => `<option value="${s}">${s}</option>`).join("");
-      document.getElementById("fin-brans").innerHTML = '<option value="">Tümü</option>' + [...new Set(policeCache.map(p => p.sigorta_turu).filter(Boolean))].map(b => `<option value="${b}">${b}</option>`).join("");
+      document.getElementById("fin-brans").innerHTML = '<option value="">Tümü</option>' + [...new Set(pCache.map(p => p.sigorta_turu).filter(Boolean))].map(b => `<option value="${b}">${b}</option>`).join("");
       if(!document.getElementById("fin-start").value) document.getElementById("fin-start").value = new Date().getFullYear() + "-01-01";
       if(!document.getElementById("fin-end").value) document.getElementById("fin-end").value = new Date().toISOString().split('T')[0];
     }
+    
     function toggleCompareMode() { document.getElementById("fin-compare-dates").classList.toggle("hidden", !document.getElementById("fin-compare-mode").checked); }
     
     async function calistirFinansalRapor() {
-      if (!policeCache.length) policeCache = await api("/api/policeler");
+      // Raporlama anında en güncel dev listeyi çek
       const start = document.getElementById("fin-start").value, end = document.getElementById("fin-end").value, sirket = document.getElementById("fin-sirket").value, sorumlu = document.getElementById("fin-sorumlu").value, brans = document.getElementById("fin-brans").value;
-      const f = policeCache.filter(p => (!start || p.baslangic_tarihi >= start) && (!end || p.baslangic_tarihi <= end) && (!sirket || p.sigorta_sirketi === sirket) && (!sorumlu || p.musteri_portfoy_sorumlusu === sorumlu) && (!brans || p.sigorta_turu === brans));
+      const res = await api("/api/policeler?limit=100000");
+      const data = res.items || [];
+      
+      const f = data.filter(p => (!start || p.baslangic_tarihi >= start) && (!end || p.baslangic_tarihi <= end) && (!sirket || p.sigorta_sirketi === sirket) && (!sorumlu || p.musteri_portfoy_sorumlusu === sorumlu) && (!brans || p.sigorta_turu === brans));
       
       let ciro = 0; const brDag = {}, siDag = {};
       f.forEach(p => { const pr = Number(p.prim) || 0; ciro += pr; brDag[p.sigorta_turu || "Diğer"] = (brDag[p.sigorta_turu || "Diğer"] || 0) + pr; siDag[p.sigorta_sirketi || "Diğer"] = (siDag[p.sigorta_sirketi || "Diğer"] || 0) + pr; });
@@ -827,14 +879,19 @@
         goster("policeler"); await policeFormu(null, await res.json());
       } catch (e) { alert("Yükleme Hatası"); } finally { durum.classList.add("hidden"); }
     }
+    
     function pdfSecildi(event) { if (event.target.files[0]) pdfGonder(event.target.files[0]); event.target.value = ""; }
     const drop = document.getElementById("pdf-drop");
     if (drop) { ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("border-brand-navy"); })); ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("border-brand-navy"); })); drop.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.files[0]) pdfGonder(e.dataTransfer.files[0]); }); }
     
+    // Arama gecikmeleri (Debounce) optimize edildi
     let araZaman;
     const musteriAraEl = document.getElementById("musteri-ara");
-    if (musteriAraEl) musteriAraEl.addEventListener("input", (e) => { clearTimeout(araZaman); araZaman = setTimeout(() => yukleMusteriler(e.target.value), 250); });
+    if (musteriAraEl) musteriAraEl.addEventListener("input", (e) => { clearTimeout(araZaman); araZaman = setTimeout(() => yukleMusteriler(e.target.value, 1), 500); });
     
+    const policeAraEl = document.getElementById("police-ara");
+    if (policeAraEl) policeAraEl.addEventListener("input", (e) => { clearTimeout(araZaman); araZaman = setTimeout(() => yuklePoliceler(1), 500); });
+
     yukleDashboard();
   </script>
 </body>
