@@ -1,32 +1,28 @@
 import pandas as pd
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from thefuzz import fuzz
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ================= AYARLAR =================
 API_BASE_URL = "https://sigorta-acente-crm.onrender.com"
-EXCEL_DOSYASI = "axa_liste.xlsx"
+EXCEL_DOSYASI = "Police_Arama_2026_09_14_15_46.xls"  # Türkiye Sigorta portal dışa aktarımı (HTML formatlı .xls)
 BENZERLIK_ESIGI = 85 
-SABIT_SIRKET = "Axa Sigorta"
-MAX_WORKERS = 5  # Aynı anda atılacak istek sayısı (Sunucuyu yormamak için ideal)
+SABIT_SIRKET = "Türkiye Sigorta"
+MAX_WORKERS = 5  # Aynı anda atılacak istek sayısı
 # ============================================
 
 BRANS_SOZLUGU = {
-    "ZORUNLU MALİ SORUMLULUK": "Trafik Sigortası",
-    "İHTİYARİ MALİ SORUMLULUK (TRAFIK)": "Trafik Sigortası",
-    "AXA ASSISTANCE - TRAFİK": "Trafik Sigortası",
-    "KASKO": "Kasko Sigortası",
-    "FERDİ KAZA": "Ferdi Kaza Sigortaları",
-    "MOTORLU ARACA BAĞLI HUKUKSAL KORUMA": "Hukuksal Koruma Sigortaları",
-    "SAĞLIK": "Özel Sağlık Sigortası",
+    "KARAYOLLARI MOTORLU ARAÇLAR ZORUNLU MALİ SORUMLULUK (TRAFİK SİGORTASI)": "Trafik Sigortası",
+    "KARA TAŞITLARI İHTİYARİ MALİ MESULİYET": "Trafik Sigortası",
+    "AVANTAJLI GENİŞLETİLMİŞ KASKO": "Kasko Sigortası",
+    "T_KASKO": "Kasko Sigortası",
+    "ZORUNLU DEPREM SİGORTASI-DASK": "DASK",
     "TAMAMLAYICI SAĞLIK": "Tamamlayıcı Sağlık Sigortası",
-    "DASK": "DASK",
-    "YANGIN": "Konut ve Eşya Sigortaları",
-    "İŞYERİ": "Kurumsal ve İş Yeri Sigortaları",
-    "ELEKTRONİK CİHAZ İLK ATEŞ": "Kurumsal ve İş Yeri Sigortaları",
-    "HIRSIZLIK": "Konut ve Eşya Sigortaları"
+    "İŞ YERİ EKSTRA": "Kurumsal ve İş Yeri Sigortaları",
+    "KAPSAMLI İŞ YERİ": "Kurumsal ve İş Yeri Sigortaları",
+    "BİRLEŞİK PAKET (1.0)": "Konut ve Eşya Sigortaları",
 }
 
 def sistemden_verileri_cek():
@@ -62,7 +58,7 @@ def musteri_bul_veya_olustur(musteri_isim, musteriler_cache):
     yeni_musteri = {
         "ad": ad, 
         "soyad": soyad, 
-        "telefon": "-",          
+        "telefon": "-",         
         "portfoy_sorumlusu": "Atanmadı", 
         "tc_kimlik": None
     }
@@ -78,38 +74,47 @@ def musteri_bul_veya_olustur(musteri_isim, musteriler_cache):
 
 def tarih_formatla(tarih_str):
     try:
-        if isinstance(tarih_str, datetime):
-            baslangic = tarih_str
-        else:
-            baslangic = datetime.strptime(str(tarih_str).strip(), "%d.%m.%Y")
-        bitis = baslangic + timedelta(days=365)
-        return baslangic.strftime("%Y-%m-%d"), bitis.strftime("%Y-%m-%d")
+        # Türkiye Sigorta portalından gelen ISO tarih formatı (örn: 2026-07-10T00:00:00.000+03:00)
+        dt = datetime.fromisoformat(str(tarih_str).strip())
+        return dt.strftime("%Y-%m-%d")
     except:
-        bugun = datetime.now()
-        return bugun.strftime("%Y-%m-%d"), (bugun + timedelta(days=365)).strftime("%Y-%m-%d")
+        try:
+            dt = datetime.strptime(str(tarih_str).strip(), "%d.%m.%Y")
+            return dt.strftime("%Y-%m-%d")
+        except:
+            bugun = datetime.now()
+            return bugun.strftime("%Y-%m-%d")
 
-def ana_bransi_bul(branslar_listesi):
-    branslar_str = " ".join([str(b).upper() for b in branslar_listesi])
-    if "KASKO" in branslar_str: return "Kasko Sigortası"
-    if "ZORUNLU MALİ SORUMLULUK" in branslar_str: return "Trafik Sigortası"
-    if "DASK" in branslar_str: return "DASK"
+def ana_bransi_bul(urun_adi):
+    temiz_urun = str(urun_adi).strip().upper()
+    if "KASKO" in temiz_urun: 
+        return "Kasko Sigortası"
+    if "TRAFİK" in temiz_urun or "ZORUNLU MALİ SORUMLULUK" in temiz_urun: 
+        return "Trafik Sigortası"
+    if "DASK" in temiz_urun: 
+        return "DASK"
+    if "SAĞLIK" in temiz_urun: 
+        return "Tamamlayıcı Sağlık Sigortası"
     
-    for brans in branslar_listesi:
-        temiz_brans = str(brans).strip().upper()
-        if temiz_brans in BRANS_SOZLUGU:
-            return BRANS_SOZLUGU[temiz_brans]
+    if temiz_urun in BRANS_SOZLUGU:
+        return BRANS_SOZLUGU[temiz_urun]
+        
     return "Diğer"
 
-def poli_isle(police_no, grup, musteriler, mevcut_policeler):
+def poli_isle(row, musteriler, mevcut_policeler):
+    police_no = str(int(row['Poliçe No'])).strip()
     if police_no in mevcut_policeler:
         return f"[!] Poliçe No {police_no} zaten sistemde var. Atlandı."
         
-    musteri_isim = grup['SIGORTALI ADI'].iloc[0]
-    tanzim_tar = grup['TANZIM  TAR'].iloc[0]
-    baslangic, bitis = tarih_formatla(tanzim_tar)
-    toplam_prim = float(grup['BÜRÜT PRİM'].sum())
-    brans_listesi = grup['BRANŞ ADI'].dropna().tolist()
-    ana_brans = ana_bransi_bul(brans_listesi)
+    musteri_isim = row['Sigortalı']
+    baslangic = tarih_formatla(row['Başlangıç Tarihi'])
+    bitis = tarih_formatla(row['Bitiş Tarihi'])
+    
+    urun_adi = row['Ürün Adı']
+    ana_brans = ana_bransi_bul(urun_adi)
+    
+    # Türkiye Sigorta liste dışa aktarımında prim kolonu bulunmadığı için 0.0 atanır
+    toplam_prim = 0.0 
     
     musteri_id = musteri_bul_veya_olustur(musteri_isim, musteriler)
     if not musteri_id:
@@ -130,7 +135,7 @@ def poli_isle(police_no, grup, musteriler, mevcut_policeler):
         p_res = requests.post(f"{API_BASE_URL}/api/policeler", json=police_data, timeout=15)
         if p_res.status_code in [200, 201]:
             mevcut_policeler.append(police_no)
-            return f"[✓] BAŞARILI: {police_no} | {ana_brans} | {toplam_prim:.2f} TL"
+            return f"[✓] BAŞARILI: {police_no} | {ana_brans} | {urun_adi}"
         else:
             return f"[X] Poliçe eklenemedi ({police_no}): {p_res.text}"
     except Exception as e:
@@ -139,26 +144,27 @@ def poli_isle(police_no, grup, musteriler, mevcut_policeler):
 def botu_calistir():
     musteriler, mevcut_policeler = sistemden_verileri_cek()
     
-    print(f"'{EXCEL_DOSYASI}' dosyası okunuyor...")
-    df = pd.read_excel(EXCEL_DOSYASI, sheet_name="Police_Kontrol_Listesi", header=4)
+    print(f"'{EXCEL_DOSYASI}' dosyası okunuyor (HTML tabanlı Excel)...")
+    try:
+        df = pd.read_html(EXCEL_DOSYASI)[0]
+    except Exception as e:
+        print(f"Dosya okunurken hata oluştu: {e}")
+        return
     
-    gruplanmis = list(df.groupby('POLİÇE NO'))
-    print(f"Toplam {len(gruplanmis)} adet benzersiz poliçe eşzamanlı olarak işlenmeye başlanıyor...\n")
+    print(f"Toplam {len(df)} adet poliçe eşzamanlı olarak işlenmeye başlanıyor...\n")
 
     islenecek_veriler = []
-    for police_no, grup in gruplanmis:
-        if pd.isnull(police_no):
+    for _, row in df.iterrows():
+        if pd.isnull(row.get('Poliçe No')):
             continue
-        police_no_str = str(int(police_no))
-        islenecek_veriler.append((police_no_str, grup, musteriler, mevcut_policeler))
+        islenecek_veriler.append((row, musteriler, mevcut_policeler))
 
-    # ThreadPoolExecutor ile aynı anda çoklu istek atarak hızı katlayalım
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(poli_isle, p_no, g, musteriler, m_pol) for p_no, g, musteriler, m_pol in islenecek_veriler]
+        futures = [executor.submit(poli_isle, row, m, m_pol) for row, m, m_pol in islenecek_veriler]
         for future in as_completed(futures):
             print(future.result())
 
-    print("\n🎉 Tüm AXA Poliçe Verileri Çok Daha Hızlı Bir Şekilde Canlı CRM'e Aktarıldı!")
+    print("\n🎉 Tüm Türkiye Sigorta Poliçe Verileri Canlı CRM'e Aktarıldı!")
 
 if __name__ == "__main__":
     botu_calistir()
