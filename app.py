@@ -147,7 +147,25 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.6.0")
+# ==================== OTOMATİK 3 AY (90 GÜN) ESKİ POLİÇE TEMİZLEME ====================
+def eski_policeleri_otomatik_temizle():
+    db = SessionLocal()
+    try:
+        sinir_tarihi = date.today() - timedelta(days=90)
+        eski_policeler = db.query(Police).filter(Police.bitis_tarihi < sinir_tarihi).all()
+        silinen_sayi = len(eski_policeler)
+        if silinen_sayi > 0:
+            for p in eski_policeler:
+                db.delete(p)
+            db.commit()
+            print(f"🧹 OTOMATİK TEMİZLİK: Bitiş tarihi 3 aydan eski olan {silinen_sayi} adet poliçe silindi.")
+    except Exception as e:
+        db.rollback()
+        print(f"Eski poliçe otomatik temizleme hatası: {e}")
+    finally:
+        db.close()
+
+app = FastAPI(title="Altun Kardeşler CRM", version="3.7.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -160,6 +178,8 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     init_db()
+    # Sunucu her açıldığında 3 aydan eski poliçeleri temizle
+    eski_policeleri_otomatik_temizle()
 
 def normalize_string(s: str) -> str:
     if not s: return ""
@@ -167,6 +187,25 @@ def normalize_string(s: str) -> str:
     s = s.replace("Ğ", "G").replace("ğ", "g").replace("Ü", "U").replace("ü", "u")
     s = s.replace("Ö", "O").replace("ö", "o").replace("Ç", "C").replace("ç", "c")
     return s.strip().lower()
+
+# ==================== MANUEL ESKİ POLİÇE TEMİZLEME ROTASI ====================
+@app.get("/api/eski-policeleri-temizle")
+def api_eski_policeleri_temizle():
+    """Bitiş tarihi üzerinden 3 ay (90 gün) geçmiş eski poliçeleri manuel olarak temizler."""
+    db = SessionLocal()
+    try:
+        sinir_tarihi = date.today() - timedelta(days=90)
+        eski_policeler = db.query(Police).filter(Police.bitis_tarihi < sinir_tarihi).all()
+        silinen_sayi = len(eski_policeler)
+        for p in eski_policeler:
+            db.delete(p)
+        db.commit()
+        return {"mesaj": f"Temizlik başarılı! Bitiş tarihi 3 aydan eski olan {silinen_sayi} eski poliçe sistemden silindi."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 # ==================== GEÇMİŞ VERİLERİ TEMİZLEME SİHRİ ====================
 @app.get("/api/sistemi-temizle")
