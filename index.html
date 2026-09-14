@@ -59,11 +59,10 @@
   <!-- SOL DAR PANEL (SIDEBAR) -->
   <aside class="w-20 bg-brand-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-sm relative h-screen">
     
-    <!-- YENİ VEKTÖREL LOGO ALANI -->
-    <div class="h-24 flex items-center justify-center border-b border-slate-100 p-2 bg-brand-light/20">
+    <!-- YENİ VEKTÖREL LOGO ALANI (BÜYÜTÜLDÜ) -->
+    <div class="h-28 flex items-center justify-center border-b border-slate-100 p-1 bg-brand-light/20">
       <div class="text-center w-full h-full flex items-center justify-center">
-        <!-- SVG formatında Sıfır Yükleme Süreli Kurumsal Logo -->
-        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" class="w-full max-h-20 drop-shadow-sm">
+        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" class="w-full max-h-24 drop-shadow-sm scale-110">
           <defs>
             <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#E5C77A"/>
@@ -83,7 +82,7 @@
     </div>
 
     <!-- Navigasyon -->
-    <nav class="flex flex-col gap-4 py-6 px-3 flex-1">
+    <nav class="flex flex-col gap-4 py-6 px-3 flex-1 mt-2">
       <button data-view="dashboard" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto bg-brand-navy/5 text-brand-navy">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
         <span>Ana Ekran</span>
@@ -111,7 +110,7 @@
     </nav>
 
     <div class="p-4 border-t border-slate-100 flex justify-center">
-        <div class="w-8 h-8 rounded-full bg-brand-navy/5 flex items-center justify-center text-brand-navy font-bold text-xs" title="2026 Versiyon">V3.5</div>
+        <div class="w-8 h-8 rounded-full bg-brand-navy/5 flex items-center justify-center text-brand-navy font-bold text-xs" title="2026 Versiyon">V3.6</div>
     </div>
   </aside>
 
@@ -163,7 +162,7 @@
           </thead>
           <tbody id="musteri-tbody" class="divide-y divide-slate-100"></tbody>
         </table>
-        <!-- YENİ: MÜŞTERİ SAYFALAMA ALANI -->
+        <!-- MÜŞTERİ SAYFALAMA ALANI -->
         <div id="musteri-pagination" class="flex items-center justify-between p-4 bg-white border-t border-slate-200"></div>
       </div>
     </section>
@@ -212,7 +211,7 @@
           </thead>
           <tbody id="police-tbody" class="divide-y divide-slate-100"></tbody>
         </table>
-        <!-- YENİ: POLİÇE SAYFALAMA ALANI -->
+        <!-- POLİÇE SAYFALAMA ALANI -->
         <div id="police-pagination" class="flex items-center justify-between p-4 bg-white border-t border-slate-200"></div>
       </div>
     </section>
@@ -343,7 +342,7 @@
   <script>
     const API = "";
     let aktifPoliceSekmesi = 'aktif';
-    const DANISMANLAR = ["Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Serhat Altunkaynak", "Ahmet Galip Altunkaynak", "Sezai Karakoç", "Diğer"];
+    const DANISMANLAR = ["Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Serhat Altunkaynak", "Ahmet Galip Altunkaynak", "Sezai Yağcı", "Diğer"];
     const perPage = 50;
 
     const DERSLER_DATA = {
@@ -368,7 +367,6 @@
           b.classList.remove("bg-brand-navy/5", "text-brand-navy"); b.classList.add("text-slate-400");
         }
       });
-      // TEMBEL YÜKLEME (LAZY LOADING) BURADA ÇALIŞIYOR
       if (ad === "dashboard") yukleDashboard();
       if (ad === "musteriler") { const q = document.getElementById("musteri-ara").value; yukleMusteriler(q, 1); }
       if (ad === "policeler") yuklePoliceler(1);
@@ -513,7 +511,6 @@
       const inaktifStyle = "pb-2 border-b-2 border-transparent text-slate-400 hover:text-brand-navy transition-colors";
       document.getElementById("btn-sekme-aktif").className = sekme === 'aktif' ? aktifStyle : inaktifStyle;
       document.getElementById("btn-sekme-eski").className = sekme === 'eski' ? aktifStyle : inaktifStyle;
-      // Yeni sekme seçilince 1. sayfaya dön
       yuklePoliceler(1);
     }
 
@@ -595,7 +592,6 @@
       }
     }
 
-    // YENİ: SAYFALANMIŞ MÜŞTERİ YÜKLEME
     async function yukleMusteriler(q = "", page = 1) {
       const qs = `?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`;
       const data = await api("/api/musteriler" + qs);
@@ -644,7 +640,6 @@
     async function musteriDetay(id) {
       try {
         const m = await api("/api/musteriler/" + id);
-        // Tüm poliçelerini görmek için limiti yüksek tutuyoruz
         const policelerRes = await api("/api/policeler?musteri_id=" + id + "&limit=1000");
         const policeler = policelerRes.items || [];
         const aktifPoliceler = policeler.filter(p => !p.suresi_dolmus);
@@ -682,7 +677,6 @@
       } catch (e) { alert("Hata: " + e.message); }
     }
 
-    // YENİ: SAYFALANMIŞ POLİÇE YÜKLEME
     async function yuklePoliceler(page = 1) {
       const q = document.getElementById("police-ara")?.value || "";
       const qs = `?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`;
@@ -743,7 +737,6 @@
     function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
     function formData() { const fd = new FormData(document.getElementById("modal-form")); const o = {}; fd.forEach((v, k) => { o[k] = v === "" ? null : v; }); return o; }
 
-    // Dropdownlar için 1 kez çağrılıp önbelleğe alınacak tüm müşteriler listesi
     let tumMusterilerCache = null;
     async function getTumMusteriler() {
         if (!tumMusterilerCache) {
@@ -756,13 +749,13 @@
     async function musteriFormu(id) {
       const m = id ? (await api("/api/musteriler/" + id)) : {};
       modalAc(id ? "Müşteri Düzenle" : "Yeni Müşteri",
-        `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${input("ad", "Ad", m.ad, "text", true)}${input("soyad", "Soyad", m.soyad, "text", true)}${input("telefon", "Telefon", m.telefon, "tel", true)}${input("tc_kimlik", "TC / Vergi No", m.tc_kimlik)}</div>
+        `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${input("ad", "Ad", m.ad, "text", true)}${input("soyad", "Soyad", m.soyad, "text", true)}${input("telefon", "Telefon", m.telefon, "tel", false)}${input("tc_kimlik", "TC / Vergi No", m.tc_kimlik)}</div>
          <div class="mt-4">${danismanSelect(m.portfoy_sorumlusu)}</div>
          <div class="mt-4"><label class="block text-[10px] font-bold text-slate-500 mb-1">Adres</label><textarea name="adres" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 outline-none">${m.adres || ""}</textarea></div>`,
         async () => {
           try { 
               await api(id ? "/api/musteriler/" + id : "/api/musteriler", { method: id ? "PUT" : "POST", body: JSON.stringify(formData()) }); 
-              tumMusterilerCache = null; // Listeyi temizle ki bir dahakine yenilensin
+              tumMusterilerCache = null; 
               modalKapat(); 
               yukleMusteriler(document.getElementById("musteri-ara").value, 1); 
           } 
@@ -789,7 +782,7 @@
       let p = {};
       
       if (id) {
-          const checkRes = await api("/api/policeler?limit=100000"); // Manuel fetch, tekli get yerine hile
+          const checkRes = await api("/api/policeler?limit=100000"); 
           p = checkRes.items.find((x) => x.id === id) || {};
       }
 
@@ -804,7 +797,7 @@
           <select name="musteri_id" onchange="musteriSecimDegisti(this)" class="w-full border rounded-lg px-3 py-2 text-sm outline-none bg-white">${opts}</select>
           <div id="yeni-musteri-alanlari" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-200">
             <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Yeni Ad Soyad</label><input type="text" name="pdf_gelen_ad" value="${pdfAdSoyad}" class="w-full border rounded-lg px-3 py-1.5 text-sm" /></div>
-            <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Telefon *</label><input type="tel" name="yeni_telefon" id="yeni-telefon-input" class="w-full border rounded-lg px-3 py-1.5 text-sm" required /></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Telefon</label><input type="tel" name="yeni_telefon" id="yeni-telefon-input" class="w-full border rounded-lg px-3 py-1.5 text-sm" /></div>
             <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Danışman *</label><select name="yeni_danisman" id="yeni-danisman-input" class="w-full border rounded-lg px-3 py-1.5 text-sm" required>${DANISMANLAR.map(d => `<option value="${d}">${d}</option>`).join("")}</select></div>
             <div><label class="block text-[10px] font-bold text-slate-500 mb-1">TC/VKN</label><input type="text" name="pdf_gelen_tc" value="${pdfVeri && pdfVeri.tckn ? pdfVeri.tckn : ''}" class="w-full border rounded-lg px-3 py-1.5 text-sm" /></div>
           </div>
@@ -829,7 +822,7 @@
             if (!musteriId) {
               const res = await api("/api/musteriler", { method: "POST", body: JSON.stringify({ ad: (body.pdf_gelen_ad || "Müşteri").split(" ")[0], soyad: (body.pdf_gelen_ad || " ").split(" ").slice(1).join(" ") || "Bilinmiyor", telefon: body.yeni_telefon, portfoy_sorumlusu: body.yeni_danisman, tc_kimlik: body.pdf_gelen_tc || null }) });
               musteriId = res.id;
-              tumMusterilerCache = null; // Cache'i patlat ki listeye dahil olsun
+              tumMusterilerCache = null; 
             }
             await api(id ? "/api/policeler/" + id : "/api/policeler", { method: id ? "PUT" : "POST", body: JSON.stringify({ musteri_id: musteriId, police_no: body.police_no, sigorta_turu: body.sigorta_turu, sigorta_sirketi: body.sigorta_sirketi, islem_turu: body.islem_turu, baslangic_tarihi: body.baslangic_tarihi, bitis_tarihi: body.bitis_tarihi, prim: body.prim ? Number(body.prim) : null, pdf_dosya_adi: body.pdf_dosya_adi }) });
             modalKapat(); yuklePoliceler(1);
@@ -840,7 +833,6 @@
     }
 
     async function yukleFinansalHazirlik() {
-      // Finansal tablo her zaman devasa veriler içerir, burası için limiti yüksek bir API çağrısı yapıyoruz
       const res = await api("/api/policeler?limit=100000");
       const pCache = res.items || [];
       document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + [...new Set(pCache.map(p => p.sigorta_sirketi).filter(Boolean))].map(s => `<option value="${s}">${s}</option>`).join("");
@@ -853,7 +845,6 @@
     function toggleCompareMode() { document.getElementById("fin-compare-dates").classList.toggle("hidden", !document.getElementById("fin-compare-mode").checked); }
     
     async function calistirFinansalRapor() {
-      // Raporlama anında en güncel dev listeyi çek
       const start = document.getElementById("fin-start").value, end = document.getElementById("fin-end").value, sirket = document.getElementById("fin-sirket").value, sorumlu = document.getElementById("fin-sorumlu").value, brans = document.getElementById("fin-brans").value;
       const res = await api("/api/policeler?limit=100000");
       const data = res.items || [];
@@ -884,7 +875,6 @@
     const drop = document.getElementById("pdf-drop");
     if (drop) { ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("border-brand-navy"); })); ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("border-brand-navy"); })); drop.addEventListener("drop", e => { e.preventDefault(); if (e.dataTransfer.files[0]) pdfGonder(e.dataTransfer.files[0]); }); }
     
-    // Arama gecikmeleri (Debounce) optimize edildi
     let araZaman;
     const musteriAraEl = document.getElementById("musteri-ara");
     if (musteriAraEl) musteriAraEl.addEventListener("input", (e) => { clearTimeout(araZaman); araZaman = setTimeout(() => yukleMusteriler(e.target.value, 1), 500); });

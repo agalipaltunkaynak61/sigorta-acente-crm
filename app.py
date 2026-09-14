@@ -25,6 +25,58 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
+# ==================== VERİ STANDARTLAŞTIRMA SÖZLÜKLERİ ====================
+SIRKET_ESLESMELERI = {
+    "türkiye sigorta a.ş.": "Türkiye Sigorta",
+    "türkiye sigorta anonim şirketi": "Türkiye Sigorta",
+    "türkiye": "Türkiye Sigorta",
+    "turkiye": "Türkiye Sigorta",
+    "axa sigorta a.ş.": "Axa Sigorta",
+    "axa": "Axa Sigorta",
+    "doğa sigorta a.ş.": "Doğa Sigorta",
+    "doğa": "Doğa Sigorta",
+    "doga": "Doğa Sigorta",
+    "ak sigorta": "Aksigorta",
+    "aksigorta": "Aksigorta",
+    "hepiyi": "Hepiyi Sigorta",
+    "neova": "Neova Sigorta",
+    "quick": "Quick Sigorta"
+}
+
+BRANS_ESLESMELERI = {
+    "trafik sigortası": "Trafik",
+    "trafik": "Trafik",
+    "kasko sigortası": "Kasko",
+    "kasko": "Kasko",
+    "tamamlayıcı sağlık sigortası": "TSS",
+    "tamamlayıcı": "TSS",
+    "tss": "TSS",
+    "dask": "DASK",
+    "deprem": "DASK",
+    "kurumsal ve iş yeri sigortaları": "İş Yeri",
+    "iş yeri": "İş Yeri",
+    "işyeri": "İş Yeri",
+    "kurumsal": "İş Yeri",
+    "konut ve eşya sigortaları": "Konut",
+    "konut": "Konut",
+    "eşya": "Konut",
+    "ferdi kaza sigortaları": "Ferdi Kaza",
+    "ferdi kaza": "Ferdi Kaza"
+}
+
+def standardize_metin(metin, sozluk):
+    """Excel veya PDF'den gelen dağınık metinleri standart formata çevirir"""
+    if not metin: return metin
+    m_lower = metin.strip().lower()
+    
+    # Kelime tam eşleşiyorsa veya içinde geçiyorsa
+    for key, val in sozluk.items():
+        if key in m_lower:
+            return val
+            
+    # Eğer sözlükte eşleşme yoksa baş harflerini büyüterek geri döndür
+    return metin.strip().title()
+
 # ==================== GEMINI AI YAPILANDIRMASI ====================
 API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 if API_KEY:
@@ -54,7 +106,7 @@ class Musteri(Base):
     id = Column(Integer, primary_key=True, index=True)
     ad = Column(String(100), nullable=False, index=True)
     soyad = Column(String(100), nullable=False, index=True)
-    telefon = Column(String(50), nullable=False, index=True)
+    telefon = Column(String(50), nullable=True, index=True) # Excel için True yapıldı
     email = Column(String(100), nullable=True)
     tc_kimlik = Column(String(50), nullable=True, index=True)
     adres = Column(Text, nullable=True)
@@ -95,7 +147,7 @@ def get_db():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.5.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.6.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,10 +162,59 @@ def on_startup():
     init_db()
 
 def normalize_string(s: str) -> str:
+    if not s: return ""
     s = s.replace("İ", "I").replace("ı", "i").replace("Ş", "S").replace("ş", "s")
     s = s.replace("Ğ", "G").replace("ğ", "g").replace("Ü", "U").replace("ü", "u")
     s = s.replace("Ö", "O").replace("ö", "o").replace("Ç", "C").replace("ç", "c")
-    return s.lower()
+    return s.strip().lower()
+
+# ==================== GEÇMİŞ VERİLERİ TEMİZLEME SİHRİ ====================
+@app.get("/api/sistemi-temizle")
+def sistemi_temizle(db: Session = Depends(get_db)):
+    """Geçmişteki bozuk/çift kayıtları tek seferde temizler ve standartlaştırır."""
+    
+    # 1. Poliçe İsimlerini (Şirket & Branş) Standartlaştır
+    policeler = db.query(Police).all()
+    for p in policeler:
+        p.sigorta_sirketi = standardize_metin(p.sigorta_sirketi, SIRKET_ESLESMELERI)
+        p.sigorta_turu = standardize_metin(p.sigorta_turu, BRANS_ESLESMELERI)
+    
+    # 2. Danışman İsimlerini Düzelt (Sezai Karakoç -> Sezai Yağcı)
+    musteriler = db.query(Musteri).all()
+    for m in musteriler:
+        if m.portfoy_sorumlusu == "Sezai Karakoç":
+            m.portfoy_sorumlusu = "Sezai Yağcı"
+
+    db.commit()
+
+    # 3. Mükerrer (Çift) Müşterileri Birleştir
+    birlesen_sayisi = 0
+    musteriler = db.query(Musteri).all()
+    isim_gruplari = {}
+    
+    for m in musteriler:
+        anahtar = f"{normalize_string(m.ad)}_{normalize_string(m.soyad)}"
+        if anahtar not in isim_gruplari:
+            isim_gruplari[anahtar] = []
+        isim_gruplari[anahtar].append(m)
+        
+    for anahtar, m_liste in isim_gruplari.items():
+        if len(m_liste) > 1:
+            ana_musteri = m_liste[0] # İlk kaydı asıl kabul et
+            for kopya_musteri in m_liste[1:]:
+                # Eski müşteride TC veya Tel varsa ve Ana müşteride yoksa taşı
+                if not ana_musteri.tc_kimlik and kopya_musteri.tc_kimlik:
+                    ana_musteri.tc_kimlik = kopya_musteri.tc_kimlik
+                if not ana_musteri.telefon and kopya_musteri.telefon:
+                    ana_musteri.telefon = kopya_musteri.telefon
+                    
+                # Poliçeleri Ana Müşteriye aktar
+                db.query(Police).filter(Police.musteri_id == kopya_musteri.id).update({"musteri_id": ana_musteri.id})
+                db.delete(kopya_musteri)
+                birlesen_sayisi += 1
+                
+    db.commit()
+    return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} çift müşteri hesabı tek hesapta birleştirildi. Şirket ve branş isimleri standardize edildi."}
 
 @app.get("/dersler/{dosya_adi}")
 def get_ders_pdf(dosya_adi: str):
@@ -139,7 +240,7 @@ def parse_tarih(val) -> date:
         return val
     if isinstance(val, str):
         val = val.strip()
-        for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y"):
+        for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y", "%Y-%m-%dT%H:%M:%S.%fZ"):
             try:
                 return datetime.strptime(val, fmt).date()
             except ValueError:
@@ -285,26 +386,36 @@ def api_musteri_detay(id: int, db: Session = Depends(get_db)):
 @app.post("/api/musteriler", status_code=201)
 def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
     tckn = payload.get("tc_kimlik")
-    ad = (payload.get("ad") or "").strip()
-    soyad = (payload.get("soyad") or "").strip()
+    ad = (payload.get("ad") or "").strip().title()
+    soyad = (payload.get("soyad") or "").strip().upper()
+    danisman = payload.get("portfoy_sorumlusu", "Diğer")
+    
+    if danisman == "Sezai Karakoç": danisman = "Sezai Yağcı"
 
     existing = None
     if tckn and "**" not in str(tckn):
         existing = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
     
     if not existing and ad and soyad and "**" not in ad:
-        existing = db.query(Musteri).filter(Musteri.ad.ilike(ad), Musteri.soyad.ilike(soyad)).first()
+        norm_ad, norm_soyad = normalize_string(ad), normalize_string(soyad)
+        tum_musteriler = db.query(Musteri).all()
+        for m in tum_musteriler:
+            if normalize_string(m.ad) == norm_ad and normalize_string(m.soyad) == norm_soyad:
+                existing = m
+                break
 
     if existing:
         for k, v in payload.items():
             if v and not str(v).startswith("*"):
                 setattr(existing, k, v)
+        existing.portfoy_sorumlusu = danisman
         db.commit()
         db.refresh(existing)
         return existing
 
-    if not payload.get("telefon") or not payload.get("portfoy_sorumlusu"):
-        raise HTTPException(status_code=400, detail="Telefon numarası ve Portföy Sorumlusu zorunludur!")
+    payload["ad"] = ad
+    payload["soyad"] = soyad
+    payload["portfoy_sorumlusu"] = danisman
     
     m = Musteri(**payload)
     db.add(m); db.commit(); db.refresh(m)
@@ -315,6 +426,7 @@ def api_musteri_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
     m = db.query(Musteri).filter(Musteri.id == id).first()
     if not m: raise HTTPException(404, "Bulunamadı")
     for k, v in payload.items(): setattr(m, k, v)
+    if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
     db.commit(); db.refresh(m)
     return m
 
@@ -380,6 +492,10 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         police_no = payload.get("police_no")
         islem_turu = payload.get("islem_turu", "Yeni Poliçe")
         arac_yeni = payload.get("arac_bilgisi")
+        
+        # STANDARTLAŞTIRMA
+        temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI)
+        temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI)
 
         ana_police = None
         if police_no and ("plaka" in str(islem_turu).lower() or "zeyil" in str(islem_turu).lower() or "tahakkuk" in str(islem_turu).lower() or "ek" in str(islem_turu).lower()):
@@ -403,8 +519,8 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         police = Police(
             musteri_id=payload.get("musteri_id"),
             police_no=police_no,
-            sigorta_turu=payload.get("sigorta_turu"),
-            sigorta_sirketi=payload.get("sigorta_sirketi"),
+            sigorta_turu=temiz_brans,
+            sigorta_sirketi=temiz_sirket,
             islem_turu=islem_turu,
             baslangic_tarihi=baslangic,
             bitis_tarihi=bitis,
@@ -433,6 +549,10 @@ def api_police_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
                 setattr(p, k, parse_tarih(v))
             elif k == "prim":
                 p.prim = float(v) if v is not None else None
+            elif k == "sigorta_sirketi":
+                p.sigorta_sirketi = standardize_metin(v, SIRKET_ESLESMELERI)
+            elif k == "sigorta_turu":
+                p.sigorta_turu = standardize_metin(v, BRANS_ESLESMELERI)
             elif hasattr(p, k):
                 setattr(p, k, v)
         
@@ -483,6 +603,12 @@ async def api_upload_parse(file: UploadFile = File(...)):
 
         ayiklanan = ayikla_police_pdf(icerik)
         ayiklanan["pdf_dosya_adi"] = dosya_adi
+        
+        # STANDARTLAŞTIRMA
+        if ayiklanan.get("sigorta_sirketi"):
+            ayiklanan["sigorta_sirketi"] = standardize_metin(ayiklanan["sigorta_sirketi"], SIRKET_ESLESMELERI)
+        if ayiklanan.get("sigorta_turu"):
+            ayiklanan["sigorta_turu"] = standardize_metin(ayiklanan["sigorta_turu"], BRANS_ESLESMELERI)
 
         try:
             tckn = ayiklanan.get("tckn")
@@ -491,11 +617,11 @@ async def api_upload_parse(file: UploadFile = File(...)):
                 bulunan_musteri = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
             
             if not bulunan_musteri:
+                norm_ad = normalize_string(ayiklanan.get("ad"))
+                norm_soyad = normalize_string(ayiklanan.get("soyad"))
                 tum_musteriler = db.query(Musteri).all()
                 for m in tum_musteriler:
-                    ayiklanan_ad = (ayiklanan.get("ad") or "").lower()
-                    m_ad = (m.ad or "").lower()
-                    if ayiklanan_ad and (ayiklanan_ad in m_ad or m_ad in ayiklanan_ad):
+                    if normalize_string(m.ad) == norm_ad and normalize_string(m.soyad) == norm_soyad:
                         bulunan_musteri = m
                         break
 
