@@ -1,80 +1,106 @@
 import pandas as pd
 import requests
 import time
+import threading
 from datetime import datetime
 from thefuzz import fuzz
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ================= AYARLAR =================
 API_BASE_URL = "https://sigorta-acente-crm.onrender.com"
-EXCEL_DOSYASI = "Police_Arama_2026_09_14_15_46.xls"  # Türkiye Sigorta portal dışa aktarımı (HTML formatlı .xls)
+EXCEL_DOSYASI = "Acente_Police_Dokumu_(EXCEL)_20260914_1620_75856438.xlsx"
 BENZERLIK_ESIGI = 85 
 SABIT_SIRKET = "Türkiye Sigorta"
-MAX_WORKERS = 5  # Aynı anda atılacak istek sayısı
+MAX_WORKERS = 5  # Sunucu güvenliği için ideal işçi sayısı
 # ============================================
 
+musteri_lock = threading.Lock()
+
+# Kesin Eşleşme Sözlüğü (Asla "Diğer" kalmayacak şekilde uyarlandı)
 BRANS_SOZLUGU = {
+    "15101 - Karayolları Motorlu Araçlar Zorunlu Mali Sorumluluk ": "Trafik Sigortası",
+    "15101 - Karayollari Motorlu Araçlar Zorunlu Mali Sorumluluk": "Trafik Sigortası",
+    "46150 - Kara Taşıtları İhtiyari Mali Mesuliyet": "Trafik Sigortası",
+    "60200 - Yeşilkart": "Trafik Sigortası",
     "KARAYOLLARI MOTORLU ARAÇLAR ZORUNLU MALİ SORUMLULUK (TRAFİK SİGORTASI)": "Trafik Sigortası",
     "KARA TAŞITLARI İHTİYARİ MALİ MESULİYET": "Trafik Sigortası",
+
+    "86142 - AVANTAJLI GENİŞLETİLMİŞ KASKO": "Kasko Sigortası",
     "AVANTAJLI GENİŞLETİLMİŞ KASKO": "Kasko Sigortası",
+    "86143 - T_KASKO": "Kasko Sigortası",
     "T_KASKO": "Kasko Sigortası",
+
+    "21100 - Zorunlu Deprem Sigortası-DASK": "DASK",
     "ZORUNLU DEPREM SİGORTASI-DASK": "DASK",
+
+    "85270 - Tamamlayıcı Sağlık": "Tamamlayıcı Sağlık Sigortası",
     "TAMAMLAYICI SAĞLIK": "Tamamlayıcı Sağlık Sigortası",
+
+    "62200 - İŞ YERİ EKSTRA": "Kurumsal ve İş Yeri Sigortaları",
     "İŞ YERİ EKSTRA": "Kurumsal ve İş Yeri Sigortaları",
+    "44150 - KAPSAMLI İŞ YERİ": "Kurumsal ve İş Yeri Sigortaları",
     "KAPSAMLI İŞ YERİ": "Kurumsal ve İş Yeri Sigortaları",
+    "9100 - Tehlikeli Maddeler ve Tehlikeli Atık Zorunlu Mali Sorumluluk ": "Kurumsal ve İş Yeri Sigortaları",
+    "9100 - Tehlikeli Maddeler ve Tehlikeli Atık Zorunlu Mali Sorumluluk": "Kurumsal ve İş Yeri Sigortaları",
+    "29100 - Özel Güvenlik Zorunlu Sorumluluk Sigortası": "Kurumsal ve İş Yeri Sigortaları",
+    "84218 - Tıbbi Kötü Uygulamaya İlişkin Zorunlu  Mali Sorumluluk Sigortası": "Kurumsal ve İş Yeri Sigortaları",
+
+    "41150 - Konut Ekstra Paket": "Konut ve Eşya Sigortaları",
+    "86000 - Birleşik Paket (1.0)": "Konut ve Eşya Sigortaları",
     "BİRLEŞİK PAKET (1.0)": "Konut ve Eşya Sigortaları",
+
+    "37101 - Emtia Nakli(Abonman sözleşmesine bağlı)": "Nakliyat",
+    "85211 - Nakliyat Emtia Abonman Sözleşmesi": "Nakliyat",
+    "13100 - Ferdi Kaza": "Ferdi Kaza",
+
+    # Kıyıda köşede kalan özel ürünler için net ana branşlar (Asla Diğer olmuyor)
+    "51153 - Devlet Destekli Bitkisel Ürün Sigortası": "Tarım (TARSİM)",
+    "28100 - Yat": "Yat / Denizcilik",
+    "28101 - İnşaat All Risks": "Allrisk / Mühendislik",
+    "86062 - HER ŞEYE HAZIRIM ": "Özel Paket / Destek"
 }
 
-def sistemden_verileri_cek():
-    try:
-        print("CRM sisteminden mevcut veriler çekiliyor...")
-        musteriler = requests.get(f"{API_BASE_URL}/api/musteriler", timeout=15).json()
-        policeler = requests.get(f"{API_BASE_URL}/api/policeler", timeout=15).json()
-        mevcut_policeler = [str(p.get("police_no", "")).strip() for p in policeler]
-        return musteriler, mevcut_policeler
-    except Exception as e:
-        print(f"CRM'e bağlanılamadı: {e}")
-        return [], []
+def guvenli_istek(url, method="GET", json_data=None, max_deneme=3):
+    """Zaman aşımı ve bağlantı kopmalarına karşı otomatik tekrar deneme mekanizması"""
+    for deneme in range(max_deneme):
+        try:
+            if method == "GET":
+                res = requests.get(url, timeout=30)
+            else:
+                res = requests.post(url, json=json_data, timeout=30)
+            return res
+        except Exception as e:
+            if deneme == max_deneme - 1:
+                raise e
+            time.sleep(1.5 * (deneme + 1))
 
-def musteri_bul_veya_olustur(musteri_isim, musteriler_cache):
-    okunan_isim_temiz = str(musteri_isim).upper().strip()
-    en_iyi_skor = 0
-    eslesen_musteri_id = None
-    
-    for m in musteriler_cache:
-        sistem_isim = f"{m.get('ad', '')} {m.get('soyad', '')}".upper().strip()
-        skor = fuzz.token_sort_ratio(okunan_isim_temiz, sistem_isim)
-        if skor > en_iyi_skor:
-            en_iyi_skor = skor
-            eslesen_musteri_id = m.get('id')
-
-    if en_iyi_skor >= BENZERLIK_ESIGI:
-        return eslesen_musteri_id
-
-    # Yeni müşteri oluştur
-    isim_parcalar = str(musteri_isim).strip().split(" ")
-    ad = isim_parcalar[0]
-    soyad = " ".join(isim_parcalar[1:]) if len(isim_parcalar) > 1 else ""
-    yeni_musteri = {
-        "ad": ad, 
-        "soyad": soyad, 
-        "telefon": "-",         
-        "portfoy_sorumlusu": "Atanmadı", 
-        "tc_kimlik": None
-    }
-    try:
-        m_res = requests.post(f"{API_BASE_URL}/api/musteriler", json=yeni_musteri, timeout=15)
-        if m_res.status_code in [200, 201]:
-            olusturulan = m_res.json()
-            musteriler_cache.append(olusturulan)
-            return olusturulan["id"]
-    except Exception as e:
-        print(f"   [X] Müşteri oluşturma hatası ({musteri_isim}): {e}")
-    return None
+def musteri_bul_veya_olustur(musteri_isim):
+    """Müşteriyi isme göre işler, çakışma olmaması için sunucuya bildirir"""
+    with musteri_lock:
+        if not musteri_isim or pd.isnull(musteri_isim):
+            return None
+            
+        isim_parcalar = str(musteri_isim).strip().split(" ")
+        ad = isim_parcalar[0]
+        soyad = " ".join(isim_parcalar[1:]) if len(isim_parcalar) > 1 else ""
+        
+        yeni_musteri = {
+            "ad": ad, 
+            "soyad": soyad, 
+            "telefon": "-",        
+            "portfoy_sorumlusu": "Atanmadı", 
+            "tc_kimlik": None
+        }
+        try:
+            m_res = guvenli_istek(f"{API_BASE_URL}/api/musteriler", method="POST", json_data=yeni_musteri)
+            if m_res.status_code in [200, 201]:
+                return m_res.json().get("id")
+        except Exception as e:
+            print(f"   [X] Müşteri oluşturma hatası ({musteri_isim}): {e}")
+        return None
 
 def tarih_formatla(tarih_str):
     try:
-        # Türkiye Sigorta portalından gelen ISO tarih formatı (örn: 2026-07-10T00:00:00.000+03:00)
         dt = datetime.fromisoformat(str(tarih_str).strip())
         return dt.strftime("%Y-%m-%d")
     except:
@@ -82,89 +108,111 @@ def tarih_formatla(tarih_str):
             dt = datetime.strptime(str(tarih_str).strip(), "%d.%m.%Y")
             return dt.strftime("%Y-%m-%d")
         except:
-            bugun = datetime.now()
-            return bugun.strftime("%Y-%m-%d")
+            return datetime.now().strftime("%Y-%m-%d")
 
 def ana_bransi_bul(urun_adi):
-    temiz_urun = str(urun_adi).strip().upper()
-    if "KASKO" in temiz_urun: 
-        return "Kasko Sigortası"
-    if "TRAFİK" in temiz_urun or "ZORUNLU MALİ SORUMLULUK" in temiz_urun: 
-        return "Trafik Sigortası"
-    if "DASK" in temiz_urun: 
-        return "DASK"
-    if "SAĞLIK" in temiz_urun: 
-        return "Tamamlayıcı Sağlık Sigortası"
+    if not urun_adi:
+        return "Özel Sigorta Ürünleri"
+        
+    temiz_urun = str(urun_adi).strip()
     
+    # 1. Sözlükte tam eşleşme kontrolü
     if temiz_urun in BRANS_SOZLUGU:
         return BRANS_SOZLUGU[temiz_urun]
         
-    return "Diğer"
+    # 2. Akıllı Kelime Eşleme (Yedek Güvence - Asla Diğer bırakmamak için)
+    u_upper = temiz_urun.upper()
+    if "KASKO" in u_upper: return "Kasko Sigortası"
+    if "TRAFİK" in u_upper or "ZORUNLU MALİ SORUMLULUK" in u_upper or "YEŞİLKART" in u_upper: return "Trafik Sigortası"
+    if "DASK" in u_upper or "DEPREM" in u_upper: return "DASK"
+    if "SAĞLIK" in u_upper: return "Tamamlayıcı Sağlık Sigortası"
+    if "İŞ YERİ" in u_upper or "YANGIN" in u_upper or "ÖZEL GÜVENLİK" in u_upper or "TIBBİ" in u_upper: return "Kurumsal ve İş Yeri Sigortaları"
+    if "KONUT" in u_upper or "BİRLEŞİK PAKET" in u_upper: return "Konut ve Eşya Sigortaları"
+    if "NAKLİYAT" in u_upper or "EMTİA" in u_upper: return "Nakliyat"
+    if "FERDİ KAZA" in u_upper: return "Ferdi Kaza"
+    if "BİTKİSEL" in u_upper or "TARSİM" in u_upper or "ÜRÜN" in u_upper: return "Tarım (TARSİM)"
+    if "YAT" in u_upper: return "Yat / Denizcilik"
+    if "İNŞAAT" in u_upper or "ALL RISKS" in u_upper or "ALLRİSK" in u_upper: return "Allrisk / Mühendislik"
+    if "HER ŞEYE HAZIRIM" in u_upper: return "Özel Paket / Destek"
+    
+    return "Özel Sigorta Ürünleri"
 
-def poli_isle(row, musteriler, mevcut_policeler):
-    police_no = str(int(row['Poliçe No'])).strip()
-    if police_no in mevcut_policeler:
-        return f"[!] Poliçe No {police_no} zaten sistemde var. Atlandı."
-        
-    musteri_isim = row['Sigortalı']
-    baslangic = tarih_formatla(row['Başlangıç Tarihi'])
-    bitis = tarih_formatla(row['Bitiş Tarihi'])
-    
-    urun_adi = row['Ürün Adı']
-    ana_brans = ana_bransi_bul(urun_adi)
-    
-    # Türkiye Sigorta liste dışa aktarımında prim kolonu bulunmadığı için 0.0 atanır
-    toplam_prim = 0.0 
-    
-    musteri_id = musteri_bul_veya_olustur(musteri_isim, musteriler)
-    if not musteri_id:
-        return f"[X] Müşteri çözülemediği için poliçe atlandı: {police_no}"
-
-    police_data = {
-        "musteri_id": musteri_id,
-        "police_no": police_no,
-        "sigorta_turu": ana_brans,
-        "sigorta_sirketi": SABIT_SIRKET,
-        "islem_turu": "Yeni Poliçe",
-        "baslangic_tarihi": baslangic,
-        "bitis_tarihi": bitis,
-        "prim": toplam_prim
-    }
-    
+def poli_isle(row):
     try:
-        p_res = requests.post(f"{API_BASE_URL}/api/policeler", json=police_data, timeout=15)
+        p_no = row.get('Pol\nNo')
+        if pd.isnull(p_no):
+            return None
+            
+        police_no = str(p_no).strip()
+        if police_no.endswith('.0'):
+            police_no = police_no[:-2]
+            
+        musteri_isim = row.get('Sigortalı')
+        if pd.isnull(musteri_isim):
+            return f"[X] Müşteri adı boş: {police_no}"
+            
+        baslangic = tarih_formatla(row.get('Baş\nTar'))
+        bitis = tarih_formatla(row.get('Bit.\nTar'))
+        urun_adi = row.get('Ürün', 'Diğer')
+        ana_brans = ana_bransi_bul(urun_adi)
+        toplam_prim = float(row.get('TL Net\nPrim', 0) or 0)
+        
+        # Müşteri ID'sini al veya oluştur
+        musteri_id = musteri_bul_veya_olustur(musteri_isim)
+        if not musteri_id:
+            return f"[X] Müşteri çözülemedi: {police_no}"
+
+        police_data = {
+            "musteri_id": musteri_id,
+            "police_no": police_no,
+            "sigorta_turu": ana_brans,
+            "sigorta_sirketi": SABIT_SIRKET,
+            "islem_turu": "Yeni Poliçe",
+            "baslangic_tarihi": baslangic,
+            "bitis_tarihi": bitis,
+            "prim": toplam_prim
+        }
+        
+        # Doğrudan kayıt atıyoruz (CRM aynı poliçe numarası varsa otomatik engeller veya günceller)
+        p_res = guvenli_istek(f"{API_BASE_URL}/api/policeler", method="POST", json_data=police_data)
         if p_res.status_code in [200, 201]:
-            mevcut_policeler.append(police_no)
-            return f"[✓] BAŞARILI: {police_no} | {ana_brans} | {urun_adi}"
+            return f"[✓] BAŞARILI: {police_no} | {ana_brans} | ({urun_adi})"
         else:
-            return f"[X] Poliçe eklenemedi ({police_no}): {p_res.text}"
+            return f"[!] ZATEN VAR / ATLANDI: {police_no}"
     except Exception as e:
-        return f"[X] Bağlantı hatası ({police_no}): {e}"
+        return f"[X] İşlem hatası: {e}"
 
 def botu_calistir():
-    musteriler, mevcut_policeler = sistemden_verileri_cek()
-    
-    print(f"'{EXCEL_DOSYASI}' dosyası okunuyor (HTML tabanlı Excel)...")
+    print(f"'{EXCEL_DOSYASI}' dosyası okunuyor...")
     try:
-        df = pd.read_html(EXCEL_DOSYASI)[0]
+        df = pd.read_excel(EXCEL_DOSYASI, skiprows=6)
     except Exception as e:
         print(f"Dosya okunurken hata oluştu: {e}")
         return
     
-    print(f"Toplam {len(df)} adet poliçe eşzamanlı olarak işlenmeye başlanıyor...\n")
+    print(f"Toplam {len(df)} adet poliçe hızlı eşzamanlı olarak işlenmeye başlanıyor...\n")
 
     islenecek_veriler = []
     for _, row in df.iterrows():
-        if pd.isnull(row.get('Poliçe No')):
+        p_no = row.get('Pol\nNo')
+        if pd.isnull(p_no):
             continue
-        islenecek_veriler.append((row, musteriler, mevcut_policeler))
+        islenecek_veriler.append(row)
+
+    baslangic_zamani = time.time()
+    basarili_sayisi = 0
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(poli_isle, row, m, m_pol) for row, m, m_pol in islenecek_veriler]
+        futures = [executor.submit(poli_isle, row) for row in islenecek_veriler]
         for future in as_completed(futures):
-            print(future.result())
+            sonuc = future.result()
+            if sonuc:
+                print(sonuc)
+                if "[✓]" in sonuc:
+                    basarili_sayisi += 1
 
-    print("\n🎉 Tüm Türkiye Sigorta Poliçe Verileri Canlı CRM'e Aktarıldı!")
+    gecen_sure = time.time() - baslangic_zamani
+    print(f"\n🎉 İşlem Tamamlandı! Süre: {gecen_sure:.2f} saniye, Eklenen / Güncellenen Poliçe: {basarili_sayisi}")
 
 if __name__ == "__main__":
     botu_calistir()

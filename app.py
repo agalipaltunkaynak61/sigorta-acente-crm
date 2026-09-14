@@ -44,22 +44,22 @@ SIRKET_ESLESMELERI = {
 }
 
 BRANS_ESLESMELERI = {
-    "trafik sigortası": "Trafik",
-    "trafik": "Trafik",
-    "kasko sigortası": "Kasko",
-    "kasko": "Kasko",
-    "tamamlayıcı sağlık sigortası": "TSS",
-    "tamamlayıcı": "TSS",
-    "tss": "TSS",
+    "trafik sigortası": "Trafik Sigortası",
+    "trafik": "Trafik Sigortası",
+    "kasko sigortası": "Kasko Sigortası",
+    "kasko": "Kasko Sigortası",
+    "tamamlayıcı sağlık sigortası": "Tamamlayıcı Sağlık Sigortası",
+    "tamamlayıcı": "Tamamlayıcı Sağlık Sigortası",
+    "tss": "Tamamlayıcı Sağlık Sigortası",
     "dask": "DASK",
     "deprem": "DASK",
-    "kurumsal ve iş yeri sigortaları": "İş Yeri",
-    "iş yeri": "İş Yeri",
-    "işyeri": "İş Yeri",
-    "kurumsal": "İş Yeri",
-    "konut ve eşya sigortaları": "Konut",
-    "konut": "Konut",
-    "eşya": "Konut",
+    "kurumsal ve iş yeri sigortaları": "Kurumsal ve İş Yeri Sigortaları",
+    "iş yeri": "Kurumsal ve İş Yeri Sigortaları",
+    "işyeri": "Kurumsal ve İş Yeri Sigortaları",
+    "kurumsal": "Kurumsal ve İş Yeri Sigortaları",
+    "konut ve eşya sigortaları": "Konut ve Eşya Sigortaları",
+    "konut": "Konut ve Eşya Sigortaları",
+    "eşya": "Konut ve Eşya Sigortaları",
     "ferdi kaza sigortaları": "Ferdi Kaza",
     "ferdi kaza": "Ferdi Kaza"
 }
@@ -106,7 +106,7 @@ class Musteri(Base):
     id = Column(Integer, primary_key=True, index=True)
     ad = Column(String(100), nullable=False, index=True)
     soyad = Column(String(100), nullable=False, index=True)
-    telefon = Column(String(50), nullable=True, index=True) # Excel için True yapıldı
+    telefon = Column(String(50), nullable=True, index=True)
     email = Column(String(100), nullable=True)
     tc_kimlik = Column(String(50), nullable=True, index=True)
     adres = Column(Text, nullable=True)
@@ -165,7 +165,7 @@ def eski_policeleri_otomatik_temizle():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.7.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.8.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -178,7 +178,6 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     init_db()
-    # Sunucu her açıldığında 3 aydan eski poliçeleri temizle
     eski_policeleri_otomatik_temizle()
 
 def normalize_string(s: str) -> str:
@@ -188,10 +187,66 @@ def normalize_string(s: str) -> str:
     s = s.replace("Ö", "O").replace("ö", "o").replace("Ç", "C").replace("ç", "c")
     return s.strip().lower()
 
+# ==================== MÜKERRER POLİÇELERİ TEMİZLEME VE TEKLEŞTİRME ROTASI ====================
+@app.get("/api/policeleri-temizle-ve-tekliyle")
+def policeleri_temizle_ve_tekliyle(db: Session = Depends(get_db)):
+    """
+    Aynı poliçe numarasına sahip mükerrer kayıtları temizler:
+    - Öncelik her zaman branşı 'Diğer', boş veya None OLMAYAN (doğru branşlı) kayıttadır.
+    - Kopyaları siler ve her poliçe numarasından sadece 1 tane bırakır.
+    """
+    try:
+        tum_policeler = db.query(Police).all()
+        
+        police_gruplari = {}
+        for p in tum_policeler:
+            p_no = str(p.police_no).strip()
+            if p_no not in police_gruplari:
+                police_gruplari[p_no] = []
+            police_gruplari[p_no].append(p)
+            
+        silinen_sayi = 0
+        guncellenen_sayi = 0
+        
+        for p_no, p_listesi in police_gruplari.items():
+            if len(p_listesi) > 1:
+                # Sıralama kriteri: Branşı "Diğer" olanlar sonda, gerçek branşlılar ve eski ID'liler önde
+                def siralama_kriteri(police):
+                    brans = (police.sigorta_turu or "").strip()
+                    is_diger = 1 if (brans in ["Diğer", "", None] or "Özel Sigorta" in brans) else 0
+                    return (is_diger, police.id)
+                
+                p_listesi.sort(key=siralama_kriteri)
+                
+                korunacak_police = p_listesi[0]
+                silinecekler = p_listesi[1:]
+                
+                # Eğer kalacak poliçe "Diğer" ise ama silinecekler arasında gerçek branş varsa onu aktar
+                if korunacak_police.sigorta_turu in ["Diğer", "", None]:
+                    for silinecek in silinecekler:
+                        if silinecek.sigorta_turu not in ["Diğer", "", None]:
+                            korunacak_police.sigorta_turu = silinecek.sigorta_turu
+                            guncellenen_sayi += 1
+                            break
+                
+                # Kopyaları sil
+                for silinecek in silinecekler:
+                    db.delete(silinecek)
+                    silinen_sayi += 1
+                    
+        db.commit()
+        return {
+            "durum": "Başarılı",
+            "mesaj": f"Temizlik tamamlandı! Toplam {silinen_sayi} adet mükerrer poliçe silindi.",
+            "guncellenen_brans_sayisi": guncellenen_sayisi
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ==================== MANUEL ESKİ POLİÇE TEMİZLEME ROTASI ====================
 @app.get("/api/eski-policeleri-temizle")
 def api_eski_policeleri_temizle():
-    """Bitiş tarihi üzerinden 3 ay (90 gün) geçmiş eski poliçeleri manuel olarak temizler."""
     db = SessionLocal()
     try:
         sinir_tarihi = date.today() - timedelta(days=90)
@@ -207,18 +262,13 @@ def api_eski_policeleri_temizle():
     finally:
         db.close()
 
-# ==================== GEÇMİŞ VERİLERİ TEMİZLEME SİHRİ ====================
 @app.get("/api/sistemi-temizle")
 def sistemi_temizle(db: Session = Depends(get_db)):
-    """Geçmişteki bozuk/çift kayıtları tek seferde temizler ve standartlaştırır."""
-    
-    # 1. Poliçe İsimlerini (Şirket & Branş) Standartlaştır
     policeler = db.query(Police).all()
     for p in policeler:
         p.sigorta_sirketi = standardize_metin(p.sigorta_sirketi, SIRKET_ESLESMELERI)
         p.sigorta_turu = standardize_metin(p.sigorta_turu, BRANS_ESLESMELERI)
     
-    # 2. Danışman İsimlerini Düzelt (Sezai Karakoç -> Sezai Yağcı)
     musteriler = db.query(Musteri).all()
     for m in musteriler:
         if m.portfoy_sorumlusu == "Sezai Karakoç":
@@ -226,7 +276,6 @@ def sistemi_temizle(db: Session = Depends(get_db)):
 
     db.commit()
 
-    # 3. Mükerrer (Çift) Müşterileri Birleştir
     birlesen_sayisi = 0
     musteriler = db.query(Musteri).all()
     isim_gruplari = {}
@@ -239,15 +288,13 @@ def sistemi_temizle(db: Session = Depends(get_db)):
         
     for anahtar, m_liste in isim_gruplari.items():
         if len(m_liste) > 1:
-            ana_musteri = m_liste[0] # İlk kaydı asıl kabul et
+            ana_musteri = m_liste[0]
             for kopya_musteri in m_liste[1:]:
-                # Eski müşteride TC veya Tel varsa ve Ana müşteride yoksa taşı
                 if not ana_musteri.tc_kimlik and kopya_musteri.tc_kimlik:
                     ana_musteri.tc_kimlik = kopya_musteri.tc_kimlik
                 if not ana_musteri.telefon and kopya_musteri.telefon:
                     ana_musteri.telefon = kopya_musteri.telefon
                     
-                # Poliçeleri Ana Müşteriye aktar
                 db.query(Police).filter(Police.musteri_id == kopya_musteri.id).update({"musteri_id": ana_musteri.id})
                 db.delete(kopya_musteri)
                 birlesen_sayisi += 1
@@ -258,7 +305,6 @@ def sistemi_temizle(db: Session = Depends(get_db)):
 @app.get("/dersler/{dosya_adi}")
 def get_ders_pdf(dosya_adi: str):
     dosya_adi = urllib.parse.unquote(dosya_adi)
-    
     hedef = DERSLER_DIR / dosya_adi
     if hedef.exists() and hedef.is_file():
         return FileResponse(hedef, media_type="application/pdf")
@@ -371,7 +417,6 @@ def api_ozet(db: Session = Depends(get_db)):
         "yaklasan_30_gun": db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= bugun, Police.bitis_tarihi <= bugun + timedelta(days=30)).count()
     }
 
-# YENİ SAYFALAMA MANTIĞI EKLENDİ
 @app.get("/api/musteriler")
 def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Musteri)
@@ -477,7 +522,6 @@ def api_musteri_sil(id: int, db: Session = Depends(get_db)):
     db.delete(m); db.commit()
     return {"ok": True}
 
-# YENİ SAYFALAMA MANTIĞI EKLENDİ
 @app.get("/api/policeler")
 def api_police_listele(musteri_id: Optional[int] = None, q: Optional[str] = None, aktif: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Police)
@@ -485,7 +529,6 @@ def api_police_listele(musteri_id: Optional[int] = None, q: Optional[str] = None
     if musteri_id: 
         query = query.filter(Police.musteri_id == musteri_id)
         
-    # Arama için Müşteri tablosunu birleştiriyoruz
     if q or aktif:
         query = query.outerjoin(Musteri, Police.musteri_id == Musteri.id)
         
@@ -532,7 +575,6 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         islem_turu = payload.get("islem_turu", "Yeni Poliçe")
         arac_yeni = payload.get("arac_bilgisi")
         
-        # STANDARTLAŞTIRMA
         temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI)
         temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI)
 
@@ -643,7 +685,6 @@ async def api_upload_parse(file: UploadFile = File(...)):
         ayiklanan = ayikla_police_pdf(icerik)
         ayiklanan["pdf_dosya_adi"] = dosya_adi
         
-        # STANDARTLAŞTIRMA
         if ayiklanan.get("sigorta_sirketi"):
             ayiklanan["sigorta_sirketi"] = standardize_metin(ayiklanan["sigorta_sirketi"], SIRKET_ESLESMELERI)
         if ayiklanan.get("sigorta_turu"):
@@ -739,7 +780,7 @@ async def api_ai_asistan(payload: dict):
                 model_name='gemini-3.5-flash-lite',
                 system_instruction=system_instruction
             )
-            chat = model.start_chat(history=formatted_history)
+            chat = model.start_chat(history=fitted_history if 'fitted_history' in locals() else formatted_history)
             response = chat.send_message(soru)
             return {"cevap": response.text}
         except Exception as e2:
