@@ -62,14 +62,13 @@
     
     <!-- Logo Alanı -->
     <div class="h-20 flex items-center justify-center border-b border-slate-100 p-2 bg-brand-navy">
-      <div class="text-center w-full">
-        <img src="vektorel_logo.svg" alt="Altun Kardeşler Sigorta" class="w-full max-h-16 object-contain drop-shadow-md mx-auto" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';" />
-        <svg id="fallback-logo" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" class="w-full h-auto max-h-16 drop-shadow-md mx-auto">
-            <path fill="#f6f6f5" d="M0 0h1024v1024H0z"/>
+      <div class="text-center w-full flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" class="w-full h-auto max-h-16 drop-shadow-md mx-auto">
+            <path fill="#061337" d="M0 0h1024v1024H0z"/>
             <defs>
-                <linearGradient id="a" x1="403.657" x2="387.458" y1="529.595" y2="259.401" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#061337"/><stop offset="1" stop-color="#364563"/></linearGradient>
+                <linearGradient id="logo-grad" x1="403.657" x2="387.458" y1="529.595" y2="259.401" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#C6A25D"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
             </defs>
-            <path fill="url(#a)" d="M295.506 531.247a29.6 29.6 0 0 1-6.535-7.479c-6.433-10.546-2.071-18.007 2.783-27.708 3.478-6.951 7.145-13.818 10.708-20.723a6309 6309 0 0 0 30.499-59.631l49.064-97.192c8.3-16.466 16.343-33.124 25.193-49.297 3.917-7.16 12.289-11.556 20.186-12.777 8.411-1.393 19.913 2.439 24.806 9.67 7.717 11.404 14.147 25.351 20.482 37.68l40.089 78.584c-6.12 3.224-12.727 5.88-19.172 8.392-8.251 3.628-15.515 6.037-23.95 9.107-1.643.373-2.749.673-4.453.777l-33.778-67.991-48.119 96.278c31.58 3.208 52.834 2.536 83.758-6.52 7.342 13.783 14.123 29.824 21.456 43.082-37.889 15.464-88.121 16.172-127.334 5.69-7.396 14.68-14.712 30.074-22.223 44.549.717 4.932-2.854 10.186-6.313 13.397-6.816 6.453-11.798 9.576-21.586 9.315-4.488-.12-10.88-1.214-14.395-4.344-1.118-.996-1.018-1.584-1.166-2.859"/>
+            <path fill="url(#logo-grad)" d="M295.506 531.247a29.6 29.6 0 0 1-6.535-7.479c-6.433-10.546-2.071-18.007 2.783-27.708 3.478-6.951 7.145-13.818 10.708-20.723a6309 6309 0 0 0 30.499-59.631l49.064-97.192c8.3-16.466 16.343-33.124 25.193-49.297 3.917-7.16 12.289-11.556 20.186-12.777 8.411-1.393 19.913 2.439 24.806 9.67 7.717 11.404 14.147 25.351 20.482 37.68l40.089 78.584c-6.12 3.224-12.727 5.88-19.172 8.392-8.251 3.628-15.515 6.037-23.95 9.107-1.643.373-2.749.673-4.453.777l-33.778-67.991-48.119 96.278c31.58 3.208 52.834 2.536 83.758-6.52 7.342 13.783 14.123 29.824 21.456 43.082-37.889 15.464-88.121 16.172-127.334 5.69-7.396 14.68-14.712 30.074-22.223 44.549.717 4.932-2.854 10.186-6.313 13.397-6.816 6.453-11.798 9.576-21.586 9.315-4.488-.12-10.88-1.214-14.395-4.344-1.118-.996-1.018-1.584-1.166-2.859"/>
         </svg>
       </div>
     </div>
@@ -518,12 +517,23 @@
       document.getElementById("ozet-kartlar").innerHTML = ozetData.map(d => `<div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between"><div class="flex items-center justify-between mb-2"><p class="text-[11px] font-bold text-slate-400 uppercase">${d.t}</p><div class="w-7 h-7 rounded bg-brand-navy/5 flex items-center justify-center text-brand-navy"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${d.icon}"></path></svg></div></div><p class="text-2xl font-sans font-black tracking-tight text-brand-navy">${d.v}</p></div>`).join("");
 
       const el = document.getElementById("yaklasan-liste");
-      if (!liste.length) { el.innerHTML = `<p class="text-sm text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200">Yaklaşan poliçe yok.</p>`; return; }
+      
+      // Yenilenmiş olan poliçe ID'lerini localStorage'dan al
+      let yenilenenler = [];
+      try { yenilenenler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e) {}
+
+      // Yenilenenleri yaklaşan listeden filtrele
+      const filtrelenmisListe = liste.filter(p => !yenilenenler.includes(p.id));
+
+      if (!filtrelenmisListe.length) { 
+        el.innerHTML = `<p class="text-sm text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200">Yaklaşan yenileme bulunmuyor.</p>`; 
+        return; 
+      }
       
       // Bitiş tarihine göre en yakın günden en uzuna doğru sıralama (kalan_gun artan sırada)
-      liste.sort((a, b) => (a.kalan_gun ?? 999) - (b.kalan_gun ?? 999));
+      filtrelenmisListe.sort((a, b) => (a.kalan_gun ?? 999) - (b.kalan_gun ?? 999));
 
-      el.innerHTML = liste.map((p) => {
+      el.innerHTML = filtrelenmisListe.map((p) => {
         const s = seviyeSinif(p.uyar_seviyesi);
         const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
         return `<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between ${s.wrap}">
@@ -537,9 +547,25 @@
           <div class="flex items-center gap-2">
             ${p.pdf_dosya_adi ? `<a href="/api/policeler/${p.id}/pdf" target="_blank" class="text-brand-gold bg-brand-gold/10 text-xs px-3 py-1.5 rounded font-bold hover:bg-brand-gold hover:text-white transition-colors">PDF</a>` : ""}
             <span class="text-[11px] font-bold px-3 py-1.5 rounded ${s.badge}">${p.kalan_gun} gün kaldı</span>
+            <button onclick="policeYenilendiSoru(${p.id}, '${ad.replace(/'/g, "\\'")}', '${p.police_no}')" class="bg-brand-navy text-brand-gold hover:bg-brand-navyhover text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Yenilendi
+            </button>
           </div>
         </div>`;
       }).join("");
+    }
+
+    function policeYenilendiSoru(id, musteriAd, policeNo) {
+      if (confirm(`"${musteriAd}" müşterisinin #${policeNo} numaralı poliçesinin yenilendiğine emin misiniz?\n\nBu işlem sonrasında poliçe yaklaşan yenilemeler listesinden kaldırılacaktır.`)) {
+        let yenilenenler = [];
+        try { yenilenenler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e) {}
+        if (!yenilenenler.includes(id)) {
+          yenilenenler.push(id);
+          localStorage.setItem("altun_yenilenen_policeler", JSON.stringify(yenilenenler));
+        }
+        yukleDashboard();
+      }
     }
 
     async function yukleMusteriler(q) {
