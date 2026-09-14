@@ -69,12 +69,10 @@ def standardize_metin(metin, sozluk):
     if not metin: return metin
     m_lower = metin.strip().lower()
     
-    # Kelime tam eşleşiyorsa veya içinde geçiyorsa
     for key, val in sozluk.items():
         if key in m_lower:
             return val
             
-    # Eğer sözlükte eşleşme yoksa baş harflerini büyüterek geri döndür
     return metin.strip().title()
 
 # ==================== GEMINI AI YAPILANDIRMASI ====================
@@ -100,7 +98,6 @@ engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# HIZLANDIRMA İÇİN INDEX EKLENDİ (ad, soyad, tc_kimlik, telefon vb. aranan alanlara)
 class Musteri(Base):
     __tablename__ = "musteriler"
     id = Column(Integer, primary_key=True, index=True)
@@ -147,7 +144,6 @@ def get_db():
     finally:
         db.close()
 
-# ==================== OTOMATİK 3 AY (90 GÜN) ESKİ POLİÇE TEMİZLEME ====================
 def eski_policeleri_otomatik_temizle():
     db = SessionLocal()
     try:
@@ -165,7 +161,7 @@ def eski_policeleri_otomatik_temizle():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.8.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.8.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -206,11 +202,10 @@ def policeleri_temizle_ve_tekliyle(db: Session = Depends(get_db)):
             police_gruplari[p_no].append(p)
             
         silinen_sayi = 0
-        guncellenen_sayi = 0
+        guncellenen_sayisi = 0
         
         for p_no, p_listesi in police_gruplari.items():
             if len(p_listesi) > 1:
-                # Sıralama kriteri: Branşı "Diğer" olanlar sonda, gerçek branşlılar ve eski ID'liler önde
                 def siralama_kriteri(police):
                     brans = (police.sigorta_turu or "").strip()
                     is_diger = 1 if (brans in ["Diğer", "", None] or "Özel Sigorta" in brans) else 0
@@ -221,15 +216,13 @@ def policeleri_temizle_ve_tekliyle(db: Session = Depends(get_db)):
                 korunacak_police = p_listesi[0]
                 silinecekler = p_listesi[1:]
                 
-                # Eğer kalacak poliçe "Diğer" ise ama silinecekler arasında gerçek branş varsa onu aktar
                 if korunacak_police.sigorta_turu in ["Diğer", "", None]:
                     for silinecek in silinecekler:
                         if silinecek.sigorta_turu not in ["Diğer", "", None]:
                             korunacak_police.sigorta_turu = silinecek.sigorta_turu
-                            guncellenen_sayi += 1
+                            guncellenen_sayisi += 1
                             break
                 
-                # Kopyaları sil
                 for silinecek in silinecekler:
                     db.delete(silinecek)
                     silinen_sayi += 1
@@ -244,7 +237,6 @@ def policeleri_temizle_ve_tekliyle(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-# ==================== MANUEL ESKİ POLİÇE TEMİZLEME ROTASI ====================
 @app.get("/api/eski-policeleri-temizle")
 def api_eski_policeleri_temizle():
     db = SessionLocal()
@@ -348,7 +340,7 @@ def hesapla_komisyon(brans: str, sirket: str, prim: float) -> float:
     elif "seyahat" in b or "seyehat" in b: oran = 0.15
     elif "ferdi kaza" in b: oran = 0.30
     elif "allrisk" in b or "inşaat" in b or "insaat" in b: oran = 0.20
-    
+
     anlasmali = ["türkiye", "turkiye", "axa", "ak", "hepiyi", "neova", "doğa", "doga", "quick"]
     disaridan = True
     for a in anlasmali:
@@ -780,7 +772,7 @@ async def api_ai_asistan(payload: dict):
                 model_name='gemini-3.5-flash-lite',
                 system_instruction=system_instruction
             )
-            chat = model.start_chat(history=fitted_history if 'fitted_history' in locals() else formatted_history)
+            chat = model.start_chat(history=formatted_history)
             response = chat.send_message(soru)
             return {"cevap": response.text}
         except Exception as e2:
