@@ -60,9 +60,19 @@
   <!-- SOL DAR PANEL (SIDEBAR) -->
   <aside class="w-20 bg-brand-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-sm relative h-screen">
     
-    <!-- Logo Alanı (Eski logoya dönme kaldırıldı, sadece SVG arayacak) -->
-    <div class="h-20 flex items-center justify-center border-b border-slate-100 p-3">
-      <img src="vektorel_logo.svg" alt="Altun Kardeşler Logo" class="w-full h-auto object-contain drop-shadow-sm">
+    <!-- Logo Alanı (Direkt Kodun İçine Gömdük) -->
+    <div class="h-20 flex items-center justify-center border-b border-slate-100 p-2 bg-brand-navy">
+      <div class="text-center w-full">
+        <!-- SVG formatında ikon + tipografi -->
+        <svg viewBox="0 0 100 60" class="w-full h-auto drop-shadow-md mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Kalkan Şekli / Altın Sarısı -->
+          <path d="M50 8 L30 18 L30 35 C30 45 40 52 50 56 C60 52 70 45 70 35 L70 18 Z" stroke="#C6A25D" stroke-width="2" fill="#0A192F" />
+          <path d="M50 12 L35 20 L35 34 C35 42 42 48 50 51 C58 48 65 42 65 34 L65 20 Z" fill="#C6A25D" />
+          
+          <!-- İçindeki AK Harfleri -->
+          <text x="50" y="38" text-anchor="middle" font-family="Playfair Display, serif" font-weight="900" font-size="20" fill="#0A192F">AK</text>
+        </svg>
+      </div>
     </div>
 
     <!-- Navigasyon -->
@@ -453,7 +463,7 @@
             <div>
               <div class="w-10 h-10 ${isKars ? 'bg-brand-gold text-white' : 'bg-brand-navy text-white'} rounded-lg flex items-center justify-center mb-3">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    ${isKars ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>'}
+                    ${isKars ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>'}
                   </svg>
               </div>
               <h3 class="font-bold text-slate-800 text-sm mb-1">${item.ad}</h3>
