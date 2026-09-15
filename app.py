@@ -13,56 +13,39 @@ from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, Lar
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 from sqlalchemy.orm.session import Session
 
-import google.generativeai as genai
-
 # PDF parser dosyan aynı kalmalı
 from pdf_parser import ayikla_police_pdf
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
-
-# DERSLER KLASÖRÜ
 DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
-# ==================== VERİ STANDARTLAŞTIRMA SÖZLÜKLERİ ====================
+# YENİLENEBİLİR BRANŞLAR LİSTESİ (Sadece bunlar "Bu Ay Bitenler"e girecek)
+YENILENEBILIR_BRANSLAR = [
+    "Trafik Sigortası", "Kasko Sigortası", "Tamamlayıcı Sağlık Sigortası", 
+    "Özel Sağlık Sigortası", "DASK", "Konut ve Eşya Sigortaları", 
+    "Kurumsal ve İş Yeri Sigortaları", "Ferdi Kaza"
+]
+
 SIRKET_ESLESMELERI = {
-    "türkiye sigorta a.ş.": "Türkiye Sigorta",
-    "türkiye sigorta anonim şirketi": "Türkiye Sigorta",
-    "türkiye": "Türkiye Sigorta",
-    "turkiye": "Türkiye Sigorta",
-    "axa sigorta a.ş.": "Axa Sigorta",
-    "axa": "Axa Sigorta",
-    "doğa sigorta a.ş.": "Doğa Sigorta",
-    "doğa": "Doğa Sigorta",
-    "doga": "Doğa Sigorta",
-    "ak sigorta": "Aksigorta",
-    "aksigorta": "Aksigorta",
-    "hepiyi": "Hepiyi Sigorta",
-    "neova": "Neova Sigorta",
-    "quick": "Quick Sigorta"
+    "türkiye sigorta a.ş.": "Türkiye Sigorta", "türkiye": "Türkiye Sigorta", "turkiye": "Türkiye Sigorta",
+    "axa sigorta a.ş.": "Axa Sigorta", "axa": "Axa Sigorta",
+    "doğa sigorta a.ş.": "Doğa Sigorta", "doğa": "Doğa Sigorta", "doga": "Doğa Sigorta",
+    "ak sigorta": "Aksigorta", "aksigorta": "Aksigorta",
+    "hepiyi": "Hepiyi Sigorta", "neova": "Neova Sigorta", "quick": "Quick Sigorta"
 }
 
 BRANS_ESLESMELERI = {
-    "trafik sigortası": "Trafik Sigortası",
-    "trafik": "Trafik Sigortası",
-    "kasko sigortası": "Kasko Sigortası",
-    "kasko": "Kasko Sigortası",
-    "tamamlayıcı sağlık sigortası": "Tamamlayıcı Sağlık Sigortası",
-    "tamamlayıcı": "Tamamlayıcı Sağlık Sigortası",
-    "tss": "Tamamlayıcı Sağlık Sigortası",
-    "dask": "DASK",
-    "deprem": "DASK",
-    "kurumsal ve iş yeri sigortaları": "Kurumsal ve İş Yeri Sigortaları",
-    "iş yeri": "Kurumsal ve İş Yeri Sigortaları",
-    "işyeri": "Kurumsal ve İş Yeri Sigortaları",
-    "kurumsal": "Kurumsal ve İş Yeri Sigortaları",
-    "konut ve eşya sigortaları": "Konut ve Eşya Sigortaları",
-    "konut": "Konut ve Eşya Sigortaları",
-    "eşya": "Konut ve Eşya Sigortaları",
-    "ferdi kaza sigortaları": "Ferdi Kaza",
-    "ferdi kaza": "Ferdi Kaza"
+    "trafik sigortası": "Trafik Sigortası", "trafik": "Trafik Sigortası",
+    "kasko sigortası": "Kasko Sigortası", "kasko": "Kasko Sigortası",
+    "tamamlayıcı sağlık sigortası": "Tamamlayıcı Sağlık Sigortası", "tamamlayıcı": "Tamamlayıcı Sağlık Sigortası", "tss": "Tamamlayıcı Sağlık Sigortası",
+    "özel sağlık sigortası": "Özel Sağlık Sigortası", "öss": "Özel Sağlık Sigortası",
+    "dask": "DASK", "deprem": "DASK",
+    "kurumsal ve iş yeri sigortaları": "Kurumsal ve İş Yeri Sigortaları", "iş yeri": "Kurumsal ve İş Yeri Sigortaları", "kurumsal": "Kurumsal ve İş Yeri Sigortaları",
+    "konut ve eşya sigortaları": "Konut ve Eşya Sigortaları", "konut": "Konut ve Eşya Sigortaları", "eşya": "Konut ve Eşya Sigortaları",
+    "ferdi kaza sigortaları": "Ferdi Kaza", "ferdi kaza": "Ferdi Kaza"
 }
 
 def standardize_metin(metin, sozluk):
@@ -73,18 +56,11 @@ def standardize_metin(metin, sozluk):
             return val
     return metin.strip().title()
 
-# ==================== GEMINI AI YAPILANDIRMASI ====================
-API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-if API_KEY:
-    genai.configure(api_key=API_KEY.strip())
-
-# ==================== VERİTABANI BAĞLANTISI ====================
+# VERİTABANI BAĞLANTISI
 DATABASE_URL = os.getenv("DATABASE_URL")
-
 if not DATABASE_URL:
     DB_PATH = BASE_DIR / "acente_crm.db"
     DATABASE_URL = f"sqlite:///{DB_PATH}"
-
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
@@ -215,16 +191,15 @@ def sistemi_temizle(db: Session = Depends(get_db)):
                     birlesen_sayisi += 1
 
         db.commit()
-        return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} adet mükerrer müşteri hesabı birleştirildi."}
+        return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} adet mükerrer hesap birleştirildi."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-# ==================== YENİ PAZARLAMA (ÇAPRAZ SATIŞ) ROTASI ====================
+# ==================== YENİ PAZARLAMA (ÇAPRAZ SATIŞ) ====================
 @app.get("/api/pazarlama")
 def api_pazarlama(db: Session = Depends(get_db)):
     bugun = date.today()
-    otuz_gun_sonra = bugun + timedelta(days=30)
     
     # Tüm aktif poliçeleri çekiyoruz
     aktif_policeler = db.query(Police).filter(Police.durum == 'aktif', Police.bitis_tarihi >= bugun).all()
@@ -241,7 +216,8 @@ def api_pazarlama(db: Session = Depends(get_db)):
         "arac_konut": [],
         "arac_tss": [],
         "konut_ferdi": [],
-        "tss_oss_kasko": []
+        "tss_oss": [],
+        "tss_kasko": []
     }
     
     for m_id, policeler in musteri_dict.items():
@@ -250,7 +226,6 @@ def api_pazarlama(db: Session = Depends(get_db)):
         
         branslar = set(p.sigorta_turu for p in policeler if p.sigorta_turu)
         
-        # Seçili branşlardan bitmesine 30 gün kalan bir poliçe var mı kontrolü
         def get_expiring(b_types):
             for p in policeler:
                 if p.sigorta_turu in b_types and (p.bitis_tarihi - bugun).days <= 30:
@@ -292,19 +267,24 @@ def api_pazarlama(db: Session = Depends(get_db)):
                     "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
                 })
 
-        # 5. TSS -> ÖSS / Kasko
-        if "Tamamlayıcı Sağlık Sigortası" in branslar:
-            # ÖSS veya Kasko'dan biri yoksa tetikle
-            if "Özel Sağlık Sigortası" not in branslar or "Kasko Sigortası" not in branslar:
-                p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
-                if p:
-                    sonuclar["tss_oss_kasko"].append({
-                        "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                    })
+        # 5. TSS -> ÖSS
+        if "Tamamlayıcı Sağlık Sigortası" in branslar and "Özel Sağlık Sigortası" not in branslar:
+            p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
+            if p:
+                sonuclar["tss_oss"].append({
+                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                })
+                
+        # 6. TSS -> Kasko
+        if "Tamamlayıcı Sağlık Sigortası" in branslar and "Kasko Sigortası" not in branslar:
+            p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
+            if p:
+                sonuclar["tss_kasko"].append({
+                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                })
                     
     return sonuclar
 
-# ==================== DİĞER ROTALAR ====================
 @app.get("/dersler/{dosya_adi}")
 def get_ders_pdf(dosya_adi: str):
     dosya_adi = urllib.parse.unquote(dosya_adi)
@@ -389,8 +369,9 @@ def api_ozet(db: Session = Depends(get_db)):
         "yaklasan_7_gun": db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= bugun, Police.bitis_tarihi <= bugun + timedelta(days=7)).count()
     }
 
+# LİMİTLER 10'A ÇEKİLDİ
 @app.get("/api/musteriler")
-def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100000), db: Session = Depends(get_db)):
+def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Musteri)
     if q:
         like = f"%{q.strip()}%"
@@ -476,8 +457,9 @@ def api_musteri_sil(id: int, db: Session = Depends(get_db)):
     db.delete(m); db.commit()
     return {"ok": True}
 
+# POLİÇE LİMİTLERİ DE 10'A ÇEKİLDİ
 @app.get("/api/policeler")
-def api_police_listele(musteri_id: Optional[int] = None, q: Optional[str] = None, aktif: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100000), db: Session = Depends(get_db)):
+def api_police_listele(musteri_id: Optional[int] = None, q: Optional[str] = None, aktif: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Police)
     if musteri_id: query = query.filter(Police.musteri_id == musteri_id)
     if q or aktif: query = query.outerjoin(Musteri, Police.musteri_id == Musteri.id)
@@ -506,7 +488,13 @@ def api_bu_ay(db: Session = Depends(get_db)):
     ilk_gun = bugun.replace(day=1)
     son_gun_sayisi = calendar.monthrange(bugun.year, bugun.month)[1]
     son_gun = bugun.replace(day=son_gun_sayisi)
-    kayitlar = db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= ilk_gun, Police.bitis_tarihi <= son_gun).all()
+    # YENİLENEBİLİR FİLTRESİ UYGULANDI
+    kayitlar = db.query(Police).filter(
+        Police.durum != "iptal", 
+        Police.bitis_tarihi >= ilk_gun, 
+        Police.bitis_tarihi <= son_gun,
+        Police.sigorta_turu.in_(YENILENEBILIR_BRANSLAR)
+    ).all()
     return [police_to_out(p, db) for p in kayitlar]
 
 @app.post("/api/policeler", status_code=201)
@@ -619,40 +607,3 @@ async def api_upload_parse(file: UploadFile = File(...)):
         return ayiklanan
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
-
-@app.post("/api/ai-asistan")
-async def api_ai_asistan(payload: dict):
-    soru = payload.get("soru")
-    gecmis = payload.get("gecmis", [])
-    if not soru: raise HTTPException(status_code=400, detail="Soru alanı boş bırakılamaz.")
-    
-    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-    if not api_key: raise HTTPException(status_code=500, detail="API Anahtarı bulunamadı!")
-        
-    genai.configure(api_key=api_key.strip())
-    bugun_tarihi = datetime.now().strftime("%d %B %Y")
-    
-    system_instruction = f"""
-    Sen sigorta acentelerine teknik danışmanlık veren doğrudan, net ve hızlı bir yapay zekasın. 
-    Bugünün tarihi: {bugun_tarihi}.
-    YASAKLAR: '20 yıllık tecrübeme dayanarak', 'Bir yapay zeka olarak' gibi saçma, robotik veya laf kalabalığı yapan hiçbir giriş cümlesi KULLANMAYACAKSIN. Doğrudan konuya girip cevabı ver. 
-    GÜNCELLİK VE KAYNAK KURALLARI:
-    1. İnternette arama yaparken her zaman EN YENİ TARİHLİ ve GÜNCEL kaynakları baz al. Eski tarihleri ele.
-    2. Eğer bir kanun, mevzuat değişmişse, bunu fark et ve KESİNLİKLE güncel olan durumu (yeni mevzuatı) aktar.
-    3. Kaynağını ve tarihini cevabının içinde açıkça belirt (Örn: "1 Temmuz 2026 tarihli Resmî Gazete...").
-    """
-    
-    try:
-        model = genai.GenerativeModel(model_name='gemini-3.5-flash-lite', system_instruction=system_instruction, tools='google_search_retrieval')
-        formatted_history = [{"role": "user" if msg.get("role") == "user" else "model", "parts": [msg.get("content")]} for msg in gecmis]
-        chat = model.start_chat(history=formatted_history)
-        response = chat.send_message(soru)
-        return {"cevap": response.text}
-    except Exception as e:
-        try:
-            model = genai.GenerativeModel(model_name='gemini-3.5-flash-lite', system_instruction=system_instruction)
-            chat = model.start_chat(history=formatted_history)
-            response = chat.send_message(soru)
-            return {"cevap": response.text}
-        except Exception as e2:
-            raise HTTPException(status_code=500, detail=f"Analiz sırasında hata oluştu: {str(e2)}")
