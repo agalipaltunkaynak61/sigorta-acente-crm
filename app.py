@@ -66,14 +66,11 @@ BRANS_ESLESMELERI = {
 }
 
 def standardize_metin(metin, sozluk):
-    """Excel veya PDF'den gelen dağınık metinleri standart formata çevirir"""
     if not metin: return metin
     m_lower = metin.strip().lower()
-    
     for key, val in sozluk.items():
         if key in m_lower:
             return val
-            
     return metin.strip().title()
 
 # ==================== GEMINI AI YAPILANDIRMASI ====================
@@ -155,14 +152,12 @@ def eski_policeleri_otomatik_temizle():
             for p in eski_policeler:
                 db.delete(p)
             db.commit()
-            print(f"🧹 OTOMATİK TEMİZLİK: Bitiş tarihi 3 aydan eski olan {silinen_sayi} adet poliçe silindi.")
     except Exception as e:
         db.rollback()
-        print(f"Eski poliçe otomatik temizleme hatası: {e}")
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.8.2")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.9.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -184,70 +179,139 @@ def normalize_string(s: str) -> str:
     s = s.replace("Ö", "O").replace("ö", "o").replace("Ç", "C").replace("ç", "c")
     return s.strip().lower()
 
-# ==================== SİSTEMİ TEMİZLE VE MÜŞTERİ BİRLEŞTİR ====================
 @app.get("/api/sistemi-temizle")
 def sistemi_temizle(db: Session = Depends(get_db)):
-    # 1. Poliçe isim standardizasyonu
-    policeler = db.query(Police).all()
-    for p in policeler:
-        p.sigorta_sirketi = standardize_metin(p.sigorta_sirketi, SIRKET_ESLESMELERI)
-        p.sigorta_turu = standardize_metin(p.sigorta_turu, BRANS_ESLESMELERI)
-    
-    # 2. Müşteri İsim Standardizasyonu (Adı Title, Soyadı UPPER)
-    musteriler = db.query(Musteri).all()
-    for m in musteriler:
-        if m.ad: m.ad = m.ad.strip().title()
-        if m.soyad: m.soyad = m.soyad.strip().upper()
-        if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
-
-    db.commit()
-
-    # 3. Kopyaları Birleştir
-    birlesen_sayisi = 0
-    musteriler = db.query(Musteri).all()
-    isim_gruplari = {}
-    
-    for m in musteriler:
-        anahtar = f"{normalize_string(m.ad)}_{normalize_string(m.soyad)}"
-        if anahtar not in isim_gruplari:
-            isim_gruplari[anahtar] = []
-        isim_gruplari[anahtar].append(m)
+    try:
+        policeler = db.query(Police).all()
+        for p in policeler:
+            if p.sigorta_sirketi: p.sigorta_sirketi = standardize_metin(p.sigorta_sirketi, SIRKET_ESLESMELERI)
+            if p.sigorta_turu: p.sigorta_turu = standardize_metin(p.sigorta_turu, BRANS_ESLESMELERI)
         
-    for anahtar, m_liste in isim_gruplari.items():
-        if len(m_liste) > 1:
-            ana_musteri = m_liste[0]
-            for kopya_musteri in m_liste[1:]:
-                # Eksik verileri doldur
-                if not ana_musteri.tc_kimlik and kopya_musteri.tc_kimlik:
-                    ana_musteri.tc_kimlik = kopya_musteri.tc_kimlik
-                if not ana_musteri.telefon and kopya_musteri.telefon:
-                    ana_musteri.telefon = kopya_musteri.telefon
-                    
-                # Poliçeleri ana müşteriye aktar
-                db.query(Police).filter(Police.musteri_id == kopya_musteri.id).update({"musteri_id": ana_musteri.id})
-                db.delete(kopya_musteri)
-                birlesen_sayisi += 1
+        musteriler = db.query(Musteri).all()
+        for m in musteriler:
+            if m.ad: m.ad = m.ad.strip().title()
+            if m.soyad: m.soyad = m.soyad.strip().upper()
+            if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
+
+        db.commit()
+
+        birlesen_sayisi = 0
+        tum_musteriler = db.query(Musteri.id, Musteri.ad, Musteri.soyad, Musteri.tc_kimlik, Musteri.telefon).all()
+        
+        gruplar = {}
+        for m in tum_musteriler:
+            anahtar = f"{normalize_string(m.ad)}_{normalize_string(m.soyad)}"
+            if anahtar not in gruplar:
+                gruplar[anahtar] = []
+            gruplar[anahtar].append(m.id)
+
+        for anahtar, m_ids in gruplar.items():
+            if len(m_ids) > 1:
+                ana_id = m_ids[0]
+                kopya_ids = m_ids[1:]
+                for kopya_id in kopya_ids:
+                    db.query(Police).filter(Police.musteri_id == kopya_id).update({"musteri_id": ana_id})
+                    db.query(Musteri).filter(Musteri.id == kopya_id).delete()
+                    birlesen_sayisi += 1
+
+        db.commit()
+        return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} adet mükerrer müşteri hesabı birleştirildi."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== YENİ PAZARLAMA (ÇAPRAZ SATIŞ) ROTASI ====================
+@app.get("/api/pazarlama")
+def api_pazarlama(db: Session = Depends(get_db)):
+    bugun = date.today()
+    otuz_gun_sonra = bugun + timedelta(days=30)
+    
+    # Tüm aktif poliçeleri çekiyoruz
+    aktif_policeler = db.query(Police).filter(Police.durum == 'aktif', Police.bitis_tarihi >= bugun).all()
+    
+    musteri_dict = {}
+    for p in aktif_policeler:
+        if p.musteri_id not in musteri_dict: musteri_dict[p.musteri_id] = []
+        musteri_dict[p.musteri_id].append(p)
+        
+    musteriler = {m.id: m for m in db.query(Musteri).filter(Musteri.id.in_(musteri_dict.keys())).all()}
+    
+    sonuclar = {
+        "dask_konut": [],
+        "arac_konut": [],
+        "arac_tss": [],
+        "konut_ferdi": [],
+        "tss_oss_kasko": []
+    }
+    
+    for m_id, policeler in musteri_dict.items():
+        m = musteriler.get(m_id)
+        if not m: continue
+        
+        branslar = set(p.sigorta_turu for p in policeler if p.sigorta_turu)
+        
+        # Seçili branşlardan bitmesine 30 gün kalan bir poliçe var mı kontrolü
+        def get_expiring(b_types):
+            for p in policeler:
+                if p.sigorta_turu in b_types and (p.bitis_tarihi - bugun).days <= 30:
+                    return p
+            return None
+
+        ad_soyad = f"{m.ad} {m.soyad}".strip()
+        tel = m.telefon or "-"
+
+        # 1. DASK -> Konut
+        if "DASK" in branslar and "Konut ve Eşya Sigortaları" not in branslar:
+            p = get_expiring(["DASK"])
+            if p:
+                sonuclar["dask_konut"].append({
+                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                })
                 
-    db.commit()
-    return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} adet mükerrer müşteri hesabı birleştirildi. Şirket/branş isimleri standartlaştırıldı."}
+        # 2. Araç (Kasko/Trafik) -> Konut
+        if ("Kasko Sigortası" in branslar or "Trafik Sigortası" in branslar) and "Konut ve Eşya Sigortaları" not in branslar:
+            p = get_expiring(["Kasko Sigortası", "Trafik Sigortası"])
+            if p:
+                sonuclar["arac_konut"].append({
+                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                })
+
+        # 3. Araç -> TSS
+        if ("Kasko Sigortası" in branslar or "Trafik Sigortası" in branslar) and "Tamamlayıcı Sağlık Sigortası" not in branslar:
+            p = get_expiring(["Kasko Sigortası", "Trafik Sigortası"])
+            if p:
+                sonuclar["arac_tss"].append({
+                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                })
+
+        # 4. Konut -> Ferdi Kaza
+        if "Konut ve Eşya Sigortaları" in branslar and "Ferdi Kaza" not in branslar:
+            p = get_expiring(["Konut ve Eşya Sigortaları"])
+            if p:
+                sonuclar["konut_ferdi"].append({
+                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                })
+
+        # 5. TSS -> ÖSS / Kasko
+        if "Tamamlayıcı Sağlık Sigortası" in branslar:
+            # ÖSS veya Kasko'dan biri yoksa tetikle
+            if "Özel Sağlık Sigortası" not in branslar or "Kasko Sigortası" not in branslar:
+                p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
+                if p:
+                    sonuclar["tss_oss_kasko"].append({
+                        "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
+                    })
+                    
+    return sonuclar
 
 # ==================== DİĞER ROTALAR ====================
 @app.get("/dersler/{dosya_adi}")
 def get_ders_pdf(dosya_adi: str):
     dosya_adi = urllib.parse.unquote(dosya_adi)
     hedef = DERSLER_DIR / dosya_adi
-    if hedef.exists() and hedef.is_file():
-        return FileResponse(hedef, media_type="application/pdf")
-        
+    if hedef.exists() and hedef.is_file(): return FileResponse(hedef, media_type="application/pdf")
     for f in DERSLER_DIR.iterdir():
-        if f.is_file() and f.name.lower() == dosya_adi.lower():
-            return FileResponse(f, media_type="application/pdf")
-            
-    hedef_norm = normalize_string(dosya_adi)
-    for f in DERSLER_DIR.iterdir():
-        if f.is_file() and normalize_string(f.name) == hedef_norm:
-            return FileResponse(f, media_type="application/pdf")
-            
+        if f.is_file() and f.name.lower() == dosya_adi.lower(): return FileResponse(f, media_type="application/pdf")
     raise HTTPException(status_code=404, detail="Not Found")
 
 def parse_tarih(val) -> date:
@@ -281,7 +345,6 @@ def hesapla_komisyon(brans: str, sirket: str, prim: float) -> float:
         if a in s:
             disaridan = False
             break
-            
     komisyon = prim * oran
     if disaridan: komisyon = komisyon / 2.0
     return komisyon
@@ -298,7 +361,6 @@ def police_to_out(p: Police, db_session: Session) -> dict:
     suresi_dolmus = (p.bitis_tarihi and p.bitis_tarihi < bugun) or (p.durum == "iptal")
     musteri = db_session.query(Musteri).filter(Musteri.id == p.musteri_id).first()
     komisyon = hesapla_komisyon(p.sigorta_turu, p.sigorta_sirketi, p.prim)
-    
     return {
         "id": p.id, "musteri_id": p.musteri_id, "police_no": p.police_no, "sigorta_turu": p.sigorta_turu,
         "sigorta_sirketi": p.sigorta_sirketi, "islem_turu": p.islem_turu or "Yeni Poliçe", "baslangic_tarihi": p.baslangic_tarihi,
@@ -333,10 +395,8 @@ def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), lim
     if q:
         like = f"%{q.strip()}%"
         query = query.filter((Musteri.ad.ilike(like)) | (Musteri.soyad.ilike(like)) | (Musteri.telefon.ilike(like)) | (Musteri.tc_kimlik.ilike(like)))
-    
     total = query.count()
     musteriler = query.order_by(Musteri.ad).offset((page - 1) * limit).limit(limit).all()
-    
     sonuc = []
     bugun = date.today()
     for m in musteriler:
@@ -345,12 +405,10 @@ def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), lim
         for p in aktif_policeler:
             t = p.sigorta_turu or "Bilinmiyor"
             dagilim[t] = dagilim.get(t, 0) + 1
-        
         sonuc.append({
             "id": m.id, "ad": m.ad, "soyad": m.soyad, "telefon": m.telefon, "tc_kimlik": m.tc_kimlik,
             "adres": m.adres, "portfoy_sorumlusu": m.portfoy_sorumlusu, "aktif_police_sayilari": dagilim
         })
-        
     return {"items": sonuc, "total": total, "page": page, "limit": limit, "pages": (total + limit - 1) // limit if limit > 0 else 1}
 
 @app.get("/api/musteriler/{id}")
@@ -363,7 +421,6 @@ def api_musteri_detay(id: int, db: Session = Depends(get_db)):
     for p in aktif_policeler:
         t = p.sigorta_turu or "Bilinmiyor"
         dagilim[t] = dagilim.get(t, 0) + 1
-    
     return {"id": m.id, "ad": m.ad, "soyad": m.soyad, "telefon": m.telefon, "tc_kimlik": m.tc_kimlik, "adres": m.adres, "portfoy_sorumlusu": m.portfoy_sorumlusu, "aktif_police_sayilari": dagilim}
 
 @app.post("/api/musteriler", status_code=201)
@@ -449,7 +506,6 @@ def api_bu_ay(db: Session = Depends(get_db)):
     ilk_gun = bugun.replace(day=1)
     son_gun_sayisi = calendar.monthrange(bugun.year, bugun.month)[1]
     son_gun = bugun.replace(day=son_gun_sayisi)
-    
     kayitlar = db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= ilk_gun, Police.bitis_tarihi <= son_gun).all()
     return [police_to_out(p, db) for p in kayitlar]
 
@@ -493,14 +549,12 @@ def api_police_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
     try:
         p = db.query(Police).filter(Police.id == id).first()
         if not p: raise HTTPException(404, "Poliçe bulunamadı")
-        
         for k, v in payload.items():
             if k in ["baslangic_tarihi", "bitis_tarihi"] and v: setattr(p, k, parse_tarih(v))
             elif k == "prim": p.prim = float(v) if v is not None else None
             elif k == "sigorta_sirketi": p.sigorta_sirketi = standardize_metin(v, SIRKET_ESLESMELERI)
             elif k == "sigorta_turu": p.sigorta_turu = standardize_metin(v, BRANS_ESLESMELERI)
             elif hasattr(p, k): setattr(p, k, v)
-        
         db.commit(); db.refresh(p)
         return police_to_out(p, db)
     except Exception as e:
@@ -573,7 +627,7 @@ async def api_ai_asistan(payload: dict):
     if not soru: raise HTTPException(status_code=400, detail="Soru alanı boş bırakılamaz.")
     
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-    if not api_key: raise HTTPException(status_code=500, detail="API Anahtarı bulunamadı! Lütfen Render panelinden GOOGLE_API_KEY değişkenini ekleyin.")
+    if not api_key: raise HTTPException(status_code=500, detail="API Anahtarı bulunamadı!")
         
     genai.configure(api_key=api_key.strip())
     bugun_tarihi = datetime.now().strftime("%d %B %Y")
@@ -581,12 +635,11 @@ async def api_ai_asistan(payload: dict):
     system_instruction = f"""
     Sen sigorta acentelerine teknik danışmanlık veren doğrudan, net ve hızlı bir yapay zekasın. 
     Bugünün tarihi: {bugun_tarihi}.
-    YASAKLAR: '20 yıllık tecrübeme dayanarak', 'Bir yapay zeka olarak', 'Size yardımcı olmaktan memnuniyet duyarım', 'Uzman bir asistan olarak' gibi saçma, robotik veya laf kalabalığı yapan hiçbir giriş cümlesi KULLANMAYACAKSIN. Doğrudan konuya girip cevabı ver. 
-    GÜNCELLİK VE KAYNAK KURALLARI (ÇOK ÖNEMLİ):
-    1. İnternette arama yaparken her zaman EN YENİ TARİHLİ ve GÜNCEL kaynakları baz al. Sigortacılıkta ve mevzuatta eski tarihli yazılar, mahkeme kararları veya blog yazıları geçersiz olabilir. Arama sonuçlarındaki tarihleri kontrol et ve eski bilgileri eleyip her zaman en son yürürlüğe giren kuralı söyle.
-    2. Eğer bir kanun, mevzuat, teminat tutarı veya kural yakın zamanda değişmişse, bunu fark et ve KESİNLİKLE güncel olan durumu (yeni mevzuatı) aktar.
-    3. Verdiğin yasal veya finansal bilgilerin kaynağını ve tarihini cevabının içinde mutlaka açıkça belirt (Örn: "1 Temmuz 2026 tarihli Resmî Gazete'de yayımlanan mevzuata göre..." veya "SEDDK'nın son yayınladığı genelgeye göre...").
-    4. Konuşma geçmişini dikkate alarak devam sorularına mantıklı yanıtlar ver ve net sayılar kullan.
+    YASAKLAR: '20 yıllık tecrübeme dayanarak', 'Bir yapay zeka olarak' gibi saçma, robotik veya laf kalabalığı yapan hiçbir giriş cümlesi KULLANMAYACAKSIN. Doğrudan konuya girip cevabı ver. 
+    GÜNCELLİK VE KAYNAK KURALLARI:
+    1. İnternette arama yaparken her zaman EN YENİ TARİHLİ ve GÜNCEL kaynakları baz al. Eski tarihleri ele.
+    2. Eğer bir kanun, mevzuat değişmişse, bunu fark et ve KESİNLİKLE güncel olan durumu (yeni mevzuatı) aktar.
+    3. Kaynağını ve tarihini cevabının içinde açıkça belirt (Örn: "1 Temmuz 2026 tarihli Resmî Gazete...").
     """
     
     try:
