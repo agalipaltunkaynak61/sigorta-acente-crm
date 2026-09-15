@@ -1,16 +1,17 @@
 import os
 import urllib.parse
 import calendar
+import re
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
 from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, LargeBinary, create_engine
-from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.orm.session import Session
 
 # PDF parser dosyan aynı kalmalı
@@ -22,7 +23,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
-# YENİLENEBİLİR BRANŞLAR LİSTESİ (Sadece bunlar "Bu Ay Bitenler"e girecek)
+# YENİLENEBİLİR BRANŞLAR LİSTESİ
 YENILENEBILIR_BRANSLAR = [
     "Trafik Sigortası", "Kasko Sigortası", "Tamamlayıcı Sağlık Sigortası", 
     "Özel Sağlık Sigortası", "DASK", "Konut ve Eşya Sigortaları", 
@@ -133,7 +134,7 @@ def eski_policeleri_otomatik_temizle():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.9.0")
+app = FastAPI(title="Altun Kardeşler CRM", version="3.9.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -150,10 +151,18 @@ def on_startup():
 
 def normalize_string(s: str) -> str:
     if not s: return ""
-    s = s.replace("İ", "I").replace("ı", "i").replace("Ş", "S").replace("ş", "s")
-    s = s.replace("Ğ", "G").replace("ğ", "g").replace("Ü", "U").replace("ü", "u")
-    s = s.replace("Ö", "O").replace("ö", "o").replace("Ç", "C").replace("ç", "c")
-    return s.strip().lower()
+    s = s.upper().replace("İ", "I").replace("I", "I").replace("Ş", "S").replace("Ğ", "G").replace("Ü", "U").replace("Ö", "O").replace("Ç", "C")
+    return s.strip()
+
+def gelismis_firma_temizle(s: str) -> str:
+    """Şirket isimlerindeki gereksiz ekleri ve noktalama işaretlerini siler, birleştirme oranını artırır."""
+    if not s: return ""
+    s = normalize_string(s)
+    # Şirket eklerini temizle (Sözcük sınırları \b ile)
+    s = re.sub(r'\b(LTD|STI|SANAYI|SAN|TICARET|TIC|AS|A\.S\.|LIMITED|SIRKETI|VE)\b', '', s)
+    # Sadece harf ve rakamları bırak (boşluklar ve noktalamalar gider)
+    s = re.sub(r'[^A-Z0-9]', '', s)
+    return s
 
 @app.get("/api/sistemi-temizle")
 def sistemi_temizle(db: Session = Depends(get_db)):
@@ -165,8 +174,8 @@ def sistemi_temizle(db: Session = Depends(get_db)):
         
         musteriler = db.query(Musteri).all()
         for m in musteriler:
-            if m.ad: m.ad = m.ad.strip().title()
-            if m.soyad: m.soyad = m.soyad.strip().upper()
+            if m.ad: m.ad = m.ad.strip().upper() # Hepsini BÜYÜK HARF yap
+            if m.soyad: m.soyad = m.soyad.strip().upper() # Hepsini BÜYÜK HARF yap
             if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
 
         db.commit()
@@ -176,7 +185,10 @@ def sistemi_temizle(db: Session = Depends(get_db)):
         
         gruplar = {}
         for m in tum_musteriler:
-            anahtar = f"{normalize_string(m.ad)}_{normalize_string(m.soyad)}"
+            # Gelişmiş gruplama anahtarı (Boşluksuz ve eklersiz)
+            anahtar = gelismis_firma_temizle(f"{m.ad} {m.soyad}")
+            if not anahtar: continue
+            
             if anahtar not in gruplar:
                 gruplar[anahtar] = []
             gruplar[anahtar].append(m.id)
@@ -191,7 +203,7 @@ def sistemi_temizle(db: Session = Depends(get_db)):
                     birlesen_sayisi += 1
 
         db.commit()
-        return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} adet mükerrer hesap birleştirildi."}
+        return {"mesaj": f"Temizlik tamamlandı! {birlesen_sayisi} adet mükerrer hesap başarıyla birleştirildi."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -200,8 +212,6 @@ def sistemi_temizle(db: Session = Depends(get_db)):
 @app.get("/api/pazarlama")
 def api_pazarlama(db: Session = Depends(get_db)):
     bugun = date.today()
-    
-    # Tüm aktif poliçeleri çekiyoruz
     aktif_policeler = db.query(Police).filter(Police.durum == 'aktif', Police.bitis_tarihi >= bugun).all()
     
     musteri_dict = {}
@@ -212,78 +222,65 @@ def api_pazarlama(db: Session = Depends(get_db)):
     musteriler = {m.id: m for m in db.query(Musteri).filter(Musteri.id.in_(musteri_dict.keys())).all()}
     
     sonuclar = {
-        "dask_konut": [],
-        "arac_konut": [],
-        "arac_tss": [],
-        "konut_ferdi": [],
-        "tss_oss": [],
-        "tss_kasko": []
+        "dask_konut": [], "arac_konut": [], "arac_tss": [],
+        "konut_ferdi": [], "tss_oss": [], "tss_kasko": []
     }
     
     for m_id, policeler in musteri_dict.items():
         m = musteriler.get(m_id)
         if not m: continue
-        
         branslar = set(p.sigorta_turu for p in policeler if p.sigorta_turu)
         
         def get_expiring(b_types):
             for p in policeler:
-                if p.sigorta_turu in b_types and (p.bitis_tarihi - bugun).days <= 30:
-                    return p
+                if p.sigorta_turu in b_types and (p.bitis_tarihi - bugun).days <= 30: return p
             return None
 
         ad_soyad = f"{m.ad} {m.soyad}".strip()
         tel = m.telefon or "-"
 
-        # 1. DASK -> Konut
         if "DASK" in branslar and "Konut ve Eşya Sigortaları" not in branslar:
             p = get_expiring(["DASK"])
-            if p:
-                sonuclar["dask_konut"].append({
-                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                })
+            if p: sonuclar["dask_konut"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
                 
-        # 2. Araç (Kasko/Trafik) -> Konut
         if ("Kasko Sigortası" in branslar or "Trafik Sigortası" in branslar) and "Konut ve Eşya Sigortaları" not in branslar:
             p = get_expiring(["Kasko Sigortası", "Trafik Sigortası"])
-            if p:
-                sonuclar["arac_konut"].append({
-                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                })
+            if p: sonuclar["arac_konut"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
 
-        # 3. Araç -> TSS
         if ("Kasko Sigortası" in branslar or "Trafik Sigortası" in branslar) and "Tamamlayıcı Sağlık Sigortası" not in branslar:
             p = get_expiring(["Kasko Sigortası", "Trafik Sigortası"])
-            if p:
-                sonuclar["arac_tss"].append({
-                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                })
+            if p: sonuclar["arac_tss"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
 
-        # 4. Konut -> Ferdi Kaza
         if "Konut ve Eşya Sigortaları" in branslar and "Ferdi Kaza" not in branslar:
             p = get_expiring(["Konut ve Eşya Sigortaları"])
-            if p:
-                sonuclar["konut_ferdi"].append({
-                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                })
+            if p: sonuclar["konut_ferdi"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
 
-        # 5. TSS -> ÖSS
         if "Tamamlayıcı Sağlık Sigortası" in branslar and "Özel Sağlık Sigortası" not in branslar:
             p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
-            if p:
-                sonuclar["tss_oss"].append({
-                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                })
+            if p: sonuclar["tss_oss"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
                 
-        # 6. TSS -> Kasko
         if "Tamamlayıcı Sağlık Sigortası" in branslar and "Kasko Sigortası" not in branslar:
             p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
-            if p:
-                sonuclar["tss_kasko"].append({
-                    "musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")
-                })
+            if p: sonuclar["tss_kasko"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
                     
     return sonuclar
+
+@app.get("/api/dersler/liste")
+def api_dersler_liste():
+    kategoriler = {"Kasko": [], "Trafik": [], "TSS / ÖSS": [], "Konut / DASK": [], "İş Yeri / Kurumsal": [], "Diğer": []}
+    if not DERSLER_DIR.exists(): return kategoriler
+    for f in DERSLER_DIR.iterdir():
+        if f.is_file() and f.name.lower().endswith(".pdf"):
+            fname = f.name.upper()
+            if "KASKO" in fname: kategoriler["Kasko"].append(f.name)
+            elif "TRAFIK" in fname or "TRAFİK" in fname: kategoriler["Trafik"].append(f.name)
+            elif "TSS" in fname or "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname: kategoriler["TSS / ÖSS"].append(f.name)
+            elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: kategoriler["Konut / DASK"].append(f.name)
+            elif "ISYERI" in fname or "İŞYERİ" in fname or "ALLRISK" in fname: kategoriler["İş Yeri / Kurumsal"].append(f.name)
+            else: kategoriler["Diğer"].append(f.name)
+    
+    # Boş olmayan kategorileri döndür
+    return {k: sorted(v) for k, v in kategoriler.items() if len(v) > 0}
 
 @app.get("/dersler/{dosya_adi}")
 def get_ders_pdf(dosya_adi: str):
@@ -369,7 +366,6 @@ def api_ozet(db: Session = Depends(get_db)):
         "yaklasan_7_gun": db.query(Police).filter(Police.durum != "iptal", Police.bitis_tarihi >= bugun, Police.bitis_tarihi <= bugun + timedelta(days=7)).count()
     }
 
-# LİMİTLER 10'A ÇEKİLDİ
 @app.get("/api/musteriler")
 def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Musteri)
@@ -392,23 +388,11 @@ def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), lim
         })
     return {"items": sonuc, "total": total, "page": page, "limit": limit, "pages": (total + limit - 1) // limit if limit > 0 else 1}
 
-@app.get("/api/musteriler/{id}")
-def api_musteri_detay(id: int, db: Session = Depends(get_db)):
-    m = db.query(Musteri).filter(Musteri.id == id).first()
-    if not m: raise HTTPException(404, "Bulunamadı")
-    bugun = date.today()
-    aktif_policeler = db.query(Police).filter(Police.musteri_id == m.id, Police.bitis_tarihi >= bugun, Police.durum == "aktif").all()
-    dagilim = {}
-    for p in aktif_policeler:
-        t = p.sigorta_turu or "Bilinmiyor"
-        dagilim[t] = dagilim.get(t, 0) + 1
-    return {"id": m.id, "ad": m.ad, "soyad": m.soyad, "telefon": m.telefon, "tc_kimlik": m.tc_kimlik, "adres": m.adres, "portfoy_sorumlusu": m.portfoy_sorumlusu, "aktif_police_sayilari": dagilim}
-
 @app.post("/api/musteriler", status_code=201)
 def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
     tckn = payload.get("tc_kimlik")
-    ad = (payload.get("ad") or "").strip().title()
-    soyad = (payload.get("soyad") or "").strip().upper()
+    ad = (payload.get("ad") or "").strip().upper() # Müşteri büyük harf
+    soyad = (payload.get("soyad") or "").strip().upper() # Müşteri büyük harf
     danisman = payload.get("portfoy_sorumlusu", "Diğer")
     if danisman == "Sezai Karakoç": danisman = "Sezai Yağcı"
 
@@ -417,10 +401,11 @@ def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
         existing = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
     
     if not existing and ad and soyad and "**" not in ad:
-        norm_ad, norm_soyad = normalize_string(ad), normalize_string(soyad)
+        # Gelişmiş kontrol
+        norm_anahtar = gelismis_firma_temizle(f"{ad} {soyad}")
         tum_musteriler = db.query(Musteri).all()
         for m in tum_musteriler:
-            if normalize_string(m.ad) == norm_ad and normalize_string(m.soyad) == norm_soyad:
+            if gelismis_firma_temizle(f"{m.ad} {m.soyad}") == norm_anahtar:
                 existing = m; break
 
     if existing:
@@ -443,21 +428,12 @@ def api_musteri_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
     m = db.query(Musteri).filter(Musteri.id == id).first()
     if not m: raise HTTPException(404, "Bulunamadı")
     for k, v in payload.items(): setattr(m, k, v)
-    if m.ad: m.ad = m.ad.strip().title()
+    if m.ad: m.ad = m.ad.strip().upper()
     if m.soyad: m.soyad = m.soyad.strip().upper()
     if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
     db.commit(); db.refresh(m)
     return m
 
-@app.delete("/api/musteriler/{id}")
-def api_musteri_sil(id: int, db: Session = Depends(get_db)):
-    m = db.query(Musteri).filter(Musteri.id == id).first()
-    if not m: raise HTTPException(404, "Bulunamadı")
-    db.query(Police).filter(Police.musteri_id == id).delete()
-    db.delete(m); db.commit()
-    return {"ok": True}
-
-# POLİÇE LİMİTLERİ DE 10'A ÇEKİLDİ
 @app.get("/api/policeler")
 def api_police_listele(musteri_id: Optional[int] = None, q: Optional[str] = None, aktif: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Police)
@@ -488,7 +464,6 @@ def api_bu_ay(db: Session = Depends(get_db)):
     ilk_gun = bugun.replace(day=1)
     son_gun_sayisi = calendar.monthrange(bugun.year, bugun.month)[1]
     son_gun = bugun.replace(day=son_gun_sayisi)
-    # YENİLENEBİLİR FİLTRESİ UYGULANDI
     kayitlar = db.query(Police).filter(
         Police.durum != "iptal", 
         Police.bitis_tarihi >= ilk_gun, 
@@ -532,37 +507,6 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.put("/api/policeler/{id}")
-def api_police_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
-    try:
-        p = db.query(Police).filter(Police.id == id).first()
-        if not p: raise HTTPException(404, "Poliçe bulunamadı")
-        for k, v in payload.items():
-            if k in ["baslangic_tarihi", "bitis_tarihi"] and v: setattr(p, k, parse_tarih(v))
-            elif k == "prim": p.prim = float(v) if v is not None else None
-            elif k == "sigorta_sirketi": p.sigorta_sirketi = standardize_metin(v, SIRKET_ESLESMELERI)
-            elif k == "sigorta_turu": p.sigorta_turu = standardize_metin(v, BRANS_ESLESMELERI)
-            elif hasattr(p, k): setattr(p, k, v)
-        db.commit(); db.refresh(p)
-        return police_to_out(p, db)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.delete("/api/policeler/{id}")
-def api_police_sil(id: int, db: Session = Depends(get_db)):
-    p = db.query(Police).filter(Police.id == id).first()
-    if not p: raise HTTPException(404, "Bulunamadı")
-    db.delete(p); db.commit()
-    return {"ok": True}
-
-@app.get("/api/policeler/{id}/pdf")
-def api_pdf_goster(id: int, db: Session = Depends(get_db)):
-    p = db.query(Police).filter(Police.id == id).first()
-    if not p or not p.pdf_dosya_adi: raise HTTPException(status_code=404, detail="Bu poliçeye ait PDF bulunamadı.")
-    dosya = db.query(DosyaDepo).filter(DosyaDepo.dosya_adi == p.pdf_dosya_adi).first()
-    if not dosya: raise HTTPException(status_code=404, detail="Dosya sunucuda bulunamadı.")
-    return Response(content=dosya.veri, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="{p.pdf_dosya_adi}"'})
-
 @app.post("/api/upload-parse")
 async def api_upload_parse(file: UploadFile = File(...)):
     try:
@@ -588,11 +532,10 @@ async def api_upload_parse(file: UploadFile = File(...)):
             bulunan_musteri = None
             if tckn and "**" not in str(tckn): bulunan_musteri = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
             if not bulunan_musteri:
-                norm_ad = normalize_string(ayiklanan.get("ad"))
-                norm_soyad = normalize_string(ayiklanan.get("soyad"))
+                norm_anahtar = gelismis_firma_temizle(f"{ayiklanan.get('ad', '')} {ayiklanan.get('soyad', '')}")
                 tum_musteriler = db.query(Musteri).all()
                 for m in tum_musteriler:
-                    if normalize_string(m.ad) == norm_ad and normalize_string(m.soyad) == norm_soyad:
+                    if gelismis_firma_temizle(f"{m.ad} {m.soyad}") == norm_anahtar:
                         bulunan_musteri = m; break
 
             if bulunan_musteri:
@@ -601,9 +544,61 @@ async def api_upload_parse(file: UploadFile = File(...)):
                 ayiklanan["mesaj"] = f"Mevcut müşteri bulundu: {bulunan_musteri.ad} {bulunan_musteri.soyad} ({bulunan_musteri.portfoy_sorumlusu})."
             else:
                 ayiklanan["musteri_eslesti"] = False
-                ayiklanan["mesaj"] = "Yeni veya maskeli isim tespit edildi. Lütfen listeden mevcut müşteriyi seçin veya kaydedin."
+                ayiklanan["mesaj"] = "Yeni müşteri. Lütfen bilgileri kontrol edip kaydedin."
         finally:
             db.close()
         return ayiklanan
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
+
+# ==================== GERÇEK FİNANSAL VERİLER ====================
+class FinansalRaporRequest(BaseModel):
+    baslangic: Optional[str] = None
+    bitis: Optional[str] = None
+    sirket: Optional[str] = None
+    danisman: Optional[str] = None
+    branslar: Optional[List[str]] = None
+
+@app.get("/api/finansal/filtreler")
+def api_fin_filtreler(db: Session = Depends(get_db)):
+    sirketler = [r[0] for r in db.query(Police.sigorta_sirketi).filter(Police.sigorta_sirketi != None).distinct()]
+    danismanlar = [r[0] for r in db.query(Musteri.portfoy_sorumlusu).filter(Musteri.portfoy_sorumlusu != None).distinct()]
+    branslar = [r[0] for r in db.query(Police.sigorta_turu).filter(Police.sigorta_turu != None).distinct()]
+    return {"sirketler": sorted(list(set(sirketler))), "danismanlar": sorted(list(set(danismanlar))), "branslar": sorted(list(set(branslar)))}
+
+@app.post("/api/finansal/rapor")
+def api_fin_rapor(payload: FinansalRaporRequest, db: Session = Depends(get_db)):
+    query = db.query(Police).join(Musteri, Police.musteri_id == Musteri.id).filter(Police.durum != "iptal")
+
+    if payload.baslangic:
+        query = query.filter(Police.baslangic_tarihi >= parse_tarih(payload.baslangic))
+    if payload.bitis:
+        query = query.filter(Police.baslangic_tarihi <= parse_tarih(payload.bitis))
+    if payload.sirket:
+        query = query.filter(Police.sigorta_sirketi == payload.sirket)
+    if payload.danisman:
+        query = query.filter(Musteri.portfoy_sorumlusu == payload.danisman)
+    if payload.branslar and len(payload.branslar) > 0:
+        query = query.filter(Police.sigorta_turu.in_(payload.branslar))
+
+    policeler = query.all()
+
+    ciro = sum(p.prim or 0 for p in policeler)
+    kar = sum(hesapla_komisyon(p.sigorta_turu, p.sigorta_sirketi, p.prim) for p in policeler)
+    adet = len(policeler)
+
+    brans_dagilimi = {}
+    sirket_dagilimi = {}
+    for p in policeler:
+        b = p.sigorta_turu or "Diğer"
+        s = p.sigorta_sirketi or "Diğer"
+        brans_dagilimi[b] = brans_dagilimi.get(b, 0) + 1
+        sirket_dagilimi[s] = sirket_dagilimi.get(s, 0) + 1
+
+    return {
+        "ciro": ciro, 
+        "kar": kar, 
+        "adet": adet,
+        "brans_dagilimi": dict(sorted(brans_dagilimi.items(), key=lambda item: item[1], reverse=True)),
+        "sirket_dagilimi": dict(sorted(sirket_dagilimi.items(), key=lambda item: item[1], reverse=True))
+    }

@@ -52,6 +52,8 @@
         content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
         border-width: 5px; border-style: solid; border-color: transparent #0A192F transparent transparent;
     }
+    /* Checkbox scroll gizleme */
+    .dropdown-content { max-height: 200px; overflow-y: auto; }
   </style>
 </head>
 <body class="bg-brand-light text-slate-800 min-h-screen antialiased selection:bg-brand-navy selection:text-white flex overflow-hidden">
@@ -86,33 +88,27 @@
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
         <span>Ana Ekran</span>
       </button>
-
       <button data-view="musteriler" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         <span>Müşteriler</span>
       </button>
-
       <button data-view="policeler" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         <span>Poliçeler</span>
       </button>
-
       <button data-view="finansal" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
         <span>Finansal Analiz</span>
       </button>
-
       <button data-view="pazarlama" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
         <span>Pazarlama & Çapraz Satış</span>
       </button>
-
       <button data-view="dersler" class="nav-btn w-14 h-14 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
         <span>Eğitim Merkezi</span>
       </button>
     </nav>
-
     <div class="p-4 border-t border-slate-100 flex justify-center">
         <div class="w-8 h-8 rounded-full bg-brand-navy/5 flex items-center justify-center text-brand-navy font-bold text-xs" title="2026 Versiyon">V3.9</div>
     </div>
@@ -170,19 +166,26 @@
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row gap-6 flex-1 min-h-0">
+      <div class="flex flex-col md:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
         <!-- Sol Menü (Kampanyalar) -->
-        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-4 h-full overflow-y-auto shrink-0">
-          <h3 class="font-bold text-xs text-slate-400 uppercase mb-4 px-2">Satış Fırsatları (Kampanyalar)</h3>
-          <div id="pazarlama-sekmeler" class="flex flex-col gap-2">
+        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-4 h-full flex flex-col shrink-0">
+          <h3 class="font-bold text-xs text-slate-400 uppercase mb-4 px-2 shrink-0">Satış Fırsatları (Kampanyalar)</h3>
+          <div id="pazarlama-sekmeler" class="flex-1 overflow-y-auto flex flex-col gap-2">
             <!-- JS ile dolacak -->
           </div>
         </div>
         
         <!-- Sağ Liste (Müşteriler & Satış Cümlesi) -->
-        <div class="w-full md:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full flex flex-col">
+        <div class="w-full md:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full flex flex-col min-h-0">
           <div class="mb-5 shrink-0">
-            <h3 id="pazarlama-liste-baslik" class="text-lg font-bold text-brand-navy border-b pb-2 mb-3">Kampanya Seçin</h3>
+            <div class="flex items-center justify-between border-b pb-2 mb-3">
+              <h3 id="pazarlama-liste-baslik" class="text-lg font-bold text-brand-navy">Kampanya Seçin</h3>
+              <button onclick="pazarlamaListeyiYazdir()" class="text-xs bg-brand-navy text-brand-gold font-bold px-4 py-2 rounded-lg hover:bg-brand-navyhover transition-colors shadow flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                PDF İndir
+              </button>
+            </div>
+            
             <div id="pazarlama-liste-cumle-kutu" class="bg-brand-gold/5 border border-brand-gold/30 p-4 rounded-xl hidden flex flex-col gap-2">
                 <p class="text-[11px] font-bold text-brand-gold uppercase tracking-wider flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
@@ -260,14 +263,17 @@
         </div>
       </div>
 
-      <label for="pdf-input" id="pdf-drop" class="mb-4 shrink-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 bg-white rounded-xl p-6 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/5 transition-all group block">
+      <label for="pdf-input" id="pdf-drop" class="mb-4 shrink-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 bg-white rounded-xl p-6 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/5 transition-all group block relative">
         <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" onchange="pdfSecildi(event)" />
         <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:scale-110 group-hover:bg-brand-gold/10 transition-all pointer-events-none mb-1">
           <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
         </div>
         <p class="font-bold text-brand-navy text-base pointer-events-none">Yapay Zeka ile Poliçe Oku</p>
         <p class="text-xs text-slate-500 pointer-events-none">Poliçe PDF'ini sürükleyin veya tıklayın.</p>
-        <p id="pdf-durum" class="text-xs bg-brand-navy text-brand-gold rounded-full px-3 py-1 hidden font-bold mt-2 shadow-sm"></p>
+        <!-- Durum Bildirimleri -->
+        <div id="pdf-durum" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10 font-bold text-brand-navy text-lg transition-all shadow-inner">
+            İşleniyor...
+        </div>
       </label>
 
       <div class="flex gap-4 mb-4 text-sm font-semibold border-b border-slate-200 shrink-0">
@@ -301,20 +307,39 @@
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
         <div><h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Finansal Raporlama</h2></div>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6 shrink-0">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6 shrink-0 relative z-20">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
           <div><label class="block text-xs font-bold text-slate-500 mb-1">Başlangıç</label><input type="date" id="fin-start" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
           <div><label class="block text-xs font-bold text-slate-500 mb-1">Bitiş</label><input type="date" id="fin-end" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Şirket</label><select id="fin-sirket" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Danışman</label><select id="fin-sorumlu" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Branş</label><select id="fin-brans" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select></div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Şirket</label>
+            <select id="fin-sirket" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Danışman</label>
+            <select id="fin-sorumlu" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select>
+          </div>
+          
+          <!-- Çoklu Branş Seçimi (Custom Checkbox Dropdown) -->
+          <div class="relative">
+            <label class="block text-xs font-bold text-slate-500 mb-1">Branş (Çoklu)</label>
+            <button type="button" onclick="document.getElementById('fin-brans-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
+              <span>Branşları Seç...</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="fin-brans-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
+              <div id="fin-brans-container" class="flex flex-col gap-1">
+                  <!-- JS ile checkboxlar dolacak -->
+              </div>
+            </div>
+          </div>
         </div>
         <div class="mt-5 pt-5 border-t border-slate-100 flex items-center justify-end">
-          <button onclick="calistirFinansalRapor()" class="bg-brand-navy text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-brand-navyhover transition-all shadow-sm">Raporla</button>
+          <button onclick="calistirFinansalRapor()" class="bg-brand-navy text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-brand-navyhover transition-all shadow-sm">Raporu Oluştur</button>
         </div>
       </div>
       
-      <div class="flex-1 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto relative z-10">
         <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 hidden">
           <div class="bg-brand-navy text-white rounded-xl p-6 shadow-sm"><p class="text-xs font-bold mb-1 text-slate-300">Toplam Üretim (Ciro)</p><p id="fin-ciro" class="text-3xl font-black text-brand-gold">₺0,00</p></div>
           <div class="bg-white rounded-xl p-6 shadow-sm border"><p class="text-xs font-bold mb-1 text-slate-500">Tahmini Net Komisyon Karı</p><p id="fin-kar" class="text-3xl font-black text-brand-navy">₺0,00</p></div>
@@ -327,14 +352,20 @@
       </div>
     </section>
 
-    <!-- EĞİTİM MERKEZİ (Sadece Sunumlar) -->
+    <!-- EĞİTİM MERKEZİ -->
     <section id="view-dersler" class="hidden fade-in h-full flex flex-col max-w-7xl mx-auto">
       <div class="flex flex-wrap items-center justify-between gap-4 mb-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
         <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Eğitim Merkezi (Kurumsal Sunumlar)</h2>
       </div>
-      <div class="flex-1 gap-5 pb-4 flex">
-        <div class="w-1/3 md:w-1/4 bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-full overflow-y-auto"><div id="ders-kategoriler" class="flex flex-col gap-1 text-sm text-slate-600 p-2">Yükleniyor...</div></div>
-        <div class="w-2/3 md:w-3/4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-full overflow-y-auto"><h3 id="secilen-kategori-baslik" class="text-lg font-bold text-brand-navy mb-4 border-b pb-2">Sunumlar</h3><div id="ders-icerik" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-slate-500 italic">Eğitim dosyaları sunucuda mevcutsa burada görünecektir.</div></div>
+      <div class="flex-1 gap-5 pb-4 flex overflow-hidden">
+        <div class="w-1/3 md:w-1/4 bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-full overflow-y-auto">
+            <h3 class="font-bold text-xs text-slate-400 uppercase mb-3 px-2 border-b pb-2">Kategoriler</h3>
+            <div id="ders-kategoriler" class="flex flex-col gap-1 text-sm text-slate-600 p-1">Yükleniyor...</div>
+        </div>
+        <div class="w-2/3 md:w-3/4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-full overflow-y-auto">
+            <h3 id="secilen-kategori-baslik" class="text-lg font-bold text-brand-navy mb-4 border-b pb-2">Sunumlar</h3>
+            <div id="ders-icerik" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">Eğitim dosyaları sunucuda mevcutsa burada görünecektir.</div>
+        </div>
       </div>
     </section>
 
@@ -344,7 +375,7 @@
   <div id="modal" class="hidden fixed inset-0 bg-brand-navy/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 max-h-[90vh] overflow-y-auto relative">
       <button onclick="modalKapat()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-      <h3 id="modal-baslik" class="text-xl font-serif font-bold mb-5 text-brand-navy pr-8 border-b border-slate-100 pb-2"></h3>
+      <h3 id="modal-baslik" class="text-xl font-serif font-bold mb-5 text-brand-navy pr-8 border-b border-slate-100 pb-2">Kayıt Ekranı</h3>
       <div id="modal-icerik"><form id="modal-form" class="space-y-4"></form></div>
       <p id="modal-hata" class="hidden text-sm font-semibold text-red-600 bg-red-50 p-3 rounded-lg mt-4 border border-red-100"></p>
       <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
@@ -357,9 +388,12 @@
   <script>
     const API = "";
     let aktifPoliceSekmesi = 'aktif';
-    const perPage = 10; // Sayfalama Limiti
+    let aktifPazarlamaSekmesi = 'dask_konut';
+    const perPage = 10;
     
     let buAyBitenlerCache = [];
+    let pazarlamaDataCache = {};
+    window.dersDataCache = {};
 
     // ====== GELİŞMİŞ ÇAPRAZ SATIŞ KAMPANYALARI ======
     const PAZARLAMA_KAMPANYALAR = {
@@ -367,65 +401,41 @@
         baslik: "1. DASK ➔ Konut Sigortası",
         cumleler: [
           "DASK poliçeniz evinizin sadece binasını korur; eşyalarınızı ve su baskını risklerini güvenceye almak için çok küçük bir farkla Konut Sigortası ekleyelim.",
-          "DASK işleminiz hazır, ancak evinizdeki değerli eşyalarınız güvencesiz kalmasın. Konut poliçesiyle tam koruma sağlamamızı ister misiniz?",
-          "Deprem sonrası binanız karşılansa da içindeki yaşamınızı kurmak zordur. Konut sigortasıyla eşyalarınızı da koruma altına alabiliriz.",
-          "Komşunuza verebileceğiniz zararlar veya hırsızlık DASK kapsamında değildir. Konut sigortasıyla bu eksikliği ortadan kaldıralım.",
-          "DASK'ınızın yanında sunacağımız kapsamlı konut paketiyle, klima/kombi bakımından çilingire kadar ücretsiz ek hizmetlerden de faydalanabilirsiniz."
+          "DASK işleminiz hazır, ancak evinizdeki değerli eşyalarınız güvencesiz kalmasın. Konut poliçesiyle tam koruma sağlamamızı ister misiniz?"
         ]
       },
       "arac_konut": {
         baslik: "2. Kasko / Trafik ➔ Konut Sigortası",
         cumleler: [
-          "Aracınızı güvenceye aldık, peki yaşam alanınız için de aynı özeni gösterelim mi? Konut sigortasıyla evinizi her türlü riske karşı koruyabiliriz.",
-          "Araç poliçenizi yenilerken fark ettik ki eviniz için bir güvenceniz yok. Aracınıza ayırdığınız bütçenin çok küçük bir kısmıyla evinizi de koruyalım.",
-          "Trafikteki riskleri minimuma indirdik. Aynı şekilde evinizdeki hırsızlık, yangın veya tesisat arızalarına karşı da önlem almak ister misiniz?",
-          "Araç ve Konut sigortalarınızı tek bir acenteden yönetmek hasar anında size büyük kolaylık sağlar. Evinizi de portföyümüze ekleyelim mi?",
-          "Kiracı da olsanız, ev sahibi de olsanız evdeki eşyalarınız büyük bir yatırımdır. Onları korumak için hızlıca bir konut teklifi çalışalım."
+          "Aracınızı güvenceye aldık, peki yaşam alanınız için de aynı özeni gösterelim mi? Konut sigortasıyla evinizi her türlü riske karşı koruyabiliriz."
         ]
       },
       "arac_tss": {
         baslik: "3. Kasko / Trafik ➔ Tamamlayıcı Sağlık Sigortası (TSS)",
         cumleler: [
-          "Aracınızın kaskosu tamam, peki kendi sağlığınız? Özel hastanelerde fark ücreti ödemeden tedavi olabileceğiniz TSS teklifimizi incelemek ister misiniz?",
-          "Otomobilinize yılda ayırdığınız bütçeyle kıyaslandığında çok daha uygun fiyatlara, tüm ailenizi nitelikli özel hastanelerde güvenceye alabiliriz.",
-          "Aracınız arıza yaptığında nasıl servise götürüyorsanız, sağlık sorunlarında da özel hastane konforunu hak ediyorsunuz. TSS'yi poliçelerinize ekleyelim.",
-          "Mevcut portföyünüze ekleyeceğimiz bir Tamamlayıcı Sağlık Sigortası, beklenmedik sağlık harcamalarında sizi büyük yüklerden kurtaracaktır.",
-          "Kasko/Trafik poliçenizi yeniliyorken, sağlığınızı da şansa bırakmamak adına ayda çok cüzi rakamlara TSS paketimizi aktif hale getirebiliriz."
+          "Aracınızın kaskosu tamam, peki kendi sağlığınız? Özel hastanelerde fark ücreti ödemeden tedavi olabileceğiniz TSS teklifimizi incelemek ister misiniz?"
         ]
       },
       "konut_ferdi": {
         baslik: "4. Konut ➔ Ferdi Kaza / Hayat Sigortası",
         cumleler: [
-          "Evinizi her türlü riske karşı koruma altına aldık. Peki beklenmeyen bir kaza durumunda ailenizin yaşam standardını kim koruyacak? Ferdi kaza poliçesi ekleyelim.",
-          "Konut sigortanızla yuvanız güvende; ancak asıl değerli olan sizsiniz. Sizi kaza risklerine karşı koruyan Ferdi Kaza paketimizi inceleyelim.",
-          "Ailenizin geçim direği olarak, ani kazalar sonucu oluşacak gelir kayıplarına karşı sevdiklerinizi küçük primlerle güvenceye alabiliriz.",
-          "Yuvanızı korurken hayatın getireceği acil durumlara karşı da kişisel bir teminat havuzu oluşturalım, paket olarak çok daha avantajlı olur.",
-          "Evinizin poliçesine entegre edeceğimiz ufak bir hayat/kaza limiti, zor zamanlarda ailenize derin bir nefes aldıracaktır."
+          "Evinizi her türlü riske karşı koruma altına aldık. Peki beklenmeyen bir kaza durumunda ailenizin yaşam standardını kim koruyacak? Ferdi kaza poliçesi ekleyelim."
         ]
       },
       "tss_oss": {
         baslik: "5. TSS ➔ Özel Sağlık Sigortası (ÖSS)",
         cumleler: [
-          "Tamamlayıcı Sağlık poliçenizi uzun süredir kullanıyorsunuz. Bütçenizi çok yormadan, limitleri çok daha geniş olan Özel Sağlık Sigortası'na geçiş yapalım mı?",
-          "TSS sadece SGK anlaşmalı kurumlarda geçerlidir. Dilerseniz kapsamı genişleterek %100 her hastanede geçerli olan ÖSS paketlerine bakalım.",
-          "Sağlığa verdiğiniz önemi biliyoruz; mevcut TSS'nizi bir üst seviyeye taşıyıp yatarak ve ayakta tedavi limitlerinizi tamamen özgürleştirelim.",
-          "SGK kısıtlamalarına takılmadan, Türkiye'nin en iyi hastanelerinden VIP hizmet alabilmeniz için mevcut poliçenizi ÖSS ile güncelleyebiliriz.",
-          "TSS bittiğinde yenilemek yerine, size ve ailenize çok daha geniş bir doktor ağı sunan Özel Sağlık Sigortası alternatiflerini değerlendirmenizi öneririm."
+          "Tamamlayıcı Sağlık poliçenizi uzun süredir kullanıyorsunuz. Bütçenizi çok yormadan, limitleri çok daha geniş olan Özel Sağlık Sigortası'na geçiş yapalım mı?"
         ]
       },
       "tss_kasko": {
         baslik: "6. TSS ➔ Kasko Sigortası",
         cumleler: [
-          "Sağlığınızı Özel Hastanelerde güvence altına almışsınız, ancak sistemimizde aracınız için kasko görünmüyor. Onu da tek elde toplayalım mı?",
-          "Sağlık sigortası için bize güvendiniz, aracınızın değerini de aynı güven ve profesyonellikle koruma altına almamıza izin verin.",
-          "Sağlığınız gibi aracınız da önemli bir yatırım. Her ikisini tek acenteden takip etmenin rahatlığını yaşamanız için kasko teklifinizi hazırlayalım.",
-          "Olası bir kazada hem sağlığınızın TSS ile hem de aracınızın Kasko ile tam koruma altında olması size tam bir huzur sağlayacaktır.",
-          "Bireysel portföyünüzü mükemmelleştirmek adına eksik kalan kasko branşınızı da mevcut poliçelerinizin arasına indirimli olarak ekleyebiliriz."
+          "Sağlığınızı Özel Hastanelerde güvence altına almışsınız, ancak sistemimizde aracınız için kasko görünmüyor. Onu da tek elde toplayalım mı?"
         ]
       }
     };
-    let pazarlamaDataCache = {};
-
+    
     // TAB YÖNETİMİ
     document.querySelectorAll(".nav-btn").forEach((btn) => btn.addEventListener("click", () => goster(btn.dataset.view)));
 
@@ -444,6 +454,41 @@
       if (ad === "policeler") yuklePoliceler(1);
       if (ad === "finansal") yukleFinansalHazirlik();
       if (ad === "pazarlama") yuklePazarlama();
+      if (ad === "dersler") yukleDersler();
+    }
+
+    // ====== PDF YÜKLEME ======
+    async function pdfSecildi(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const durum = document.getElementById("pdf-durum");
+        durum.classList.remove("hidden");
+        durum.innerHTML = `<span>Yükleniyor ve Yapay Zeka Okuyor...</span>`;
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        try {
+            const res = await fetch(API + "/api/upload-parse", { method: "POST", body: formData });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || "PDF okunurken hata oluştu");
+            }
+            const data = await res.json();
+            
+            durum.innerHTML = `<span class="text-green-600 text-sm">Başarılı! Form açılıyor...</span>`;
+            setTimeout(() => {
+                durum.classList.add("hidden");
+                // Modalı açıp parse edilen datayı göster
+                alert(`PDF Başarıyla Analiz Edildi!\nMüşteri: ${data.ad || ''} ${data.soyad || ''}\nŞirket: ${data.sigorta_sirketi || ''}\n(Sistemde mock modal yerine bu alert gösteriliyor. Datalar parse edilip gelmiştir.)`);
+            }, 1000);
+            
+        } catch (e) {
+            durum.innerHTML = `<span class="text-red-500 text-sm">Hata: ${e.message}</span>`;
+            setTimeout(() => durum.classList.add("hidden"), 3000);
+        }
+        event.target.value = ""; // Inputu sıfırla
     }
 
     // ====== PAZARLAMA (ÇAPRAZ SATIŞ) ======
@@ -471,6 +516,7 @@
     }
 
     function pazarlamaSekmeSec(key) {
+        aktifPazarlamaSekmesi = key;
         Object.keys(PAZARLAMA_KAMPANYALAR).forEach(k => {
             const btn = document.getElementById("btn-paz-" + k);
             if(btn) {
@@ -517,6 +563,36 @@
         }
     }
 
+    function pazarlamaListeyiYazdir() {
+        const liste = pazarlamaDataCache[aktifPazarlamaSekmesi];
+        if (!liste || liste.length === 0) { alert("Bu kampanya için liste boş!"); return; }
+        
+        const baslik = PAZARLAMA_KAMPANYALAR[aktifPazarlamaSekmesi].baslik;
+        
+        let printHTML = `<html><head><title>${baslik} - Satış Listesi</title>
+        <style>body { font-family: Arial, sans-serif; padding: 20px; font-size: 13px; } h2 { text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; } table { width: 100%; border-collapse: collapse; margin-bottom: 30px; } th, td { border: 1px solid #ddd; padding: 10px; text-align: left; } th { background-color: #f5f5f5; } .checkbox-box { width: 18px; height: 18px; border: 1.5px solid #000; display: inline-block; } @media print { button { display: none; } }</style>
+        </head><body>`;
+        
+        printHTML += `<h2>KAMPANYA: ${baslik}</h2>
+        <table><thead><tr><th>Müşteri Adı Soyadı</th><th>Telefon</th><th>Tetikleyici Biten Poliçe</th><th>Bitiş Tarihi</th><th>Arandı Mı?</th></tr></thead><tbody>`;
+        
+        liste.forEach(item => {
+            printHTML += `<tr>
+                <td><strong>${item.ad_soyad}</strong></td>
+                <td>${item.telefon}</td>
+                <td>${item.dayanak}</td>
+                <td>${item.bitis}</td>
+                <td style="text-align:center;"><div class="checkbox-box"></div></td>
+            </tr>`;
+        });
+        
+        printHTML += `</tbody></table><div style="text-align: center; margin-top:20px;"><button onclick="window.print()" style="padding: 10px 20px; background-color: #0A192F; color: white; border:none; border-radius:5px; cursor:pointer;">Yazdır / PDF İndir</button></div></body></html>`;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printHTML); printWindow.document.close();
+    }
+
+
     // ====== SAYFALAMA VE MÜŞTERİ / POLİÇE TABLOLARI ======
     function renderPagination(containerId, data, onClickFnName) {
       const cont = document.getElementById(containerId);
@@ -547,7 +623,6 @@
       return res.status === 204 ? null : res.json();
     }
 
-    // ====== ARAMA TETİKLEYİCİLERİ ======
     document.getElementById("musteri-ara").addEventListener("input", (e) => {
         clearTimeout(window.searchTimeout);
         window.searchTimeout = setTimeout(() => yukleMusteriler(e.target.value, 1), 500);
@@ -585,7 +660,7 @@
           <td class="px-5 py-3 text-xs text-slate-500">${m.portfoy_sorumlusu || "—"}</td>
           <td class="px-5 py-3 text-xs text-slate-400">${m.tc_kimlik || "—"}</td>
           <td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
-            <button class="text-slate-500 hover:text-brand-navy text-xs font-bold mr-2" onclick="alert('Düzenleme formu açılacak')">Düzenle</button>
+            <button class="text-slate-500 hover:text-brand-navy text-xs font-bold mr-2">Düzenle</button>
           </td>
         </tr>`;
       });
@@ -611,15 +686,30 @@
             return;
         }
         tbody.innerHTML = data.items.map(p => {
+            // Durum etiketi düzenleme
+            let durumGosterim = p.durum.toUpperCase();
+            let bgRenk = p.durum === 'aktif' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+            
+            // Eğer "Eski/İptal" sekmesindeysek ve aktif yazıyorsa onu düzelt:
+            if (aktifPoliceSekmesi === 'eski') {
+                if (p.durum === 'iptal') {
+                    durumGosterim = "İPTAL";
+                    bgRenk = "text-slate-600 bg-slate-200";
+                } else if (p.suresi_dolmus) {
+                    durumGosterim = "SÜRESİ DOLDU";
+                    bgRenk = "text-amber-600 bg-amber-50";
+                }
+            }
+
             return `<tr class="hover:bg-slate-50 border-b border-slate-100 group">
                 <td class="px-5 py-3 font-bold text-brand-navy text-xs">${p.police_no}</td>
                 <td class="px-5 py-3 text-xs font-medium">${p.musteri_ad} ${p.musteri_soyad}</td>
                 <td class="px-5 py-3 text-xs text-slate-500">${p.sigorta_sirketi} <br> <span class="font-bold text-slate-700">${p.sigorta_turu}</span></td>
                 <td class="px-5 py-3 text-xs">${tarih(p.bitis_tarihi)}</td>
-                <td class="px-5 py-3 text-xs"><span class="${p.durum === 'aktif' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded font-bold">${p.durum.toUpperCase()}</span></td>
+                <td class="px-5 py-3 text-xs"><span class="${bgRenk} px-2 py-1 rounded font-bold">${durumGosterim}</span></td>
                 <td class="px-5 py-3 text-xs font-bold text-brand-gold">${para(p.prim)}</td>
                 <td class="px-5 py-3 text-right text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button class="text-red-400 hover:text-red-600 font-bold" onclick="alert('Silme işlemi...')">Sil</button>
+                    <button class="text-red-400 hover:text-red-600 font-bold">Sil</button>
                 </td>
             </tr>`;
         }).join("");
@@ -688,21 +778,117 @@
       }
     }
 
-    // ====== HATA VERMEYEN YEDEK FONKSİYONLAR ======
-    function musteriFormu() { alert("Müşteri formu açılacak (Modal örneği)"); }
-    function policeFormu() { alert("Manuel poliçe ekleme formu açılacak"); }
-    function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
-    
-    // Finansal Sayfasını Göstermek İçin Mock
+    // ====== FİNANSAL ANALİZ ======
     window.yukleFinansalHazirlik = async function() {
-        document.getElementById("fin-metrics").classList.remove("hidden");
-        document.getElementById("fin-details").classList.remove("hidden");
+        try {
+            const res = await api("/api/finansal/filtreler");
+            
+            document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + res.sirketler.map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + res.danismanlar.map(d => `<option value="${d}">${d}</option>`).join('');
+            
+            // Branşlar için çoklu seçim kutusu doldurma
+            const bransDiv = document.getElementById("fin-brans-container");
+            bransDiv.innerHTML = res.branslar.map(b => `
+                <label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
+                    <input type="checkbox" value="${b}" class="fin-brans-cb rounded text-brand-navy focus:ring-brand-navy"> ${b}
+                </label>
+            `).join('');
+
+        } catch (e) {
+            console.error("Filtreler yüklenemedi", e);
+        }
     };
-    window.calistirFinansalRapor = function() {
-        document.getElementById("fin-ciro").textContent = "₺" + (Math.random()*150000).toLocaleString('tr-TR');
-        document.getElementById("fin-kar").textContent = "₺" + (Math.random()*25000).toLocaleString('tr-TR');
-        document.getElementById("fin-adet").textContent = Math.floor(Math.random()*60) + " Adet";
+
+    window.calistirFinansalRapor = async function() {
+        // Seçili branşları topla
+        const seciliBranslar = Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb => cb.value);
+
+        const payload = {
+            baslangic: document.getElementById("fin-start").value || null,
+            bitis: document.getElementById("fin-end").value || null,
+            sirket: document.getElementById("fin-sirket").value || null,
+            danisman: document.getElementById("fin-sorumlu").value || null,
+            branslar: seciliBranslar
+        };
+
+        try {
+            const btn = event.currentTarget;
+            btn.innerHTML = "Hesaplanıyor..."; btn.disabled = true;
+
+            const res = await fetch(API + "/api/finansal/rapor", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(r => r.json());
+
+            document.getElementById("fin-metrics").classList.remove("hidden");
+            document.getElementById("fin-details").classList.remove("hidden");
+
+            document.getElementById("fin-ciro").textContent = para(res.ciro);
+            document.getElementById("fin-kar").textContent = para(res.kar);
+            document.getElementById("fin-adet").textContent = res.adet + " Adet";
+
+            // Listeleri doldur
+            const formatList = (dict) => Object.entries(dict).map(([k, v]) => `
+                <div class="flex justify-between py-2 border-b border-slate-50 last:border-0">
+                    <span class="text-sm font-semibold text-slate-600">${k}</span>
+                    <span class="text-sm font-bold text-brand-navy">${v} Adet</span>
+                </div>
+            `).join('') || '<span class="text-slate-400 italic text-sm">Veri yok.</span>';
+
+            document.getElementById("fin-brans-liste").innerHTML = formatList(res.brans_dagilimi);
+            document.getElementById("fin-sirket-liste").innerHTML = formatList(res.sirket_dagilimi);
+
+            btn.innerHTML = "Raporu Oluştur"; btn.disabled = false;
+        } catch (e) {
+            alert("Rapor çekilirken hata oluştu.");
+            console.error(e);
+        }
     };
+
+    // ====== EĞİTİM MERKEZİ ======
+    async function yukleDersler() {
+        try {
+            const data = await api("/api/dersler/liste");
+            const katDiv = document.getElementById("ders-kategoriler");
+            
+            if(Object.keys(data).length === 0) {
+                katDiv.innerHTML = '<span class="text-xs italic text-slate-400">PDF bulunamadı.</span>';
+                return;
+            }
+
+            katDiv.innerHTML = Object.keys(data).map(k =>
+                `<button onclick="dersKategoriGoster('${k}')" class="text-left w-full px-3 py-2.5 rounded-lg hover:bg-brand-navy/5 font-semibold text-brand-navy transition-colors flex justify-between">
+                    ${k} <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs">${data[k].length}</span>
+                </button>`
+            ).join("");
+            window.dersDataCache = data;
+            
+            // İlk kategoriyi seç
+            dersKategoriGoster(Object.keys(data)[0]);
+        } catch(e) {
+            console.error("Dersler yüklenemedi.", e);
+        }
+    }
+
+    window.dersKategoriGoster = function(kategori) {
+        document.getElementById("secilen-kategori-baslik").textContent = kategori + " Sunumları";
+        const dosyalar = window.dersDataCache[kategori] || [];
+        const icerik = document.getElementById("ders-icerik");
+        
+        if (dosyalar.length === 0) {
+            icerik.innerHTML = "<p class='text-slate-400 italic text-sm col-span-3'>Dosya bulunamadı.</p>";
+            return;
+        }
+        
+        icerik.innerHTML = dosyalar.map(f => `
+            <a href="/dersler/${encodeURIComponent(f)}" target="_blank" class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-200 rounded-xl hover:border-brand-gold hover:shadow-md transition-all group">
+                <svg class="w-12 h-12 text-red-500 mb-3 group-hover:-translate-y-1 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+                <span class="text-xs font-bold text-center text-brand-navy break-all leading-tight">${f.replace('.pdf','').replace('.PDF','')}</span>
+            </a>
+        `).join("");
+    }
+
 
     // Aylık Liste Yazdırma
     function aylikListeyiYazdir() {
@@ -733,7 +919,7 @@
     }
 
     async function sistemiTemizleVeBirlestir() {
-        if(confirm("DİKKAT: Sistemdeki tüm müşteriler düzenlenecek ve birleştirilecek. Devam edilsin mi?")) {
+        if(confirm("DİKKAT: Sistemdeki tüm müşteriler düzenlenecek, ad/soyadları büyük harfe çevrilecek ve gereksiz şirket ekleri temizlenerek birleştirilecek. Devam edilsin mi?")) {
             try {
                 const button = event.currentTarget;
                 const oldText = button.innerHTML;
@@ -745,6 +931,19 @@
             } catch(e) { alert("Hata: " + e.message); }
         }
     }
+
+    function musteriFormu() { alert("Manuel form açılacak (Modal örneği)"); }
+    function policeFormu() { alert("Manuel form açılacak (Modal örneği)"); }
+    function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
+
+    // Tıklamada menü kapanması için (Finansal Branche Çoklu Seçim Menüsü)
+    document.addEventListener('click', function(event) {
+        var isClickInside = document.getElementById('fin-brans-menu')?.contains(event.target);
+        var isClickBtn = event.target.closest('button[onclick*="fin-brans-menu"]');
+        if (!isClickInside && !isClickBtn) {
+            document.getElementById('fin-brans-menu')?.classList.add('hidden');
+        }
+    });
 
     yukleDashboard(); // İlk açılışta Dashboard yüklensin.
   </script>
