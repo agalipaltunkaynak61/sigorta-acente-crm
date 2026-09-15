@@ -14,7 +14,6 @@ from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, Lar
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.orm.session import Session
 
-# PDF parser dosyan aynı kalmalı
 from pdf_parser import ayikla_police_pdf
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -23,39 +22,71 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
-# YENİLENEBİLİR BRANŞLAR LİSTESİ
-YENILENEBILIR_BRANSLAR = [
-    "Trafik Sigortası", "Kasko Sigortası", "Tamamlayıcı Sağlık Sigortası", 
-    "Özel Sağlık Sigortası", "DASK", "Konut ve Eşya Sigortaları", 
-    "Kurumsal ve İş Yeri Sigortaları", "Ferdi Kaza"
+# =========================================================================
+# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR (KULLANICI TALEBİ - 15.09.2026) 🔴
+# =========================================================================
+
+ZORUNLU_SIRKETLER = [
+    "Aksigorta", "Allianz Sigorta", "Anadolu Sigorta", "Ankara Sigorta", "Axa Sigorta",
+    "Bereket Sigorta", "Bupa Acıbadem Sigorta", "Doğa Sigorta", "Eureko Sigorta",
+    "HDI Sigorta", "Hepiyi Sigorta", "Koru Sigorta", "Magdeburger Sigorta",
+    "Mapfre Sigorta", "Neova Sigorta", "Quick Sigorta", "Ray Sigorta", "Sompo Sigorta",
+    "Türkiye Sigorta", "Unico Sigorta", "Zurich Sigorta"
 ]
 
+ZORUNLU_DANISMANLAR = [
+    "Muammer Altunkaynak", "İhsan Berat Altunkaynak", "Sezai Yağcı",
+    "Serhat Altunkaynak", "Ahmet Galip Altunkaynak"
+]
+
+ZORUNLU_BRANSLAR = [
+    "DASK", "Konut ve Eşya Sigortaları", "Trafik Sigortası", "Kasko Sigortası",
+    "Ferdi Kaza", "İş Yeri", "Nakliyat", "Tamamlayıcı Sağlık Sigortası",
+    "Tarım", "Yat / Denizcilik", "Allrisk", "Özel Paket / Destek"
+]
+
+YENILENEBILIR_BRANSLAR = [
+    "Trafik Sigortası", "Kasko Sigortası", "Tamamlayıcı Sağlık Sigortası", 
+    "DASK", "Konut ve Eşya Sigortaları", "İş Yeri", "Ferdi Kaza"
+]
+
+# Gelen kirli veriyi zorunlu listeye çevirme sözlüğü
 SIRKET_ESLESMELERI = {
-    "türkiye sigorta a.ş.": "Türkiye Sigorta", "türkiye": "Türkiye Sigorta", "turkiye": "Türkiye Sigorta",
-    "axa sigorta a.ş.": "Axa Sigorta", "axa": "Axa Sigorta",
-    "doğa sigorta a.ş.": "Doğa Sigorta", "doğa": "Doğa Sigorta", "doga": "Doğa Sigorta",
-    "ak sigorta": "Aksigorta", "aksigorta": "Aksigorta",
-    "hepiyi": "Hepiyi Sigorta", "neova": "Neova Sigorta", "quick": "Quick Sigorta"
+    "türkiye": "Türkiye Sigorta", "turkiye": "Türkiye Sigorta", "anonim": "Türkiye Sigorta", "a.ş.": "Türkiye Sigorta",
+    "axa": "Axa Sigorta", "doğa": "Doğa Sigorta", "doga": "Doğa Sigorta",
+    "ak sigorta": "Aksigorta", "aksigorta": "Aksigorta", "allianz": "Allianz Sigorta",
+    "anadolu": "Anadolu Sigorta", "ankara": "Ankara Sigorta", "bereket": "Bereket Sigorta",
+    "bupa": "Bupa Acıbadem Sigorta", "acıbadem": "Bupa Acıbadem Sigorta", "eureko": "Eureko Sigorta",
+    "hdi": "HDI Sigorta", "hepiyi": "Hepiyi Sigorta", "koru": "Koru Sigorta",
+    "magdeburger": "Magdeburger Sigorta", "mapfre": "Mapfre Sigorta", "neova": "Neova Sigorta",
+    "quick": "Quick Sigorta", "ray": "Ray Sigorta", "sompo": "Sompo Sigorta",
+    "unico": "Unico Sigorta", "zurich": "Zurich Sigorta"
 }
 
 BRANS_ESLESMELERI = {
-    "trafik sigortası": "Trafik Sigortası", "trafik": "Trafik Sigortası",
-    "kasko sigortası": "Kasko Sigortası", "kasko": "Kasko Sigortası",
-    "tamamlayıcı sağlık sigortası": "Tamamlayıcı Sağlık Sigortası", "tamamlayıcı": "Tamamlayıcı Sağlık Sigortası", "tss": "Tamamlayıcı Sağlık Sigortası",
-    "özel sağlık sigortası": "Özel Sağlık Sigortası", "öss": "Özel Sağlık Sigortası",
+    "trafik": "Trafik Sigortası", "kasko": "Kasko Sigortası", 
+    "tamamlayıcı": "Tamamlayıcı Sağlık Sigortası", "tss": "Tamamlayıcı Sağlık Sigortası",
     "dask": "DASK", "deprem": "DASK",
-    "kurumsal ve iş yeri sigortaları": "Kurumsal ve İş Yeri Sigortaları", "iş yeri": "Kurumsal ve İş Yeri Sigortaları", "kurumsal": "Kurumsal ve İş Yeri Sigortaları",
-    "konut ve eşya sigortaları": "Konut ve Eşya Sigortaları", "konut": "Konut ve Eşya Sigortaları", "eşya": "Konut ve Eşya Sigortaları",
-    "ferdi kaza sigortaları": "Ferdi Kaza", "ferdi kaza": "Ferdi Kaza"
+    "iş yeri": "İş Yeri", "kurumsal": "İş Yeri", "işyeri": "İş Yeri",
+    "konut": "Konut ve Eşya Sigortaları", "eşya": "Konut ve Eşya Sigortaları",
+    "ferdi kaza": "Ferdi Kaza", "nakliyat": "Nakliyat", "tarım": "Tarım",
+    "yat": "Yat / Denizcilik", "denizcilik": "Yat / Denizcilik",
+    "allrisk": "Allrisk", "özel": "Özel Paket / Destek", "destek": "Özel Paket / Destek"
 }
 
-def standardize_metin(metin, sozluk):
-    if not metin: return metin
+def standardize_metin(metin, sozluk, zorunlu_liste=None):
+    if not metin: return "Diğer"
     m_lower = metin.strip().lower()
     for key, val in sozluk.items():
         if key in m_lower:
             return val
+    # Eğer eşleşme bulunamazsa ama zorunlu listede varsa onu döndür
+    if zorunlu_liste:
+        for zorunlu in zorunlu_liste:
+            if zorunlu.lower() in m_lower: return zorunlu
     return metin.strip().title()
+
+# =========================================================================
 
 # VERİTABANI BAĞLANTISI
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -147,6 +178,21 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     init_db()
+    
+    # 🔴 TÜM VERİLERİ SIFIRLAMA (Kullanıcı Talebi) 🔴
+    # Sistem ilk açıldığında tüm müşteri ve poliçeleri temizler.
+    # Excel yüklemelerinden sonra bir daha silinmemesi için bu bloğu yoruma alabilirsiniz.
+    db = SessionLocal()
+    try:
+        db.query(Police).delete()
+        db.query(Musteri).delete()
+        db.commit()
+        print("--- DİKKAT: TÜM MÜŞTERİ VE POLİÇE VERİLERİ SİLİNDİ (Temiz Başlangıç) ---")
+    except Exception as e:
+        db.rollback()
+    finally:
+        db.close()
+    
     eski_policeleri_otomatik_temizle()
 
 def normalize_string(s: str) -> str:
@@ -155,12 +201,9 @@ def normalize_string(s: str) -> str:
     return s.strip()
 
 def gelismis_firma_temizle(s: str) -> str:
-    """Şirket isimlerindeki gereksiz ekleri ve noktalama işaretlerini siler, birleştirme oranını artırır."""
     if not s: return ""
     s = normalize_string(s)
-    # Şirket eklerini temizle (Sözcük sınırları \b ile)
     s = re.sub(r'\b(LTD|STI|SANAYI|SAN|TICARET|TIC|AS|A\.S\.|LIMITED|SIRKETI|VE)\b', '', s)
-    # Sadece harf ve rakamları bırak (boşluklar ve noktalamalar gider)
     s = re.sub(r'[^A-Z0-9]', '', s)
     return s
 
@@ -169,14 +212,15 @@ def sistemi_temizle(db: Session = Depends(get_db)):
     try:
         policeler = db.query(Police).all()
         for p in policeler:
-            if p.sigorta_sirketi: p.sigorta_sirketi = standardize_metin(p.sigorta_sirketi, SIRKET_ESLESMELERI)
-            if p.sigorta_turu: p.sigorta_turu = standardize_metin(p.sigorta_turu, BRANS_ESLESMELERI)
+            if p.sigorta_sirketi: p.sigorta_sirketi = standardize_metin(p.sigorta_sirketi, SIRKET_ESLESMELERI, ZORUNLU_SIRKETLER)
+            if p.sigorta_turu: p.sigorta_turu = standardize_metin(p.sigorta_turu, BRANS_ESLESMELERI, ZORUNLU_BRANSLAR)
         
         musteriler = db.query(Musteri).all()
         for m in musteriler:
-            if m.ad: m.ad = m.ad.strip().upper() # Hepsini BÜYÜK HARF yap
-            if m.soyad: m.soyad = m.soyad.strip().upper() # Hepsini BÜYÜK HARF yap
-            if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
+            if m.ad: m.ad = m.ad.strip().upper() 
+            if m.soyad: m.soyad = m.soyad.strip().upper() 
+            if not m.portfoy_sorumlusu or m.portfoy_sorumlusu not in ZORUNLU_DANISMANLAR:
+                m.portfoy_sorumlusu = "Muammer Altunkaynak"
 
         db.commit()
 
@@ -185,7 +229,6 @@ def sistemi_temizle(db: Session = Depends(get_db)):
         
         gruplar = {}
         for m in tum_musteriler:
-            # Gelişmiş gruplama anahtarı (Boşluksuz ve eklersiz)
             anahtar = gelismis_firma_temizle(f"{m.ad} {m.soyad}")
             if not anahtar: continue
             
@@ -208,7 +251,6 @@ def sistemi_temizle(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-# ==================== YENİ PAZARLAMA (ÇAPRAZ SATIŞ) ====================
 @app.get("/api/pazarlama")
 def api_pazarlama(db: Session = Depends(get_db)):
     bugun = date.today()
@@ -278,8 +320,6 @@ def api_dersler_liste():
             elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: kategoriler["Konut / DASK"].append(f.name)
             elif "ISYERI" in fname or "İŞYERİ" in fname or "ALLRISK" in fname: kategoriler["İş Yeri / Kurumsal"].append(f.name)
             else: kategoriler["Diğer"].append(f.name)
-    
-    # Boş olmayan kategorileri döndür
     return {k: sorted(v) for k, v in kategoriler.items() if len(v) > 0}
 
 @app.get("/dersler/{dosya_adi}")
@@ -391,17 +431,24 @@ def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), lim
 @app.post("/api/musteriler", status_code=201)
 def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
     tckn = payload.get("tc_kimlik")
-    ad = (payload.get("ad") or "").strip().upper() # Müşteri büyük harf
-    soyad = (payload.get("soyad") or "").strip().upper() # Müşteri büyük harf
-    danisman = payload.get("portfoy_sorumlusu", "Diğer")
-    if danisman == "Sezai Karakoç": danisman = "Sezai Yağcı"
+    ad = (payload.get("ad") or "").strip().upper() 
+    soyad = (payload.get("soyad") or "").strip().upper() 
+    
+    # 🔴 SABİT DANIŞMAN KONTROLÜ 🔴
+    danisman = payload.get("portfoy_sorumlusu")
+    if not danisman or str(danisman).strip().lower() in ["", "atanmadı", "null", "none"]:
+        danisman = "Muammer Altunkaynak"
+    elif danisman == "Sezai Karakoç": 
+        danisman = "Sezai Yağcı"
+    
+    if danisman not in ZORUNLU_DANISMANLAR:
+        danisman = "Muammer Altunkaynak"
 
     existing = None
     if tckn and "**" not in str(tckn):
         existing = db.query(Musteri).filter(Musteri.tc_kimlik == tckn).first()
     
     if not existing and ad and soyad and "**" not in ad:
-        # Gelişmiş kontrol
         norm_anahtar = gelismis_firma_temizle(f"{ad} {soyad}")
         tum_musteriler = db.query(Musteri).all()
         for m in tum_musteriler:
@@ -428,9 +475,19 @@ def api_musteri_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
     m = db.query(Musteri).filter(Musteri.id == id).first()
     if not m: raise HTTPException(404, "Bulunamadı")
     for k, v in payload.items(): setattr(m, k, v)
+    
     if m.ad: m.ad = m.ad.strip().upper()
     if m.soyad: m.soyad = m.soyad.strip().upper()
-    if m.portfoy_sorumlusu == "Sezai Karakoç": m.portfoy_sorumlusu = "Sezai Yağcı"
+    
+    # 🔴 SABİT DANIŞMAN KONTROLÜ 🔴
+    if not m.portfoy_sorumlusu or str(m.portfoy_sorumlusu).strip().lower() in ["", "atanmadı", "null"]:
+        m.portfoy_sorumlusu = "Muammer Altunkaynak"
+    elif m.portfoy_sorumlusu == "Sezai Karakoç": 
+        m.portfoy_sorumlusu = "Sezai Yağcı"
+        
+    if m.portfoy_sorumlusu not in ZORUNLU_DANISMANLAR:
+        m.portfoy_sorumlusu = "Muammer Altunkaynak"
+        
     db.commit(); db.refresh(m)
     return m
 
@@ -481,8 +538,10 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         police_no = payload.get("police_no")
         islem_turu = payload.get("islem_turu", "Yeni Poliçe")
         arac_yeni = payload.get("arac_bilgisi")
-        temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI)
-        temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI)
+        
+        # 🔴 SABİT ŞİRKET VE BRANŞ KONTROLÜ 🔴
+        temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI, ZORUNLU_SIRKETLER)
+        temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI, ZORUNLU_BRANSLAR)
 
         ana_police = None
         if police_no and ("plaka" in str(islem_turu).lower() or "zeyil" in str(islem_turu).lower() or "tahakkuk" in str(islem_turu).lower() or "ek" in str(islem_turu).lower()):
@@ -524,8 +583,8 @@ async def api_upload_parse(file: UploadFile = File(...)):
 
         ayiklanan = ayikla_police_pdf(icerik)
         ayiklanan["pdf_dosya_adi"] = dosya_adi
-        if ayiklanan.get("sigorta_sirketi"): ayiklanan["sigorta_sirketi"] = standardize_metin(ayiklanan["sigorta_sirketi"], SIRKET_ESLESMELERI)
-        if ayiklanan.get("sigorta_turu"): ayiklanan["sigorta_turu"] = standardize_metin(ayiklanan["sigorta_turu"], BRANS_ESLESMELERI)
+        if ayiklanan.get("sigorta_sirketi"): ayiklanan["sigorta_sirketi"] = standardize_metin(ayiklanan["sigorta_sirketi"], SIRKET_ESLESMELERI, ZORUNLU_SIRKETLER)
+        if ayiklanan.get("sigorta_turu"): ayiklanan["sigorta_turu"] = standardize_metin(ayiklanan["sigorta_turu"], BRANS_ESLESMELERI, ZORUNLU_BRANSLAR)
 
         try:
             tckn = ayiklanan.get("tckn")
@@ -561,10 +620,12 @@ class FinansalRaporRequest(BaseModel):
 
 @app.get("/api/finansal/filtreler")
 def api_fin_filtreler(db: Session = Depends(get_db)):
-    sirketler = [r[0] for r in db.query(Police.sigorta_sirketi).filter(Police.sigorta_sirketi != None).distinct()]
-    danismanlar = [r[0] for r in db.query(Musteri.portfoy_sorumlusu).filter(Musteri.portfoy_sorumlusu != None).distinct()]
-    branslar = [r[0] for r in db.query(Police.sigorta_turu).filter(Police.sigorta_turu != None).distinct()]
-    return {"sirketler": sorted(list(set(sirketler))), "danismanlar": sorted(list(set(danismanlar))), "branslar": sorted(list(set(branslar)))}
+    # 🔴 SABİT DROPDOWNLAR (Veritabanındaki çöp isimler yerine doğrudan sabit listeler yollanıyor) 🔴
+    return {
+        "sirketler": sorted(ZORUNLU_SIRKETLER),
+        "danismanlar": ZORUNLU_DANISMANLAR,
+        "branslar": sorted(ZORUNLU_BRANSLAR)
+    }
 
 @app.post("/api/finansal/rapor")
 def api_fin_rapor(payload: FinansalRaporRequest, db: Session = Depends(get_db)):
