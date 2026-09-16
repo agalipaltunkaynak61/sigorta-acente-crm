@@ -50,31 +50,10 @@
   <!-- HAREKETLİ SOL PANEL (SIDEBAR) -->
   <aside class="group w-20 hover:w-64 bg-brand-white border-r border-slate-200 flex flex-col z-[100] shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 h-screen absolute top-0 left-0 hover:shadow-2xl overflow-hidden">
     
-    <!-- LOGO ALANI -->
-    <div class="h-24 flex items-center justify-center border-b border-slate-100 p-2 bg-gradient-to-b from-brand-light/40 to-transparent shrink-0">
-      <!-- Öncelikli Vektörel Logo (Bulunamazsa OnError ile Yedek SVG açılır) -->
-      <img src="/vektorel_logo_4.svg" alt="Altun Kardeşler" class="w-full h-full object-contain max-h-12 group-hover:max-h-20 transition-all duration-300 ease-in-out p-1 drop-shadow-sm" 
-           onerror="this.style.display='none'; document.getElementById('svg-yedek-logo').style.display='block';">
-      
-      <!-- Yedek Logo (Senin Gönderdiğin Orijinal SVG) -->
-      <div id="svg-yedek-logo" style="display:none;" class="w-full h-full flex items-center justify-center transition-all duration-300 ease-in-out group-hover:scale-110">
-          <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
-            <defs>
-              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#E5C77A"/>
-                <stop offset="50%" stop-color="#C6A25D"/>
-                <stop offset="100%" stop-color="#A88645"/>
-              </linearGradient>
-            </defs>
-            <g transform="translate(130, 0)">
-              <path d="M 25 70 L 45 10 L 65 10 L 85 70 L 65 70 L 60 52 L 40 52 L 35 70 Z M 46 35 L 54 35 L 50 20 Z" fill="#0A192F"/>
-              <path d="M 50 45 C 70 40, 90 20, 100 10 L 115 10 C 95 30, 75 50, 65 70 L 45 70 C 55 60, 60 50, 50 45 Z" fill="url(#goldGrad)"/>
-              <rect x="75" y="10" width="18" height="60" fill="#0A192F" transform="rotate(25, 84, 40)"/>
-            </g>
-            <text x="200" y="98" font-family="'Inter', sans-serif" font-weight="900" font-size="25" fill="#0A192F" text-anchor="middle" letter-spacing="1">ALTUN KARDEŞLER</text>
-            <text x="200" y="118" font-family="'Playfair Display', serif" font-weight="600" font-size="14" fill="#0A192F" text-anchor="middle" letter-spacing="8">SİGORTA</text>
-          </svg>
-      </div>
+    <!-- BÜYÜTÜLMÜŞ LOGO ALANI (Senin gönderdiğin orijinal kod ile birebir değiştirildi) -->
+    <div class="h-40 flex items-center justify-center border-b border-slate-100 p-4 bg-brand-light/30 shrink-0">
+        <!-- API'den çekilen logo, sığacak şekilde en büyük boyutta (object-contain) -->
+        <img src="/api/logo" alt="Altun Kardeşler Sigorta" class="w-full h-full object-contain drop-shadow-sm" onerror="this.src='vektorel_logo_5.svg'">
     </div>
 
     <!-- Navigasyon -->
@@ -153,7 +132,7 @@
       </div>
     </section>
 
-    <!-- PAZARLAMA VE ÇAPRAZ SATIŞ MODÜLÜ (Sıfır Değişiklik) -->
+    <!-- PAZARLAMA VE ÇAPRAZ SATIŞ MODÜLÜ (GELİŞTİRİLDİ) -->
     <section id="view-pazarlama" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
         <div>
@@ -196,6 +175,7 @@
                   <th class="px-5 py-4">Müşteri</th>
                   <th class="px-5 py-4">Telefon</th>
                   <th class="px-5 py-4">Biten Poliçe (Tetikleyici)</th>
+                  <th class="px-5 py-4">Diğer Fırsatlar</th>
                   <th class="px-5 py-4 text-center">Bitiş</th>
                 </tr>
               </thead>
@@ -303,45 +283,85 @@
       </div>
     </section>
 
-    <!-- FİNANSAL ANALİZ (Sıfır Değişiklik) -->
+    <!-- FİNANSAL ANALİZ (GELİŞTİRİLDİ) -->
     <section id="view-finansal" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
         <div><h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Finansal Raporlama</h2></div>
       </div>
+      
       <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6 shrink-0 relative z-20">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Başlangıç</label><input type="date" id="fin-start" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Bitiş</label><input type="date" id="fin-end" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">Şirket</label>
-            <select id="fin-sirket" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select>
+        <div class="flex items-center justify-between mb-4 border-b pb-3 border-slate-100">
+            <h3 class="font-bold text-brand-navy text-sm">Rapor Parametreleri</h3>
+            <label class="flex items-center gap-2 text-xs font-bold text-brand-navy cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm">
+                <input type="checkbox" id="fin-kiyas-aktif" onchange="document.getElementById('fin-kiyas-container').classList.toggle('hidden', !this.checked)" class="rounded text-brand-navy w-3.5 h-3.5 focus:ring-brand-navy"> 
+                Dönem Kıyaslaması Yap (Dönem 2'yi Ekle)
+            </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start mb-4">
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">Dönem 1 Başlangıç</label><input type="date" id="fin-start" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">Dönem 1 Bitiş</label><input type="date" id="fin-end" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
+          
+          <!-- Çoklu Seçim Filtreleri -->
+          <div class="relative">
+            <label class="block text-xs font-bold text-slate-500 mb-1">Şirket (Çoklu)</label>
+            <button type="button" onclick="document.getElementById('fin-sirket-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
+              <span class="truncate">Şirket Seç...</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="fin-sirket-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
+              <div id="fin-sirket-container" class="flex flex-col gap-1"></div>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">Danışman</label>
-            <select id="fin-sorumlu" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select>
+
+          <div class="relative">
+            <label class="block text-xs font-bold text-slate-500 mb-1">Danışman (Çoklu)</label>
+            <button type="button" onclick="document.getElementById('fin-sorumlu-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
+              <span class="truncate">Danışman Seç...</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="fin-sorumlu-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
+              <div id="fin-sorumlu-container" class="flex flex-col gap-1"></div>
+            </div>
           </div>
           
           <div class="relative">
             <label class="block text-xs font-bold text-slate-500 mb-1">Branş (Çoklu)</label>
             <button type="button" onclick="document.getElementById('fin-brans-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
-              <span>Branşları Seç...</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              <span class="truncate">Branş Seç...</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             <div id="fin-brans-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
               <div id="fin-brans-container" class="flex flex-col gap-1"></div>
             </div>
           </div>
         </div>
-        <div class="mt-5 pt-5 border-t border-slate-100 flex items-center justify-end">
+
+        <!-- Kıyaslama Dates (Hidden by default) -->
+        <div id="fin-kiyas-container" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4 items-start p-4 bg-brand-gold/5 border border-brand-gold/20 rounded-xl mb-4">
+          <div><label class="block text-xs font-bold text-brand-navy mb-1">Dönem 2 Başlangıç</label><input type="date" id="fin-start-2" class="w-full border border-brand-gold/30 rounded-lg px-3 py-2 text-sm bg-white" /></div>
+          <div><label class="block text-xs font-bold text-brand-navy mb-1">Dönem 2 Bitiş</label><input type="date" id="fin-end-2" class="w-full border border-brand-gold/30 rounded-lg px-3 py-2 text-sm bg-white" /></div>
+          <div class="md:col-span-3 flex items-center text-[11px] font-medium text-slate-500 italic mt-6">
+              * Kıyaslama seçildiğinde, Dönem 1 (Asıl) ve Dönem 2 (Kıyas) verileri ayrı ayrı hesaplanır. Panellerdeki oklar (▲▼) iki dönem arasındaki farkı temsil eder.
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-end">
           <button onclick="calistirFinansalRapor()" class="bg-brand-navy text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-brand-navyhover transition-all shadow-sm">Raporu Oluştur</button>
         </div>
       </div>
       
       <div class="flex-1 overflow-y-auto relative z-10">
         <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 hidden">
-          <div class="bg-brand-navy text-white rounded-xl p-6 shadow-sm"><p class="text-xs font-bold mb-1 text-slate-300">Toplam Üretim (Ciro)</p><p id="fin-ciro" class="text-3xl font-black text-brand-gold">₺0,00</p></div>
-          <div class="bg-white rounded-xl p-6 shadow-sm border"><p class="text-xs font-bold mb-1 text-slate-500">Tahmini Net Komisyon Karı</p><p id="fin-kar" class="text-3xl font-black text-brand-navy">₺0,00</p></div>
-          <div class="bg-white rounded-xl p-6 shadow-sm border"><p class="text-xs font-bold mb-1 text-slate-500">Toplam Satış Adedi</p><p id="fin-adet" class="text-3xl font-black text-brand-navy">0 Adet</p></div>
+          <div class="bg-brand-navy text-white rounded-xl p-6 shadow-sm flex flex-col justify-center">
+              <p class="text-xs font-bold mb-2 text-slate-300">Toplam Üretim (Ciro)</p>
+              <div id="fin-ciro"></div>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-center">
+              <p class="text-xs font-bold mb-2 text-slate-500">Tahmini Net Komisyon Karı</p>
+              <div id="fin-kar"></div>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-center">
+              <p class="text-xs font-bold mb-2 text-slate-500">Toplam Satış Adedi</p>
+              <div id="fin-adet"></div>
+          </div>
         </div>
         <div id="fin-details" class="grid grid-cols-1 md:grid-cols-2 gap-5 hidden pb-4">
           <div class="bg-white rounded-xl shadow-sm border"><div class="bg-slate-50 px-4 py-3 border-b font-bold text-xs text-brand-navy">Branş Dağılımı</div><div class="p-4" id="fin-brans-liste">Veri Yok</div></div>
@@ -429,7 +449,7 @@
       </div>
   </div>
 
-  <!-- YENİ GELİŞTİRİLMİŞ AI POLİÇE VE MÜŞTERİ MODALI (Ad Soyad Birleşik) -->
+  <!-- YENİ GELİŞTİRİLMİŞ AI POLİÇE VE MÜŞTERİ MODALI (Sıfır Değişiklik) -->
   <div id="ai-police-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-brand-navy/70 backdrop-blur-sm transition-opacity" onclick="aiModalKapat()"></div>
     
@@ -858,7 +878,6 @@
                 musteriSec(aiData.musteri.id, `${aiData.musteri.ad} ${aiData.musteri.soyad}`);
             } else {
                 musteriTabGecis('yeni');
-                // Ad ve Soyad'ı birleştirip tek inputa yazdır
                 const tamAd = `${aiData.ad || ''} ${aiData.soyad || ''}`.trim();
                 document.getElementById("yeni-adsoyad").value = tamAd;
                 document.getElementById("yeni-tckn").value = aiData.tckn || "";
@@ -946,7 +965,6 @@
                 const tckn = document.getElementById("yeni-tckn").value.trim();
                 if(!tamAd) throw new Error("Yeni müşteri eklemek için Ad Soyad zorunludur.");
                 
-                // Ad ve Soyad'ı API için ayırıyoruz
                 const parts = tamAd.split(" ");
                 const soyad = parts.length > 1 ? parts.pop() : "";
                 const ad = parts.join(" ");
@@ -982,7 +1000,7 @@
     }
 
 
-    // ====== AŞAĞIDAKİ TÜM KODLAR SENİN ORİJİNAL KODLARINDIR ======
+    // ====== AŞAĞIDAKİ TÜM KODLAR SENİN ORİJİNAL KODLARINDIR (MODİFİYE EDİLEN KISIMLAR HARİÇ) ======
     
     async function yukleDersler() {
         try {
@@ -1109,6 +1127,7 @@
         pazarlamaSekmeSec("dask_konut");
     }
 
+    // PAZARLAMA - ORTAK LİSTE GÖSTERGESİ EKLENDİ
     window.pazarlamaSekmeSec = function(key) {
         aktifPazarlamaSekmesi = key;
         Object.keys(PAZARLAMA_KAMPANYALAR).forEach(k => {
@@ -1123,17 +1142,91 @@
                 }
             }
         });
+        
         document.getElementById("pazarlama-liste-baslik").textContent = PAZARLAMA_KAMPANYALAR[key].baslik;
         document.getElementById("pazarlama-liste-cumle").innerHTML = PAZARLAMA_KAMPANYALAR[key].cumleler.map(c => `<li>${c}</li>`).join("");
         document.getElementById("pazarlama-liste-cumle-kutu").classList.remove("hidden");
+        
         const liste = pazarlamaDataCache[key] || [];
         const tbody = document.getElementById("pazarlama-tbody");
-        if(liste.length === 0) { tbody.innerHTML = ""; document.getElementById("pazarlama-empty").classList.remove("hidden"); }
-        else {
+        
+        if(liste.length === 0) { 
+            tbody.innerHTML = ""; document.getElementById("pazarlama-empty").classList.remove("hidden"); 
+        } else {
             document.getElementById("pazarlama-empty").classList.add("hidden");
-            tbody.innerHTML = liste.map(item => `<tr class="hover:bg-slate-50"><td class="px-5 py-3 font-semibold text-brand-navy text-[13px]">${item.ad_soyad}</td><td class="px-5 py-3 text-slate-600 font-bold">${item.telefon}</td><td class="px-5 py-3 text-slate-500 text-xs">${item.dayanak}</td><td class="px-5 py-3 text-center"><span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1.5 rounded-lg">Bitiş: ${item.bitis}</span></td></tr>`).join("");
+            tbody.innerHTML = liste.map(item => {
+                // Diğer Fırsatlar Taraması
+                let digerKampanyalar = [];
+                for(let k in pazarlamaDataCache) {
+                    if(k !== key && pazarlamaDataCache[k]) {
+                        if(pazarlamaDataCache[k].find(x => x.ad_soyad === item.ad_soyad || x.telefon === item.telefon)) {
+                            digerKampanyalar.push(PAZARLAMA_KAMPANYALAR[k].baslik.split('➔')[1].trim());
+                        }
+                    }
+                }
+                
+                let digerHtml = digerKampanyalar.length > 0 
+                    ? digerKampanyalar.map(d => `<span class="bg-brand-navy text-brand-gold font-bold text-[9px] uppercase px-1.5 py-0.5 rounded shadow-sm">${d}</span>`).join('') 
+                    : '<span class="text-[10px] text-slate-400 font-medium">-</span>';
+
+                return `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 font-semibold text-brand-navy text-[13px]">${item.ad_soyad}</td>
+                    <td class="px-5 py-3 text-slate-600 font-bold">${item.telefon}</td>
+                    <td class="px-5 py-3 text-slate-500 text-xs">${item.dayanak}</td>
+                    <td class="px-5 py-3"><div class="flex flex-wrap gap-1">${digerHtml}</div></td>
+                    <td class="px-5 py-3 text-center"><span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1.5 rounded-lg">Bitiş: ${item.bitis}</span></td>
+                </tr>`;
+            }).join("");
         }
     }
+
+    // PAZARLAMA - YAZDIRMA PDF LİSTESİ (Çapraz Satış Etiketleri Dahil)
+    window.pazarlamaListeyiYazdir = function() {
+        const key = aktifPazarlamaSekmesi;
+        const liste = pazarlamaDataCache[key] || [];
+        if(!liste.length) { alert("Yazdırılacak veri bulunamadı."); return; }
+
+        let h = `<html><head><title>${PAZARLAMA_KAMPANYALAR[key].baslik} - Pazarlama Listesi</title>
+        <style>
+            body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#333;}
+            h2{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;color:#0A192F;}
+            table{width:100%;border-collapse:collapse;margin-bottom:30px;}
+            th,td{border:1px solid #ddd;padding:10px;text-align:left;}
+            th{background-color:#0A192F;color:white;}
+            .diger{background-color:#f8f9fa;font-size:10px;color:#555;padding:2px 4px;border-radius:4px;border:1px solid #ccc;margin-right:4px;}
+            @media print{button{display:none;}}
+        </style></head><body>`;
+        
+        h += `<h2>Kampanya: ${PAZARLAMA_KAMPANYALAR[key].baslik}</h2>
+              <table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe (Tetikleyici)</th><th>Diğer Listelerdeki Durumu</th><th>Bitiş Tarihi</th></tr></thead><tbody>`;
+
+        liste.forEach(item => {
+            let digerKampanyalar = [];
+            for(let k in pazarlamaDataCache) {
+                if(k !== key && pazarlamaDataCache[k]) {
+                    if(pazarlamaDataCache[k].find(x => x.ad_soyad === item.ad_soyad || x.telefon === item.telefon)) {
+                        digerKampanyalar.push(PAZARLAMA_KAMPANYALAR[k].baslik.split('➔')[1].trim());
+                    }
+                }
+            }
+            let digerMetin = digerKampanyalar.length > 0 
+                ? digerKampanyalar.map(d => `<span class="diger">${d}</span>`).join('') 
+                : "-";
+
+            h += `<tr>
+                <td><strong>${item.ad_soyad}</strong></td>
+                <td>${item.telefon}</td>
+                <td>${item.dayanak}</td>
+                <td>${digerMetin}</td>
+                <td><strong>${item.bitis}</strong></td>
+            </tr>`;
+        });
+
+        h += `</tbody></table><div style="text-align:center;"><button onclick="window.print()" style="padding:12px 24px;background:#0A192F;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">Çıktı Al / PDF Kaydet</button></div></body></html>`;
+        const w = window.open('','_blank'); w.document.write(h); w.document.close();
+    }
+
 
     function renderPagination(c, data, fName) {
       if (!document.getElementById(c)) return;
@@ -1209,26 +1302,99 @@
       }
     }
 
+    // FİNANSAL ANALİZ - ÇOKLU SEÇİM VE KIYASLAMA GÜNCELLEMESİ
     window.yukleFinansalHazirlik = async function() {
         try {
             const res = await api("/api/finansal/filtreler");
-            document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + res.sirketler.map(s => `<option value="${s}">${s}</option>`).join('');
-            document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + res.danismanlar.map(d => `<option value="${d}">${d}</option>`).join('');
-            document.getElementById("fin-brans-container").innerHTML = res.branslar.map(b => `<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium"><input type="checkbox" value="${b}" class="fin-brans-cb rounded text-brand-navy focus:ring-brand-navy"> ${b}</label>`).join('');
+            
+            // Tüm select filtrelerini checkbox sistemine döndürüyoruz
+            document.getElementById("fin-sirket-container").innerHTML = res.sirketler.map(s => 
+                `<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
+                    <input type="checkbox" value="${s}" class="fin-sirket-cb rounded text-brand-navy focus:ring-brand-navy"> ${s}
+                 </label>`
+            ).join('');
+            
+            document.getElementById("fin-sorumlu-container").innerHTML = res.danismanlar.map(d => 
+                `<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
+                    <input type="checkbox" value="${d}" class="fin-sorumlu-cb rounded text-brand-navy focus:ring-brand-navy"> ${d}
+                 </label>`
+            ).join('');
+            
+            document.getElementById("fin-brans-container").innerHTML = res.branslar.map(b => 
+                `<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
+                    <input type="checkbox" value="${b}" class="fin-brans-cb rounded text-brand-navy focus:ring-brand-navy"> ${b}
+                 </label>`
+            ).join('');
         } catch (e) { console.error("Filtreler yüklenemedi", e); }
     };
 
     window.calistirFinansalRapor = async function() {
-        const p = { baslangic: document.getElementById("fin-start").value||null, bitis: document.getElementById("fin-end").value||null, sirket: document.getElementById("fin-sirket").value||null, danisman: document.getElementById("fin-sorumlu").value||null, branslar: Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb=>cb.value) };
+        // Parametre Toplama Fonksiyonu
+        const getParams = (startId, endId) => ({
+            baslangic: document.getElementById(startId).value || null,
+            bitis: document.getElementById(endId).value || null,
+            sirket: Array.from(document.querySelectorAll('.fin-sirket-cb:checked')).map(cb=>cb.value),
+            danisman: Array.from(document.querySelectorAll('.fin-sorumlu-cb:checked')).map(cb=>cb.value),
+            branslar: Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb=>cb.value)
+        });
+
+        const kiyasAktif = document.getElementById('fin-kiyas-aktif').checked;
+        const p1 = getParams("fin-start", "fin-end");
+        
         try {
-            const btn = event.currentTarget; btn.innerHTML = "Hesaplanıyor..."; btn.disabled = true;
-            const res = await fetch(API + "/api/finansal/rapor", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) }).then(r=>r.json());
-            document.getElementById("fin-metrics").classList.remove("hidden"); document.getElementById("fin-details").classList.remove("hidden");
-            document.getElementById("fin-ciro").textContent = para(res.ciro); document.getElementById("fin-kar").textContent = para(res.kar); document.getElementById("fin-adet").textContent = res.adet + " Adet";
+            const btn = event.currentTarget; 
+            const oldText = btn.innerHTML; 
+            btn.innerHTML = "Hesaplanıyor..."; 
+            btn.disabled = true;
+            
+            // Asıl Dönem İsteği
+            const res1 = await fetch(API + "/api/finansal/rapor", { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify(p1) 
+            }).then(r=>r.json());
+            
+            document.getElementById("fin-metrics").classList.remove("hidden"); 
+            document.getElementById("fin-details").classList.remove("hidden");
+            
+            if(!kiyasAktif) {
+                // Sadece Tek Dönem
+                document.getElementById("fin-ciro").innerHTML = `<span class="text-3xl font-black text-brand-gold">${para(res1.ciro)}</span>`; 
+                document.getElementById("fin-kar").innerHTML = `<span class="text-3xl font-black text-brand-navy">${para(res1.kar)}</span>`; 
+                document.getElementById("fin-adet").innerHTML = `<span class="text-3xl font-black text-brand-navy">${res1.adet} Adet</span>`;
+            } else {
+                // 2. Dönem İsteği ve Kıyaslama Mantığı
+                const p2 = getParams("fin-start-2", "fin-end-2");
+                const res2 = await fetch(API + "/api/finansal/rapor", { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(p2) 
+                }).then(r=>r.json());
+                
+                const getFarkHtml = (v1, v2, formatFn) => {
+                    const fark = v1 - v2;
+                    const ok = fark > 0 ? '▲' : (fark < 0 ? '▼' : '≈');
+                    const color = fark > 0 ? 'text-green-500' : (fark < 0 ? 'text-red-500' : 'text-slate-400');
+                    return `<span class="block text-3xl font-black text-brand-navy mb-1">${formatFn(v1)}</span>
+                            <span class="text-xs font-bold ${color} flex items-center gap-1">
+                               ${ok} Fark: ${formatFn(Math.abs(fark))} 
+                               <span class="text-[10px] text-slate-400 font-medium ml-1 bg-slate-50 px-1 py-0.5 rounded border border-slate-200">
+                                  Kıyas (Dönem 2): ${formatFn(v2)}
+                               </span>
+                            </span>`;
+                };
+
+                document.getElementById("fin-ciro").innerHTML = getFarkHtml(res1.ciro, res2.ciro, para);
+                document.getElementById("fin-kar").innerHTML = getFarkHtml(res1.kar, res2.kar, para);
+                document.getElementById("fin-adet").innerHTML = getFarkHtml(res1.adet, res2.adet, val => val + " Adet");
+            }
+            
             const fmt = (dict) => Object.entries(dict).map(([k,v]) => `<div class="flex justify-between py-2 border-b border-slate-50 last:border-0"><span class="text-sm font-semibold text-slate-600">${k}</span><span class="text-sm font-bold text-brand-navy">${v} Adet</span></div>`).join('') || '<span class="text-slate-400 italic text-sm">Veri yok.</span>';
-            document.getElementById("fin-brans-liste").innerHTML = fmt(res.brans_dagilimi); document.getElementById("fin-sirket-liste").innerHTML = fmt(res.sirket_dagilimi);
-            btn.innerHTML = "Raporu Oluştur"; btn.disabled = false;
-        } catch (e) { alert("Hata oluştu."); }
+            document.getElementById("fin-brans-liste").innerHTML = fmt(res1.brans_dagilimi); 
+            document.getElementById("fin-sirket-liste").innerHTML = fmt(res1.sirket_dagilimi);
+            
+            btn.innerHTML = oldText; btn.disabled = false;
+        } catch (e) { alert("Rapor oluşturulurken hata meydana geldi."); console.error(e); }
     };
 
     function aylikListeyiYazdir() {
@@ -1253,7 +1419,12 @@
 
     const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]; document.getElementById("ay-ismi").textContent = aylar[new Date().getMonth()];
     
-    document.addEventListener('click', function(e) { if (!document.getElementById('fin-brans-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-brans-menu"]')) document.getElementById('fin-brans-menu')?.classList.add('hidden'); });
+    // Menüleri dışarı tıklayınca kapatma
+    document.addEventListener('click', function(e) { 
+        if (!document.getElementById('fin-brans-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-brans-menu"]')) document.getElementById('fin-brans-menu')?.classList.add('hidden'); 
+        if (!document.getElementById('fin-sirket-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-sirket-menu"]')) document.getElementById('fin-sirket-menu')?.classList.add('hidden'); 
+        if (!document.getElementById('fin-sorumlu-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-sorumlu-menu"]')) document.getElementById('fin-sorumlu-menu')?.classList.add('hidden'); 
+    });
 
     yukleDashboard(); 
   </script>
