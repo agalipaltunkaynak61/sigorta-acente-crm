@@ -80,13 +80,10 @@ def standardize_metin(metin, sozluk, zorunlu_liste=None):
     for key, val in sozluk.items():
         if key in m_lower:
             return val
-    # Eğer eşleşme bulunamazsa ama zorunlu listede varsa onu döndür
     if zorunlu_liste:
         for zorunlu in zorunlu_liste:
             if zorunlu.lower() in m_lower: return zorunlu
     return metin.strip().title()
-
-# =========================================================================
 
 # VERİTABANI BAĞLANTISI
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -180,8 +177,6 @@ def on_startup():
     init_db()
     
     # 🔴 TÜM VERİLERİ SIFIRLAMA (Kullanıcı Talebi) 🔴
-    # Sistem ilk açıldığında tüm müşteri ve poliçeleri temizler.
-    # Excel yüklemelerinden sonra bir daha silinmemesi için bu bloğu yoruma alabilirsiniz.
     db = SessionLocal()
     try:
         db.query(Police).delete()
@@ -309,17 +304,37 @@ def api_pazarlama(db: Session = Depends(get_db)):
 
 @app.get("/api/dersler/liste")
 def api_dersler_liste():
-    kategoriler = {"Kasko": [], "Trafik": [], "TSS / ÖSS": [], "Konut / DASK": [], "İş Yeri / Kurumsal": [], "Diğer": []}
+    # KULLANICI TALEBİ: "Diğer" kaldırıldı. Sadece var olan dosya isimlerine göre temiz dizilim.
+    kategoriler = {
+        "Kasko Sigortası": [], 
+        "Tamamlayıcı & Özel Sağlık": [], 
+        "Konut Sigortası": [], 
+        "İş Yeri & All Risk": [],
+        "Nakliyat Sigortası": [],
+        "Site & Ortak Alan": []
+    }
+    
     if not DERSLER_DIR.exists(): return kategoriler
     for f in DERSLER_DIR.iterdir():
         if f.is_file() and f.name.lower().endswith(".pdf"):
             fname = f.name.upper()
-            if "KASKO" in fname: kategoriler["Kasko"].append(f.name)
-            elif "TRAFIK" in fname or "TRAFİK" in fname: kategoriler["Trafik"].append(f.name)
-            elif "TSS" in fname or "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname: kategoriler["TSS / ÖSS"].append(f.name)
-            elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: kategoriler["Konut / DASK"].append(f.name)
-            elif "ISYERI" in fname or "İŞYERİ" in fname or "ALLRISK" in fname: kategoriler["İş Yeri / Kurumsal"].append(f.name)
-            else: kategoriler["Diğer"].append(f.name)
+            
+            if "KASKO" in fname: 
+                kategoriler["Kasko Sigortası"].append(f.name)
+            elif "TSS" in fname or "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname: 
+                kategoriler["Tamamlayıcı & Özel Sağlık"].append(f.name)
+            elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: 
+                kategoriler["Konut Sigortası"].append(f.name)
+            elif "İŞYERİ" in fname or "ISYERI" in fname or "ALLRISK" in fname or "ALLRİSK" in fname: 
+                kategoriler["İş Yeri & All Risk"].append(f.name)
+            elif "NAKLİYAT" in fname or "NAKLIYAT" in fname: 
+                kategoriler["Nakliyat Sigortası"].append(f.name)
+            elif "SİTE" in fname or "SITE" in fname: 
+                kategoriler["Site & Ortak Alan"].append(f.name)
+            else:
+                # Olası kaçaklar için en genel torba (Diğer yerine İş Yeri/Kurumsal'a dahil edilecek)
+                kategoriler["İş Yeri & All Risk"].append(f.name)
+                
     return {k: sorted(v) for k, v in kategoriler.items() if len(v) > 0}
 
 @app.get("/dersler/{dosya_adi}")
@@ -434,7 +449,6 @@ def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
     ad = (payload.get("ad") or "").strip().upper() 
     soyad = (payload.get("soyad") or "").strip().upper() 
     
-    # 🔴 SABİT DANIŞMAN KONTROLÜ 🔴
     danisman = payload.get("portfoy_sorumlusu")
     if not danisman or str(danisman).strip().lower() in ["", "atanmadı", "null", "none"]:
         danisman = "Muammer Altunkaynak"
@@ -479,7 +493,6 @@ def api_musteri_guncelle(id: int, payload: dict, db: Session = Depends(get_db)):
     if m.ad: m.ad = m.ad.strip().upper()
     if m.soyad: m.soyad = m.soyad.strip().upper()
     
-    # 🔴 SABİT DANIŞMAN KONTROLÜ 🔴
     if not m.portfoy_sorumlusu or str(m.portfoy_sorumlusu).strip().lower() in ["", "atanmadı", "null"]:
         m.portfoy_sorumlusu = "Muammer Altunkaynak"
     elif m.portfoy_sorumlusu == "Sezai Karakoç": 
@@ -539,7 +552,6 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         islem_turu = payload.get("islem_turu", "Yeni Poliçe")
         arac_yeni = payload.get("arac_bilgisi")
         
-        # 🔴 SABİT ŞİRKET VE BRANŞ KONTROLÜ 🔴
         temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI, ZORUNLU_SIRKETLER)
         temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI, ZORUNLU_BRANSLAR)
 
@@ -610,7 +622,6 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
-# ==================== GERÇEK FİNANSAL VERİLER ====================
 class FinansalRaporRequest(BaseModel):
     baslangic: Optional[str] = None
     bitis: Optional[str] = None
@@ -620,7 +631,6 @@ class FinansalRaporRequest(BaseModel):
 
 @app.get("/api/finansal/filtreler")
 def api_fin_filtreler(db: Session = Depends(get_db)):
-    # 🔴 SABİT DROPDOWNLAR (Veritabanındaki çöp isimler yerine doğrudan sabit listeler yollanıyor) 🔴
     return {
         "sirketler": sorted(ZORUNLU_SIRKETLER),
         "danismanlar": ZORUNLU_DANISMANLAR,

@@ -52,7 +52,6 @@
         content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
         border-width: 5px; border-style: solid; border-color: transparent #0A192F transparent transparent;
     }
-    /* Checkbox scroll gizleme */
     .dropdown-content { max-height: 200px; overflow-y: auto; }
   </style>
 </head>
@@ -320,7 +319,6 @@
             <select id="fin-sorumlu" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50"><option value="">Tümü</option></select>
           </div>
           
-          <!-- Çoklu Branş Seçimi (Custom Checkbox Dropdown) -->
           <div class="relative">
             <label class="block text-xs font-bold text-slate-500 mb-1">Branş (Çoklu)</label>
             <button type="button" onclick="document.getElementById('fin-brans-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
@@ -352,19 +350,36 @@
       </div>
     </section>
 
-    <!-- EĞİTİM MERKEZİ -->
+    <!-- EĞİTİM MERKEZİ (ÖZEL TASARIM) -->
     <section id="view-dersler" class="hidden fade-in h-full flex flex-col max-w-7xl mx-auto">
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
-        <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Eğitim Merkezi (Kurumsal Sunumlar)</h2>
-      </div>
-      <div class="flex-1 gap-5 pb-4 flex overflow-hidden">
-        <div class="w-1/3 md:w-1/4 bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-full overflow-y-auto">
-            <h3 class="font-bold text-xs text-slate-400 uppercase mb-3 px-2 border-b pb-2">Kategoriler</h3>
-            <div id="ders-kategoriler" class="flex flex-col gap-1 text-sm text-slate-600 p-1">Yükleniyor...</div>
+      
+      <!-- Akademi Hero Banner -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 bg-brand-navy p-6 rounded-2xl shadow-lg shrink-0 relative overflow-hidden">
+        <!-- Dekoratif Çember -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+        <div class="relative z-10">
+            <h2 class="text-3xl font-serif font-bold text-brand-gold tracking-tight mb-1">Eğitim Merkezi</h2>
+            <p class="text-sm text-slate-300 font-medium">Satış ekipleri için kurumsal eğitim ve karşılaştırma sunumları</p>
         </div>
-        <div class="w-2/3 md:w-3/4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-full overflow-y-auto">
-            <h3 id="secilen-kategori-baslik" class="text-lg font-bold text-brand-navy mb-4 border-b pb-2">Sunumlar</h3>
-            <div id="ders-icerik" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">Eğitim dosyaları sunucuda mevcutsa burada görünecektir.</div>
+      </div>
+      
+      <div class="flex-1 gap-6 pb-4 flex flex-col md:flex-row overflow-hidden">
+        <!-- Sol Menü -->
+        <div class="w-full md:w-1/4 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-full flex flex-col shrink-0">
+            <h3 class="font-black text-[11px] tracking-widest text-slate-400 uppercase mb-4 px-2">Kategoriler</h3>
+            <div id="ders-kategoriler" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1">
+                <!-- JS dolduracak -->
+            </div>
+        </div>
+        
+        <!-- Sağ İçerik -->
+        <div class="w-full md:w-3/4 bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-inner h-full flex flex-col min-h-0">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 shrink-0">
+                <h3 id="secilen-kategori-baslik" class="text-xl font-bold text-brand-navy">Sunumlar</h3>
+            </div>
+            <div id="ders-icerik" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 content-start pr-2">
+                <!-- JS dolduracak -->
+            </div>
         </div>
       </div>
     </section>
@@ -480,7 +495,6 @@
             durum.innerHTML = `<span class="text-green-600 text-sm">Başarılı! Form açılıyor...</span>`;
             setTimeout(() => {
                 durum.classList.add("hidden");
-                // Modalı açıp parse edilen datayı göster
                 alert(`PDF Başarıyla Analiz Edildi!\nMüşteri: ${data.ad || ''} ${data.soyad || ''}\nŞirket: ${data.sigorta_sirketi || ''}\n(Sistemde mock modal yerine bu alert gösteriliyor. Datalar parse edilip gelmiştir.)`);
             }, 1000);
             
@@ -488,7 +502,7 @@
             durum.innerHTML = `<span class="text-red-500 text-sm">Hata: ${e.message}</span>`;
             setTimeout(() => durum.classList.add("hidden"), 3000);
         }
-        event.target.value = ""; // Inputu sıfırla
+        event.target.value = "";
     }
 
     // ====== PAZARLAMA (ÇAPRAZ SATIŞ) ======
@@ -686,11 +700,9 @@
             return;
         }
         tbody.innerHTML = data.items.map(p => {
-            // Durum etiketi düzenleme
             let durumGosterim = p.durum.toUpperCase();
             let bgRenk = p.durum === 'aktif' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
             
-            // Eğer "Eski/İptal" sekmesindeysek ve aktif yazıyorsa onu düzelt:
             if (aktifPoliceSekmesi === 'eski') {
                 if (p.durum === 'iptal') {
                     durumGosterim = "İPTAL";
@@ -786,7 +798,6 @@
             document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + res.sirketler.map(s => `<option value="${s}">${s}</option>`).join('');
             document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + res.danismanlar.map(d => `<option value="${d}">${d}</option>`).join('');
             
-            // Branşlar için çoklu seçim kutusu doldurma
             const bransDiv = document.getElementById("fin-brans-container");
             bransDiv.innerHTML = res.branslar.map(b => `
                 <label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
@@ -800,7 +811,6 @@
     };
 
     window.calistirFinansalRapor = async function() {
-        // Seçili branşları topla
         const seciliBranslar = Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb => cb.value);
 
         const payload = {
@@ -828,7 +838,6 @@
             document.getElementById("fin-kar").textContent = para(res.kar);
             document.getElementById("fin-adet").textContent = res.adet + " Adet";
 
-            // Listeleri doldur
             const formatList = (dict) => Object.entries(dict).map(([k, v]) => `
                 <div class="flex justify-between py-2 border-b border-slate-50 last:border-0">
                     <span class="text-sm font-semibold text-slate-600">${k}</span>
@@ -846,7 +855,7 @@
         }
     };
 
-    // ====== EĞİTİM MERKEZİ ======
+    // ====== EĞİTİM MERKEZİ (YENİLENMİŞ) ======
     async function yukleDersler() {
         try {
             const data = await api("/api/dersler/liste");
@@ -857,14 +866,14 @@
                 return;
             }
 
+            // Kategori butonlarını şık tasarımla basıyoruz
             katDiv.innerHTML = Object.keys(data).map(k =>
-                `<button onclick="dersKategoriGoster('${k}')" class="text-left w-full px-3 py-2.5 rounded-lg hover:bg-brand-navy/5 font-semibold text-brand-navy transition-colors flex justify-between">
-                    ${k} <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs">${data[k].length}</span>
+                `<button data-kat="${k}" onclick="dersKategoriGoster('${k}')" class="kategori-btn text-left w-full px-4 py-3 rounded-xl font-bold transition-all flex justify-between items-center mb-2">
+                    ${k} <span class="badge px-2 py-0.5 rounded-md text-xs shadow-sm transition-colors">${data[k].length}</span>
                 </button>`
             ).join("");
-            window.dersDataCache = data;
             
-            // İlk kategoriyi seç
+            window.dersDataCache = data;
             dersKategoriGoster(Object.keys(data)[0]);
         } catch(e) {
             console.error("Dersler yüklenemedi.", e);
@@ -876,17 +885,51 @@
         const dosyalar = window.dersDataCache[kategori] || [];
         const icerik = document.getElementById("ders-icerik");
         
+        // Sol menü aktif class işlemleri
+        document.querySelectorAll('.kategori-btn').forEach(btn => {
+            if(btn.dataset.kat === kategori) {
+                btn.classList.add('bg-brand-navy', 'text-white', 'shadow-md');
+                btn.classList.remove('text-brand-navy', 'hover:bg-brand-navy/5');
+                btn.querySelector('.badge').classList.add('bg-white/20', 'text-white');
+                btn.querySelector('.badge').classList.remove('bg-slate-200', 'text-slate-600');
+            } else {
+                btn.classList.remove('bg-brand-navy', 'text-white', 'shadow-md');
+                btn.classList.add('text-brand-navy', 'hover:bg-brand-navy/5');
+                btn.querySelector('.badge').classList.remove('bg-white/20', 'text-white');
+                btn.querySelector('.badge').classList.add('bg-slate-200', 'text-slate-600');
+            }
+        });
+
         if (dosyalar.length === 0) {
-            icerik.innerHTML = "<p class='text-slate-400 italic text-sm col-span-3'>Dosya bulunamadı.</p>";
+            icerik.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-12 px-4 bg-white border border-dashed border-slate-300 rounded-2xl h-full">
+                <svg class="w-16 h-16 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                <p class='text-slate-500 font-medium text-center'>Bu kategoriye henüz sunum yüklenmemiş.</p>
+            </div>`;
             return;
         }
         
-        icerik.innerHTML = dosyalar.map(f => `
-            <a href="/dersler/${encodeURIComponent(f)}" target="_blank" class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-200 rounded-xl hover:border-brand-gold hover:shadow-md transition-all group">
-                <svg class="w-12 h-12 text-red-500 mb-3 group-hover:-translate-y-1 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
-                <span class="text-xs font-bold text-center text-brand-navy break-all leading-tight">${f.replace('.pdf','').replace('.PDF','')}</span>
+        // PDF kartlarının yeni şık tasarımı. (Uzantıları ve alt tireleri siliyoruz)
+        icerik.innerHTML = dosyalar.map(f => {
+            let temizAd = f.replace('.pdf','').replace('.PDF','').replace(/_/g, ' ');
+            return `
+            <a href="/dersler/${encodeURIComponent(f)}" target="_blank" class="relative group bg-white border border-slate-200 rounded-2xl p-5 hover:border-brand-gold hover:shadow-xl transition-all duration-300 flex flex-col h-44 overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-brand-gold/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="flex-1 flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-3 group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <h4 class="font-bold text-brand-navy text-sm leading-snug break-words">${temizAd}</h4>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-400">PDF SUNUM</span>
+                    <span class="text-[10px] font-bold text-brand-gold flex items-center gap-1 group-hover:text-brand-navy transition-colors">
+                        Görüntüle <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </span>
+                </div>
             </a>
-        `).join("");
+            `;
+        }).join("");
     }
 
 
@@ -936,7 +979,6 @@
     function policeFormu() { alert("Manuel form açılacak (Modal örneği)"); }
     function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
 
-    // Tıklamada menü kapanması için (Finansal Branche Çoklu Seçim Menüsü)
     document.addEventListener('click', function(event) {
         var isClickInside = document.getElementById('fin-brans-menu')?.contains(event.target);
         var isClickBtn = event.target.closest('button[onclick*="fin-brans-menu"]');
@@ -945,7 +987,7 @@
         }
     });
 
-    yukleDashboard(); // İlk açılışta Dashboard yüklensin.
+    yukleDashboard(); 
   </script>
 </body>
 </html>
