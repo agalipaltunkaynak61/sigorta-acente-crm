@@ -10,7 +10,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile, Re
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
-from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, LargeBinary, create_engine
+from sqlalchemy import Column, Date, DateTime, Float, Integer, String, Text, LargeBinary, create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.orm.session import Session
 
@@ -23,7 +23,7 @@ DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
 # =========================================================================
-# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR (KULLANICI TALEBİ)
+# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR
 # =========================================================================
 
 ZORUNLU_SIRKETLER = [
@@ -49,6 +49,13 @@ YENILENEBILIR_BRANSLAR = [
     "Trafik Sigortası", "Kasko Sigortası", "Tamamlayıcı Sağlık Sigortası", 
     "DASK", "Konut ve Eşya Sigortaları", "İş Yeri", "Ferdi Kaza"
 ]
+
+ACENTE_KOMISYON_ORANLARI = {
+    "DASK": 0.15, "Konut ve Eşya Sigortaları": 0.20, "Trafik Sigortası": 0.10, 
+    "Kasko Sigortası": 0.17, "Ferdi Kaza": 0.25, "İş Yeri": 0.18, 
+    "Nakliyat": 0.12, "Tamamlayıcı Sağlık Sigortası": 0.20, 
+    "Tarım": 0.10, "Yat / Denizcilik": 0.12, "Allrisk": 0.12, "Özel Paket / Destek": 0.25
+}
 
 SIRKET_ESLESMELERI = {
     "türkiye": "Türkiye Sigorta", "turkiye": "Türkiye Sigorta", "anonim": "Türkiye Sigorta", "a.ş.": "Türkiye Sigorta",
@@ -82,6 +89,9 @@ def standardize_metin(metin, sozluk, zorunlu_liste=None):
         for zorunlu in zorunlu_liste:
             if zorunlu.lower() in m_lower: return zorunlu
     return metin.strip().title()
+
+def komisyon_orani_getir(brans: str) -> float:
+    return ACENTE_KOMISYON_ORANLARI.get(brans, 0.10)  # Bulunamazsa varsayılan %10
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
@@ -118,10 +128,12 @@ class Police(Base):
     police_no = Column(String(80), nullable=False, index=True)
     sigorta_turu = Column(String(120), nullable=False, index=True)
     sigorta_sirketi = Column(String(100), nullable=True, index=True)
-    islem_turu = Column(String(50), default="Yeni Poliçe")
+    islem_turu = Column(String(50), default="Yeni") 
+    uretim_kaynagi = Column(String(50), default="Kendi")  # YENİ ALAN
     baslangic_tarihi = Column(Date, nullable=False)
     bitis_tarihi = Column(Date, nullable=False, index=True)
     prim = Column(Float, nullable=True)
+    komisyon = Column(Float, nullable=True)  # YENİ ALAN: Net komisyon tutarı
     durum = Column(String(30), default="aktif", index=True)
     arac_bilgisi = Column(String(255), nullable=True) 
     varlik_bilgisi = Column(Text, nullable=True)    
@@ -134,8 +146,21 @@ class DosyaDepo(Base):
     dosya_adi = Column(String(255), unique=True, nullable=False)
     veri = Column(LargeBinary, nullable=False)
 
+def check_and_upgrade_db():
+    # SQLite kullanırken tabloya sonradan sütun eklendiğinde veritabanının patlamaması için otomatik göç(migration).
+    with engine.begin() as conn:
+        try:
+            conn.execute(text("SELECT uretim_kaynagi FROM policeler LIMIT 1"))
+        except Exception:
+            try:
+                conn.execute(text("ALTER TABLE policeler ADD COLUMN uretim_kaynagi VARCHAR(50) DEFAULT 'Kendi'"))
+                conn.execute(text("ALTER TABLE policeler ADD COLUMN komisyon FLOAT DEFAULT 0.0"))
+            except Exception as e:
+                print("DB Upgrade Error:", e)
+
 def init_db():
     Base.metadata.create_all(bind=engine)
+    check_and_upgrade_db()
 
 def get_db():
     db = SessionLocal()
@@ -155,7 +180,7 @@ def eski_policeleri_otomatik_temizle():
     finally:
         db.close()
 
-app = FastAPI(title="Altun Kardeşler CRM", version="3.9.1")
+app = FastAPI(title="Altun Kardeşler CRM", version="4.0")
 
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
@@ -178,7 +203,6 @@ def gelismis_firma_temizle(s: str) -> str:
     s = re.sub(r'[^A-Z0-9]', '', s)
     return s
 
-# --- YENİ EKLENEN ENDPOINTLER ---
 @app.get("/vektorel_logo_2.svg")
 def serve_logo():
     logo_path = BASE_DIR / "vektorel_logo_2.svg"
@@ -192,7 +216,6 @@ def api_sabitler():
         "sirketler": sorted(ZORUNLU_SIRKETLER),
         "branslar": sorted(ZORUNLU_BRANSLAR)
     }
-# --------------------------------
 
 @app.get("/api/sistemi-temizle")
 def sistemi_temizle(db: Session = Depends(get_db)):
@@ -308,25 +331,15 @@ def api_dersler_liste():
     for f in DERSLER_DIR.iterdir():
         if f.is_file() and f.name.lower().endswith(".pdf"):
             fname = f.name.upper()
-            
-            if "KASKO" in fname: 
-                kategoriler["Kasko Sigortası"].append(f.name)
-            elif "TSS" in fname or "TAMAMLAYICI" in fname: 
-                kategoriler["Tamamlayıcı Sağlık Sigortası"].append(f.name)
-            elif "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname or "ÖZEL" in fname: 
-                kategoriler["Özel Sağlık Sigortası"].append(f.name)
-            elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: 
-                kategoriler["Konut Sigortası"].append(f.name)
-            elif "İŞYERİ" in fname or "ISYERI" in fname: 
-                kategoriler["İş Yeri Sigortası"].append(f.name)
-            elif "ALLRISK" in fname or "ALLRİSK" in fname or "MÜHENDİSLİK" in fname or "INSAAT" in fname or "İNŞAAT" in fname: 
-                kategoriler["Mühendislik & All Risk"].append(f.name)
-            elif "NAKLİYAT" in fname or "NAKLIYAT" in fname: 
-                kategoriler["Nakliyat Sigortası"].append(f.name)
-            elif "SİTE" in fname or "SITE" in fname: 
-                kategoriler["Site & Ortak Alan"].append(f.name)
-            else:
-                kategoriler["İş Yeri Sigortası"].append(f.name)
+            if "KASKO" in fname: kategoriler["Kasko Sigortası"].append(f.name)
+            elif "TSS" in fname or "TAMAMLAYICI" in fname: kategoriler["Tamamlayıcı Sağlık Sigortası"].append(f.name)
+            elif "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname or "ÖZEL" in fname: kategoriler["Özel Sağlık Sigortası"].append(f.name)
+            elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: kategoriler["Konut Sigortası"].append(f.name)
+            elif "İŞYERİ" in fname or "ISYERI" in fname: kategoriler["İş Yeri Sigortası"].append(f.name)
+            elif "ALLRISK" in fname or "ALLRİSK" in fname or "MÜHENDİSLİK" in fname or "INSAAT" in fname or "İNŞAAT" in fname: kategoriler["Mühendislik & All Risk"].append(f.name)
+            elif "NAKLİYAT" in fname or "NAKLIYAT" in fname: kategoriler["Nakliyat Sigortası"].append(f.name)
+            elif "SİTE" in fname or "SITE" in fname: kategoriler["Site & Ortak Alan"].append(f.name)
+            else: kategoriler["İş Yeri Sigortası"].append(f.name)
                 
     return {k: sorted(v) for k, v in kategoriler.items() if len(v) > 0}
 
@@ -348,30 +361,19 @@ def parse_tarih(val) -> date:
             except ValueError: continue
     return date.today()
 
-def hesapla_komisyon(brans: str, sirket: str, prim: float) -> float:
-    if not prim: return 0.0
-    b = (brans or "").lower()
-    s = (sirket or "").lower()
-    oran = 0.10
-    if "tss" in b or "tamamlay" in b: oran = 0.25
-    elif "iş" in b or "is yeri" in b or "isyeri" in b: oran = 0.20
-    elif "dask" in b: oran = 0.12
-    elif "trafik" in b: oran = 0.10
-    elif "kasko" in b: oran = 0.15
-    elif "yeşil" in b or "yesil" in b: oran = 0.10
-    elif "konut" in b: oran = 0.25
-    elif "seyahat" in b or "seyehat" in b: oran = 0.15
-    elif "ferdi kaza" in b: oran = 0.30
-    elif "allrisk" in b or "inşaat" in b or "insaat" in b: oran = 0.20
-
-    anlasmali = ["türkiye", "turkiye", "axa", "ak", "hepiyi", "neova", "doğa", "doga", "quick"]
-    disaridan = True
-    for a in anlasmali:
-        if a in s:
-            disaridan = False
-            break
+def net_komisyon_hesapla(p: Police) -> float:
+    # Veritabanında net komisyon kayıtlıysa onu kullan (Yeni mantık)
+    if getattr(p, "komisyon", None) is not None and p.komisyon != 0.0:
+        return p.komisyon
+    
+    # Eski poliçeler için fallback hesaplama mantığı (Geriye dönük uyumluluk)
+    prim = p.prim or 0.0
+    oran = komisyon_orani_getir(p.sigorta_turu)
+    kaynak = getattr(p, "uretim_kaynagi", "Kendi")
+    
     komisyon = prim * oran
-    if disaridan: komisyon = komisyon / 2.0
+    if kaynak == "Dışarıdan":
+        komisyon *= 0.5
     return komisyon
 
 def uyar_seviyesi(kalan_gun: int) -> str:
@@ -385,17 +387,19 @@ def police_to_out(p: Police, db_session: Session) -> dict:
     kalan = (p.bitis_tarihi - bugun).days if p.bitis_tarihi else 0
     suresi_dolmus = (p.bitis_tarihi and p.bitis_tarihi < bugun) or (p.durum == "iptal")
     musteri = db_session.query(Musteri).filter(Musteri.id == p.musteri_id).first()
-    komisyon = hesapla_komisyon(p.sigorta_turu, p.sigorta_sirketi, p.prim)
+    
     return {
         "id": p.id, "musteri_id": p.musteri_id, "police_no": p.police_no, "sigorta_turu": p.sigorta_turu,
-        "sigorta_sirketi": p.sigorta_sirketi, "islem_turu": p.islem_turu or "Yeni Poliçe", "baslangic_tarihi": p.baslangic_tarihi,
+        "sigorta_sirketi": p.sigorta_sirketi, "islem_turu": p.islem_turu or "Yeni", 
+        "uretim_kaynagi": p.uretim_kaynagi or "Kendi", "baslangic_tarihi": p.baslangic_tarihi,
         "bitis_tarihi": p.bitis_tarihi, "prim": p.prim, "durum": p.durum, "arac_bilgisi": p.arac_bilgisi,
         "varlik_bilgisi": p.varlik_bilgisi, "aciklama": p.aciklama, "pdf_dosya_adi": p.pdf_dosya_adi,
         "kalan_gun": 0 if suresi_dolmus else kalan, "suresi_dolmus": suresi_dolmus,
         "uyar_seviyesi": "suresi_dolmus" if suresi_dolmus else uyar_seviyesi(kalan),
         "musteri_ad": musteri.ad if musteri else None, "musteri_soyad": musteri.soyad if musteri else None,
         "musteri_telefon": musteri.telefon if musteri else None,
-        "musteri_portfoy_sorumlusu": musteri.portfoy_sorumlusu if musteri else None, "komisyon": komisyon
+        "musteri_portfoy_sorumlusu": musteri.portfoy_sorumlusu if musteri else None, 
+        "komisyon": net_komisyon_hesapla(p)
     }
 
 @app.get("/")
@@ -540,35 +544,80 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
     try:
         baslangic = parse_tarih(payload.get("baslangic_tarihi"))
         bitis = parse_tarih(payload.get("bitis_tarihi"))
-        prim_deger = float(payload.get("prim") or 0) if payload.get("prim") is not None else None
+        prim_deger = float(payload.get("prim") or 0)
         police_no = payload.get("police_no")
-        islem_turu = payload.get("islem_turu", "Yeni Poliçe")
+        islem_tipi = payload.get("islem_tipi", "Yeni")
+        uretim_kaynagi = payload.get("uretim_kaynagi", "Kendi")
         arac_yeni = payload.get("arac_bilgisi")
         
         temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI, ZORUNLU_SIRKETLER)
         temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI, ZORUNLU_BRANSLAR)
 
+        # Ana poliçe kontrolü (İptal ve Zeyil işlemleri için gereklidir)
         ana_police = None
-        if police_no and ("plaka" in str(islem_turu).lower() or "zeyil" in str(islem_turu).lower() or "tahakkuk" in str(islem_turu).lower() or "ek" in str(islem_turu).lower()):
+        if police_no and islem_tipi in ["İptal", "İadeli Zeyil", "Primli Zeyil"]:
             ana_police = db.query(Police).filter(Police.police_no == police_no).first()
+            if not ana_police:
+                raise ValueError("Bu poliçe numarasına ait ana bir poliçe bulunamadı. İptal/Zeyil işlemi yapılamaz.")
 
-        if ana_police:
+        # --- YENİ VEYA YENİLEME İŞLEMLERİ ---
+        if islem_tipi in ["Yeni", "Yenileme"]:
+            komisyon_oran = komisyon_orani_getir(temiz_brans)
+            hesaplanan_komisyon = prim_deger * komisyon_oran
+            if uretim_kaynagi == "Dışarıdan":
+                hesaplanan_komisyon *= 0.5
+                
+            police = Police(
+                musteri_id=payload.get("musteri_id"), police_no=police_no, sigorta_turu=temiz_brans, 
+                sigorta_sirketi=temiz_sirket, islem_turu=islem_tipi, uretim_kaynagi=uretim_kaynagi,
+                baslangic_tarihi=baslangic, bitis_tarihi=bitis, prim=prim_deger, komisyon=hesaplanan_komisyon,
+                durum="aktif", arac_bilgisi=arac_yeni, varlik_bilgisi=payload.get("varlik_bilgisi"),
+                aciklama=payload.get("aciklama"), pdf_dosya_adi=payload.get("pdf_dosya_adi")
+            )
+            db.add(police); db.commit(); db.refresh(police)
+            return police_to_out(police, db)
+
+        # --- İPTAL VE ZEYİL İŞLEMLERİ (PRO-RATA HESAPLAMA) ---
+        else:
+            oran = komisyon_orani_getir(ana_police.sigorta_turu)
+            if ana_police.uretim_kaynagi == "Dışarıdan":
+                oran *= 0.5
+                
+            if islem_tipi == "İptal":
+                ana_police.durum = "iptal"
+                
+                # Kullanıcı tutar girmediyse pro-rata (gün esaslı) iade primi hesapla
+                if prim_deger == 0:
+                    toplam_gun = (ana_police.bitis_tarihi - ana_police.baslangic_tarihi).days
+                    kullanilan_gun = (bitis - ana_police.baslangic_tarihi).days
+                    
+                    if toplam_gun > 0 and kullanilan_gun >= 0:
+                        iade_orani = max(0, min(1, (toplam_gun - kullanilan_gun) / toplam_gun))
+                        prim_deger = (ana_police.prim or 0) * iade_orani
+                
+                ana_police.prim = (ana_police.prim or 0) - prim_deger
+                ana_police.komisyon = (ana_police.komisyon or 0) - (prim_deger * oran)
+                aciklama_ek = f" | İPTAL: {bitis.strftime('%d.%m.%Y')} tarihi itibariyle. İade: {prim_deger:.2f} TL"
+                ana_police.aciklama = f"{(ana_police.aciklama or '')}{aciklama_ek}".strip(" |")
+
+            elif islem_tipi == "İadeli Zeyil":
+                ana_police.prim = (ana_police.prim or 0) - prim_deger
+                ana_police.komisyon = (ana_police.komisyon or 0) - (prim_deger * oran)
+                aciklama_ek = f" | İadeli Zeyil: {prim_deger:.2f} TL iade."
+                ana_police.aciklama = f"{(ana_police.aciklama or '')}{aciklama_ek}".strip(" |")
+
+            elif islem_tipi == "Primli Zeyil":
+                ana_police.prim = (ana_police.prim or 0) + prim_deger
+                ana_police.komisyon = (ana_police.komisyon or 0) + (prim_deger * oran)
+                aciklama_ek = f" | Primli Zeyil: {prim_deger:.2f} TL eklendi."
+                ana_police.aciklama = f"{(ana_police.aciklama or '')}{aciklama_ek}".strip(" |")
+
             if arac_yeni: ana_police.arac_bilgisi = arac_yeni
-            if prim_deger: ana_police.prim = (ana_police.prim or 0) + prim_deger
-            ana_police.aciklama = (ana_police.aciklama or "") + f" | Ek Belge ({islem_turu}): Prim +{prim_deger} TL, Araç: {arac_yeni}"
-            if payload.get("pdf_dosya_adi"): ana_police.pdf_dosya_adi = payload.get("pdf_dosya_adi")
             db.commit(); db.refresh(ana_police)
             return police_to_out(ana_police, db)
 
-        police = Police(
-            musteri_id=payload.get("musteri_id"), police_no=police_no, sigorta_turu=temiz_brans, sigorta_sirketi=temiz_sirket,
-            islem_turu=islem_turu, baslangic_tarihi=baslangic, bitis_tarihi=bitis, prim=prim_deger,
-            durum=str(payload.get("durum", "aktif")).lower(), arac_bilgisi=arac_yeni, varlik_bilgisi=payload.get("varlik_bilgisi"),
-            aciklama=payload.get("aciklama"), pdf_dosya_adi=payload.get("pdf_dosya_adi")
-        )
-        db.add(police); db.commit(); db.refresh(police)
-        return police_to_out(police, db)
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/upload-parse")
@@ -615,11 +664,13 @@ async def api_upload_parse(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": f"PDF okuma hatası: {str(e)}"})
 
+
+# --- YENİ ÇOKLU SEÇİM RAPORLAMA ---
 class FinansalRaporRequest(BaseModel):
     baslangic: Optional[str] = None
     bitis: Optional[str] = None
-    sirket: Optional[str] = None
-    danisman: Optional[str] = None
+    sirket: Optional[List[str]] = None
+    danisman: Optional[List[str]] = None
     branslar: Optional[List[str]] = None
 
 @app.get("/api/finansal/filtreler")
@@ -638,17 +689,19 @@ def api_fin_rapor(payload: FinansalRaporRequest, db: Session = Depends(get_db)):
         query = query.filter(Police.baslangic_tarihi >= parse_tarih(payload.baslangic))
     if payload.bitis:
         query = query.filter(Police.baslangic_tarihi <= parse_tarih(payload.bitis))
-    if payload.sirket:
-        query = query.filter(Police.sigorta_sirketi == payload.sirket)
-    if payload.danisman:
-        query = query.filter(Musteri.portfoy_sorumlusu == payload.danisman)
+        
+    # List filtreleri (Frontend'den çoklu seçim geldiğinde devreye girer)
+    if payload.sirket and len(payload.sirket) > 0:
+        query = query.filter(Police.sigorta_sirketi.in_(payload.sirket))
+    if payload.danisman and len(payload.danisman) > 0:
+        query = query.filter(Musteri.portfoy_sorumlusu.in_(payload.danisman))
     if payload.branslar and len(payload.branslar) > 0:
         query = query.filter(Police.sigorta_turu.in_(payload.branslar))
 
     policeler = query.all()
 
-    ciro = sum(p.prim or 0 for p in policeler)
-    kar = sum(hesapla_komisyon(p.sigorta_turu, p.sigorta_sirketi, p.prim) for p in policeler)
+    ciro = sum(p.prim or 0.0 for p in policeler)
+    kar = sum(net_komisyon_hesapla(p) for p in policeler)
     adet = len(policeler)
 
     brans_dagilimi = {}
