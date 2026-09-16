@@ -23,7 +23,7 @@ DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
 # =========================================================================
-# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR (KULLANICI TALEBİ - 16.09.2026) 🔴
+# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR (KULLANICI TALEBİ)
 # =========================================================================
 
 ZORUNLU_SIRKETLER = [
@@ -166,18 +166,6 @@ def on_startup():
     init_db()
     eski_policeleri_otomatik_temizle()
 
-# ✅ LOGO DOSYASINI OKUYAN ENDPOINT
-@app.get("/api/logo")
-def get_logo():
-    olasi_isimler = ["vektorel_logo.svg", "logo.svg", "logo.png", "logo.jpg", "logo.jpeg"]
-    for isim in olasi_isimler:
-        dosya_yolu = BASE_DIR / isim
-        if dosya_yolu.exists():
-            return FileResponse(dosya_yolu)
-    
-    yedek_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150"><text x="200" y="75" font-family="Arial" font-size="30" font-weight="bold" fill="#0A192F" text-anchor="middle">ALTUN KARDEŞLER</text><text x="200" y="110" font-family="Arial" font-size="18" fill="#C6A25D" text-anchor="middle">SİGORTA</text></svg>"""
-    return Response(content=yedek_svg, media_type="image/svg+xml")
-
 def normalize_string(s: str) -> str:
     if not s: return ""
     s = s.upper().replace("İ", "I").replace("I", "I").replace("Ş", "S").replace("Ğ", "G").replace("Ü", "U").replace("Ö", "O").replace("Ç", "C")
@@ -189,6 +177,22 @@ def gelismis_firma_temizle(s: str) -> str:
     s = re.sub(r'\b(LTD|STI|SANAYI|SAN|TICARET|TIC|AS|A\.S\.|LIMITED|SIRKETI|VE)\b', '', s)
     s = re.sub(r'[^A-Z0-9]', '', s)
     return s
+
+# --- YENİ EKLENEN ENDPOINTLER ---
+@app.get("/vektorel_logo_2.svg")
+def serve_logo():
+    logo_path = BASE_DIR / "vektorel_logo_2.svg"
+    if logo_path.exists():
+        return FileResponse(logo_path, media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Logo bulunamadı")
+
+@app.get("/api/sabitler")
+def api_sabitler():
+    return {
+        "sirketler": sorted(ZORUNLU_SIRKETLER),
+        "branslar": sorted(ZORUNLU_BRANSLAR)
+    }
+# --------------------------------
 
 @app.get("/api/sistemi-temizle")
 def sistemi_temizle(db: Session = Depends(get_db)):
@@ -601,10 +605,10 @@ async def api_upload_parse(file: UploadFile = File(...)):
             if bulunan_musteri:
                 ayiklanan["musteri"] = {"id": bulunan_musteri.id, "ad": bulunan_musteri.ad, "soyad": bulunan_musteri.soyad, "telefon": bulunan_musteri.telefon, "portfoy_sorumlusu": bulunan_musteri.portfoy_sorumlusu}
                 ayiklanan["musteri_eslesti"] = True
-                ayiklanan["mesaj"] = f"Mevcut müşteri bulundu: {bulunan_musteri.ad} {bulunan_musteri.soyad} ({bulunan_musteri.portfoy_sorumlusu})."
+                ayiklanan["mesaj"] = f"Mevcut müşteri bulundu: {bulunan_musteri.ad} {bulunan_musteri.soyad}"
             else:
                 ayiklanan["musteri_eslesti"] = False
-                ayiklanan["mesaj"] = "Yeni müşteri algılandı."
+                ayiklanan["mesaj"] = "Yeni müşteri. Lütfen bilgileri kontrol edip kaydedin."
         finally:
             db.close()
         return ayiklanan
