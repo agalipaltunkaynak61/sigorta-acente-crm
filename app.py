@@ -166,7 +166,7 @@ def on_startup():
     init_db()
     eski_policeleri_otomatik_temizle()
 
-# ✅ LOGO DOSYASINI OKUYAN ENDPOINT (YENİ)
+# ✅ LOGO DOSYASINI OKUYAN ENDPOINT
 @app.get("/api/logo")
 def get_logo():
     olasi_isimler = ["vektorel_logo.svg", "logo.svg", "logo.png", "logo.jpg", "logo.jpeg"]
@@ -175,7 +175,6 @@ def get_logo():
         if dosya_yolu.exists():
             return FileResponse(dosya_yolu)
     
-    # Dosya bulunamazsa varsayılan metin tabanlı SVG döndür (Kırık resim çıkmasın diye)
     yedek_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150"><text x="200" y="75" font-family="Arial" font-size="30" font-weight="bold" fill="#0A192F" text-anchor="middle">ALTUN KARDEŞLER</text><text x="200" y="110" font-family="Arial" font-size="18" fill="#C6A25D" text-anchor="middle">SİGORTA</text></svg>"""
     return Response(content=yedek_svg, media_type="image/svg+xml")
 
@@ -605,7 +604,7 @@ async def api_upload_parse(file: UploadFile = File(...)):
                 ayiklanan["mesaj"] = f"Mevcut müşteri bulundu: {bulunan_musteri.ad} {bulunan_musteri.soyad} ({bulunan_musteri.portfoy_sorumlusu})."
             else:
                 ayiklanan["musteri_eslesti"] = False
-                ayiklanan["mesaj"] = "Yeni müşteri. Lütfen bilgileri kontrol edip kaydedin."
+                ayiklanan["mesaj"] = "Yeni müşteri algılandı."
         finally:
             db.close()
         return ayiklanan
