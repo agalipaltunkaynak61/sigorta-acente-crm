@@ -39,6 +39,9 @@
     .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     
+    .scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
     .nav-btn { position: relative; }
     .nav-btn span {
         position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
@@ -166,15 +169,13 @@
       </div>
 
       <div class="flex flex-col md:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
-        <!-- Sol Menü (Kampanyalar) -->
+        <!-- Sol Menü -->
         <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-4 h-full flex flex-col shrink-0">
           <h3 class="font-bold text-xs text-slate-400 uppercase mb-4 px-2 shrink-0">Satış Fırsatları (Kampanyalar)</h3>
-          <div id="pazarlama-sekmeler" class="flex-1 overflow-y-auto flex flex-col gap-2">
-            <!-- JS ile dolacak -->
-          </div>
+          <div id="pazarlama-sekmeler" class="flex-1 overflow-y-auto flex flex-col gap-2"></div>
         </div>
         
-        <!-- Sağ Liste (Müşteriler & Satış Cümlesi) -->
+        <!-- Sağ Liste -->
         <div class="w-full md:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full flex flex-col min-h-0">
           <div class="mb-5 shrink-0">
             <div class="flex items-center justify-between border-b pb-2 mb-3">
@@ -269,10 +270,7 @@
         </div>
         <p class="font-bold text-brand-navy text-base pointer-events-none">Yapay Zeka ile Poliçe Oku</p>
         <p class="text-xs text-slate-500 pointer-events-none">Poliçe PDF'ini sürükleyin veya tıklayın.</p>
-        <!-- Durum Bildirimleri -->
-        <div id="pdf-durum" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10 font-bold text-brand-navy text-lg transition-all shadow-inner">
-            İşleniyor...
-        </div>
+        <div id="pdf-durum" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10 font-bold text-brand-navy text-lg transition-all shadow-inner">İşleniyor...</div>
       </label>
 
       <div class="flex gap-4 mb-4 text-sm font-semibold border-b border-slate-200 shrink-0">
@@ -326,9 +324,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             <div id="fin-brans-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
-              <div id="fin-brans-container" class="flex flex-col gap-1">
-                  <!-- JS ile checkboxlar dolacak -->
-              </div>
+              <div id="fin-brans-container" class="flex flex-col gap-1"></div>
             </div>
           </div>
         </div>
@@ -350,16 +346,15 @@
       </div>
     </section>
 
-    <!-- EĞİTİM MERKEZİ (ÖZEL TASARIM) -->
+    <!-- EĞİTİM MERKEZİ (OYUNLAŞTIRILMIŞ & SATIŞ ARGÜMANLARI MODÜLÜ) -->
     <section id="view-dersler" class="hidden fade-in h-full flex flex-col max-w-7xl mx-auto">
       
       <!-- Akademi Hero Banner -->
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 bg-brand-navy p-6 rounded-2xl shadow-lg shrink-0 relative overflow-hidden">
-        <!-- Dekoratif Çember -->
         <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
         <div class="relative z-10">
-            <h2 class="text-3xl font-serif font-bold text-brand-gold tracking-tight mb-1">Eğitim Merkezi</h2>
-            <p class="text-sm text-slate-300 font-medium">Satış ekipleri için kurumsal eğitim ve karşılaştırma sunumları</p>
+            <h2 class="text-3xl font-serif font-bold text-brand-gold tracking-tight mb-1">Eğitim Merkezi & Satış Asistanı</h2>
+            <p class="text-sm text-slate-300 font-medium">Satış ekipleri için sunumlar ve "Müşteriyi İkna Etme" argümanları</p>
         </div>
       </div>
       
@@ -367,18 +362,17 @@
         <!-- Sol Menü -->
         <div class="w-full md:w-1/4 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-full flex flex-col shrink-0">
             <h3 class="font-black text-[11px] tracking-widest text-slate-400 uppercase mb-4 px-2">Kategoriler</h3>
-            <div id="ders-kategoriler" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1">
-                <!-- JS dolduracak -->
-            </div>
+            <div id="ders-kategoriler" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1"></div>
         </div>
         
         <!-- Sağ İçerik -->
-        <div class="w-full md:w-3/4 bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-inner h-full flex flex-col min-h-0">
+        <div class="w-full md:w-3/4 bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-inner h-full flex flex-col min-h-0 relative">
             <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 shrink-0">
-                <h3 id="secilen-kategori-baslik" class="text-xl font-bold text-brand-navy">Sunumlar</h3>
+                <h3 id="secilen-kategori-baslik" class="text-xl font-bold text-brand-navy flex items-center gap-2">Sunumlar</h3>
             </div>
-            <div id="ders-icerik" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 content-start pr-2">
-                <!-- JS dolduracak -->
+            
+            <div id="ders-icerik" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 content-start pr-2 pb-4 pt-1">
+                <!-- Şık Oyunlaştırılmış PDF Kartları Buraya Gelecek -->
             </div>
         </div>
       </div>
@@ -386,7 +380,52 @@
 
   </main>
   
-  <!-- MODAL FORMLAR -->
+  <!-- DERS / SATIŞ ARGÜMANLARI ÖZEL MODALI -->
+  <div id="ders-detay-modal" class="hidden fixed inset-0 bg-brand-navy/80 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all">
+      <div class="bg-white rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] w-full max-w-4xl max-h-[90vh] overflow-hidden relative flex flex-col scale-in border-4 border-white">
+          
+          <!-- Kapat Butonu -->
+          <button onclick="kapatDersDetay()" class="absolute top-6 right-6 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 p-2.5 rounded-full transition-colors z-20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+          
+          <!-- Modal Üst Alan -->
+          <div class="bg-gradient-to-r from-brand-navy to-brand-navyhover p-8 shrink-0 relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-80 h-80 bg-brand-gold opacity-10 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+              <span id="detay-kategori-badge" class="bg-brand-gold text-brand-navy text-[11px] font-black tracking-widest px-3 py-1 rounded-full uppercase shadow-sm">KATEGORİ</span>
+              <h3 id="detay-baslik" class="text-3xl md:text-4xl font-serif font-bold text-white mt-4 mb-2 pr-16 drop-shadow-md">Sunum Başlığı</h3>
+              <p class="text-brand-light/80 text-sm font-medium">Müşteriye Sunulacak Temel Avantajlar ve Satış Argümanları</p>
+          </div>
+          
+          <!-- Modal Alt Alan (Argümanlar + Buton) -->
+          <div class="flex-1 overflow-y-auto p-8 bg-slate-50 flex flex-col md:flex-row gap-8">
+              <!-- Sol Panel (Eylem / İndirme) -->
+              <div class="w-full md:w-64 shrink-0 flex flex-col gap-4 order-2 md:order-1">
+                  <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center sticky top-0">
+                      <div class="w-20 h-20 bg-red-50 text-red-500 rounded-[20px] flex items-center justify-center mx-auto mb-4 border border-red-100 shadow-inner">
+                          <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+                      </div>
+                      <h4 class="font-bold text-brand-navy text-sm mb-2">Orijinal Doküman</h4>
+                      <p class="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Limitleri, özel koşulları ve poliçe şartlarını pdf üzerinden inceleyebilirsiniz.</p>
+                      <a href="#" id="detay-pdf-btn" target="_blank" class="block w-full py-3.5 px-4 bg-brand-gold text-brand-navy font-black text-sm rounded-xl hover:bg-brand-goldhover hover:shadow-[0_10px_20px_rgba(198,162,93,0.3)] hover:-translate-y-1 transition-all">PDF'İ GÖRÜNTÜLE</a>
+                  </div>
+              </div>
+              
+              <!-- Sağ Panel (Argümanlar Listesi) -->
+              <div class="flex-1 order-1 md:order-2">
+                  <h4 class="text-brand-navy font-bold text-lg mb-4 flex items-center gap-2 border-b border-slate-200 pb-3">
+                      <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                      Müşteri Neden Bu Şirketi Seçmeli?
+                  </h4>
+                  <div id="detay-argumanlar" class="space-y-4">
+                      <!-- JS Dolduracak -->
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- GENEL MODAL (Yeni Kayıt vs) -->
   <div id="modal" class="hidden fixed inset-0 bg-brand-navy/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 max-h-[90vh] overflow-y-auto relative">
       <button onclick="modalKapat()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -410,45 +449,225 @@
     let pazarlamaDataCache = {};
     window.dersDataCache = {};
 
-    // ====== GELİŞMİŞ ÇAPRAZ SATIŞ KAMPANYALARI ======
+    // ====== SATIŞ ARGÜMANLARI VERİ TABANI ======
+    const SATIS_ARGUMANLARI = {
+        "Kasko Sigortası": {
+            "Aksigorta": [
+                "<b>Hasarsızlık Koruma (Araç Satışı Sonrası):</b> Araç satışı sonrası 180 gün (6 ay) içinde tekrar Aksigorta tercih edilirse hasarsızlık indirimi korunur.",
+                "<b>Mini Onarım Avantajları:</b> Beyan yeterlidir; tutanak veya ekspertiz gerekmez. Auto King / RS Servis'te 2 yıl garanti sunulur. Tek yan cephede kaporta çizikleri 30 cm limit olmaksızın bedelsiz giderilir.",
+                "<b>Taksit Kolaylığı:</b> Kaskoya 9 taksit imkânı tanınır.",
+                "<b>E-Kasko (Elektrikli Araç):</b> Üretici garanti süresince muafiyetsiz batarya teminatı, yanlış şarj dolum hasarları teminatı. Yılda 2 kez mobil şarj imkânı (belirli illerde)."
+            ],
+            "Axa": [
+                "<b>Yeni Değer Teminatı:</b> Elit ve Maksimum paketlerinde 3 yıl boyunca yeni değer teminatı sunulur.",
+                "<b>Garanti Koşulları:</b> AXA Garantili Servislerde ömür boyu işçilik ve 2 yıl parça garantisi verilir.",
+                "<b>İkame Araç Süresi:</b> Elit ve Maksimum paketlerinde 30 güne kadar aynı segment (maks C) ikame araç sağlanır.",
+                "<b>Hasarsızlık Koruması:</b> Garantili Servis onarımları, bir defaya mahsus cam kırılması ve kusursuz kazalarda hasarsızlık bozulmaz.",
+                "<b>Özel Ekler:</b> 50.000 TL çekme kurtarma, yanlış akaryakıt dolumu ve sokaktaki dostlarımızın güvencesi yer alır."
+            ],
+            "Hepiyi": [
+                "<b>Fiyat & Taksit:</b> %75'e varan avantajlı prim, 12 aya varan taksit imkânı ve Doğan Holding güvencesi.",
+                "<b>Marka Kasko (MG & Suzuki):</b> Orijinal parça, eskime payı düşülmeme, anahtarla çalınmada muafiyet uygulanmama.",
+                "<b>Alternatif Kasko:</b> Ekonomik bütçeler için çift taraflı çarpışma, çalınma ve yanma temel risklerini kapsayan ekonomik model.",
+                "<b>Koruma Paketi:</b> Kişisel eşya, hukuksal koruma, yılda 1 kez vale hizmeti, özel şoför ve lastik saklama içerir."
+            ],
+            "Neova": [
+                "<b>NeoMini Onarım:</b> RS Servis güvencesiyle geniş kapsamlı mini yama, göçük düzeltme, plastik tampon onarımı (limitsiz).",
+                "<b>Hasarsızlar Kulübü:</b> Hasarsızlık süresi sona erdikten sonra 3 ay korunur; indirim araç bazlı değil sigortalı kişiye bağlıdır.",
+                "<b>NeoPrestij Kasko:</b> 0-5 yaş lüks araçlar için limitsiz ikame araç, limitsiz çekici ve limitsiz İMM.",
+                "<b>NeoEnerjik Kasko:</b> Elektrikli araçlar için batarya koruma, şarj ekipmanları güvencesi ve mobil şarj asistansı."
+            ],
+            "Quick": [
+                "<b>Quick Kasko:</b> %20 peşin ödeme indirimi, ücretsiz lastik saklama ve değişimi, eskime payı düşmeme, sınırsız İMM.",
+                "<b>KASKONOMİQ:</b> Araç yaşı sınırı olmaksızın uygulanır. %15 veya %25 muafiyet seçeneğiyle düşük prim avantajı sağlar. Yılda 1 kez 7 gün ikame araç."
+            ],
+            "Türkiye": [
+                "<b>Dar (Pert) Kasko:</b> 4-20 yaş araçlar için sadece pert ve çalınma teminatı ile %50'ye varan prim avantajı.",
+                "<b>T-Kasko (TOGG Özel):</b> Batarya değişimi, orijinal şarj kabloları hırsızlık güvencesi ve siber risk teminatı.",
+                "<b>Marka Özel Kasko:</b> Fiat Connect ile %10 indirim, VW için %60 kademeli hasarsızlık avantajı.",
+                "<b>Traktör Kasko:</b> Tarla, bağ, bahçe koşullarında devrilme riski ile römork/pulluk ekleme imkânı."
+            ]
+        },
+        "İş Yeri Sigortası": {
+            "Aksigorta": [
+                "<b>Ödül ve Deneyim:</b> Mükemmel Müşteri Yönetimi ve Engelsiz Müşteri Deneyimi ödülleri.",
+                "<b>İletişim & Asistans:</b> 444 27 27 üzerinden 7/24 ücretsiz hizmet. Tesisat, çilingir (250 TL), Cam işleri (450 TL - Yılda 3 kez).",
+                "<b>Partner Fırsatları:</b> SushiCo, Sosyopix, CampusOnline, Eşarj indirim ve puan kampanyaları.",
+                "<b>Teminat Kapsamı:</b> Kâr/Kira Kaybı, İşveren Mali Sorumluluk, Makine Kırılması dahil geniş kapsam."
+            ],
+            "Axa": [
+                "<b>Temel Yaklaşım:</b> İşyerindeki canlı veya cansız her unsurun zor durumda kalmasını önleyen zengin ek hizmet grupları.",
+                "<b>Geniş Teminatlar:</b> Dahili su, terör, taşıt çarpması, emniyeti suistimal, taşınan para, elektronik cihaz.",
+                "<b>Özel Ek Hizmetler:</b> Geçici adres nakli, çalışan eşyaları, izolasyon eksikliği, arızi inşaat, siber asistans."
+            ],
+            "Neova": [
+                "<b>Fark Yaratan Model:</b> Faizsiz sigortacılık (Katılım) modeli ile faaliyet gösterir. Bakiye iade uygulaması bulunur.",
+                "<b>Ürün Çeşitleri:</b> NeoKOBİ Paket, Otel Paket, Endüstriyel Paket, Akaryakıt Paket.",
+                "<b>Dijital Platform:</b> Neova Pusula ile işletmelere rehberlik hizmeti (444 1 636)."
+            ],
+            "Quick": [
+                "<b>Quick Yedekleyen:</b> Eksik sigorta uygulanmaz; işletmenin gerçek değeri tam korunur, oranlama yapılmaz.",
+                "<b>Quick Basiretli Tacir:</b> Yüksek limitler sunar (Üçüncü şahıs ve işveren mali sorumlulukta 100.000 TL'ye varan limitler).",
+                "<b>Bina Tamamlama Sigortası:</b> İflas veya vefat durumunda arsa sahiplerine kira desteği sağlayan haczedilemez kefalet modeli."
+            ],
+            "Türkiye": [
+                "<b>Sektörel Uzmanlıklar:</b> Eczane (Mesleki sorumluluk), Akaryakıt (Çevre kirliliği, pompacı nakit hırsızlığı), Otel Paketleri.",
+                "<b>Yüksek Asistans Limitleri:</b> Tesisat, elektrik, anahtar: 5.000 TL. Cam işleri: 7.500 TL (Yılda 3 defa).",
+                "<b>Sınırsız Hizmet:</b> İş yerinde kalan kişinin kurtarılması ve ambulans hizmetleri sınırsızdır."
+            ]
+        },
+        "Konut Sigortası": {
+            "Aksigorta": [
+                "<b>Ürün Paketleri:</b> Bütçeye uygun Mini, Standart ve Premium konut seçenekleri.",
+                "<b>Diş Sağlığı Paketi:</b> Yılda 1 kez ücretsiz muayene, diş taşı temizliği ve tek diş röntgeni.",
+                "<b>Premium Ayrıcalıkları:</b> Kazayla eşya kırılması, gıda bozulması, GES ve pati ferdi kaza teminatı."
+            ],
+            "Axa": [
+                "<b>Ücretsiz Asistans Limitleri:</b> Tesisat ve Cam (7.500 TL), Elektrik (5.000 TL), Çilingir (3.000 TL).",
+                "<b>Özel Ayrıcalıklar:</b> Evde çocuk/yaşlı bakımı, Çocuğum Güvende asistans, Evde küçük işler hizmeti.",
+                "<b>Evcil Hayvan:</b> Yılda 1 kez ücretsiz veteriner paketi ve 3 gün otel konaklama imkânı.",
+                "<b>Kiracı Hakları:</b> İşten çıkarma durumunda 1 aylık kira yardımı (30.000 TL) ve Taşınma asistansı."
+            ],
+            "Neova": [
+                "<b>Ücretsiz Bakım:</b> Yılda 1 kez ücretsiz klima ve kombi bakımı.",
+                "<b>Yüksek Limitli Acil Yardım:</b> Tesisat, elektrik, çilingir, doktor hizmetlerinde 25.000 TL limit.",
+                "<b>Elektronik Cihaz:</b> Lüks paketlerde 15 yaşa kadar olan cihazlar güvence altında.",
+                "<b>Geniş Kapsam:</b> 4 yıldızlı otelde 3 gün otel hizmeti ve güvenlik hizmeti."
+            ],
+            "Quick": [
+                "<b>Ücretsiz Bakım:</b> Garanti süresi dolmuş ev tipi kombi ve klima için periyodik bakım.",
+                "<b>Halı Yıkama:</b> Yılda 1 kez 6m2 halı için ücretsiz yıkama (evden alım teslimat).",
+                "<b>Teminat Yapısı:</b> Yangın, deprem, sel, hırsızlık, dahili su içeren kolay anlaşılır tek paket."
+            ],
+            "Türkiye": [
+                "<b>Alternatifler:</b> Ekonomik Pratik Ev ve Geniş kapsamlı Konut Ekstra.",
+                "<b>Asistans:</b> Profesyonel ev hizmetleri ve hukuki danışmanlık.",
+                "<b>Ekstra Teminatlar:</b> İkamet değişikliği, kapkaç, gıda bozulması ve kira kaybı."
+            ]
+        },
+        "Mühendislik & All Risk": {
+            "Aksigorta": [
+                "<b>İkinci El Makine:</b> Şartların sağlanması halinde 2. el makineler için de sigorta yapılabilme imkanı.",
+                "<b>Esnek Montaj:</b> Montaj sigortasında teminat, alana inişle başlayıp testlerle biter.",
+                "<b>Ödüller & Partnerlik:</b> Mükemmel Müşteri Yönetimi ödülü; SushiCo, Eşarj kurumsal indirimleri."
+            ],
+            "Axa": [
+                "<b>Ek Teminat Zenginliği:</b> Makine kırılmasında kâr kaybı ve hareketli makine geniş kasko imkânı.",
+                "<b>Elektronik Cihaz Artıları:</b> Seyyar cihaz sevkiyatı ve manyetik bant/disk fiziki hasar güvencesi.",
+                "<b>Proje Kapsamı:</b> Enkaz kaldırma, geçici şantiye tesisleri ve ekspres nakliye masrafları güvencesi."
+            ],
+            "Neova": [
+                "<b>Katılım Modeli:</b> İslami finans prensiplerine uygun, faizsiz sigortacılık modeli.",
+                "<b>Adil Yapı:</b> Risk havuzunda kalan bakiyelerin katılımcılara iade edilmesi uygulaması.",
+                "<b>Reasürans:</b> Faize dayalı olmayan koasürans ve tekerrül ortaklık yapıları."
+            ],
+            "Türkiye": [
+                "<b>Geniş Kapsam:</b> Hırsızlık, tasarımcı rizikosu, şantiye dışı depolama ve inşaat hatalarına karşı güvence.",
+                "<b>Saha ve SGK Entegrasyonu:</b> Günlük inşaat işçi sigortalılığı için SGK ve e-Devlet entegrasyonu (işe giriş kolaylığı)."
+            ]
+        },
+        "Nakliyat Sigortası": {
+            "Aksigorta": [
+                "<b>Esnek Poliçeler:</b> Kati, geçici (flotan), abonman ve blok poliçe alternatifleri.",
+                "<b>Kıymet Sigortası:</b> Personelin nakit, çek gibi kıymetleri taşıması sırasındaki hırsızlık/yağma risklerine tam güvence.",
+                "<b>Partner Avantajları:</b> İşletme sahiplerine özel kurumsal indirim ve puan kampanyaları."
+            ],
+            "Axa": [
+                "<b>Esnek Bekleme:</b> Yurtdışı taşımalarda gümrükte uzun bekleme süreleri (havayolu 30, deniz/kara 60 gün).",
+                "<b>Tekne/Yat:</b> Bot/motor çalınması, çevre kirliliği ve yat asistans ek teminatları.",
+                "<b>Taşıyıcı Sorumluluk:</b> Karayolu taşımacılığında mücbir sebepler hariç taşıyıcının hukuki sorumluluğunu korur."
+            ],
+            "Neova": [
+                "<b>Katılım Esaslı:</b> Üretici ve ticaret erbabı için faizsiz sigortacılık modeline dayalı koruma.",
+                "<b>Bakiye İade:</b> Danışma Komitesi onayı ve havuzda kalan bakiyelerin iadesi uygulaması."
+            ],
+            "Türkiye": [
+                "<b>Kapsamlı Ağ:</b> Yurt içi/dışı kara, deniz, hava ve demiryolu taşımacılığı güvencesi.",
+                "<b>Detaylı Primleme:</b> Emtianın ambalajlama, taşıma şekli ve güzergahına göre hassas prim hesabı.",
+                "<b>Alternatif Yapılar:</b> Geniş, dar ve tam ziya olmak üzere ihtiyaca yönelik esneklik."
+            ]
+        },
+        "Özel Sağlık Sigortası": {
+            "Aksigorta": [
+                "<b>Bağımsız Çocuk:</b> 18 yaş altındaki çocuklar ebeveynlerinden bağımsız sigortalanabilir.",
+                "<b>Ücretsiz Check-up & Diş:</b> 18+ için mamografi/PSA check-up ve kapsamlı dental check-up (polisaj dahil).",
+                "<b>Hasarsızlık İndirimi:</b> Yatarak planlarda kullanılmadığında 1. yıl %10, 2. yıl %20 prim indirimi.",
+                "<b>Kısa Bekleme:</b> Doğum teminatı için sadece 5 aylık kısa bekleme süresi."
+            ],
+            "Axa": [
+                "<b>ÖBYG Avantajı:</b> İlk yatarak tedavi kullanımı ve küçük müdahaleler hasar/prim oranını etkilemez.",
+                "<b>AXA Plus Bebeği:</b> Bebeklere doğuştan ÖBYG, bekleme süresiz haklar, doğumsal genetik anomali ve şaşılık güvencesi.",
+                "<b>Ücretsiz Asistans:</b> Psikolojik danışmanlık (%40 indirim), diyetisyen (%30 indirim), One Dose Online doktor."
+            ],
+            "Türkiye": [
+                "<b>Geniş Yaş Skalası:</b> 0-60 yaş arası yeni giriş; öğrencilerin 25 yaşına kadar ailesiyle kalabilmesi.",
+                "<b>Zengin Ekstra Paketler:</b> Ücretsiz check-up, kapsamlı diş muayenesi (dolgu, çekim dahil) ve göz paketi.",
+                "<b>Türkiye Bebek:</b> Doğum masrafları karşılanan bebeklere doğuştan ÖBYG.",
+                "<b>Vergi Avantajı:</b> Primlerin brüt ücretin %15'ine kadar gelir vergisinden düşülebilmesi."
+            ]
+        },
+        "Site & Ortak Alan": {
+            "Aksigorta": [
+                "<b>Özel Sorumluluk:</b> Otopark kazalarında ve asansör kazalarında yönetiminin hukuki sorumluluklarına tam güvence.",
+                "<b>Kapsam:</b> Ortak alanlar, emtia, kasa, kıymetli eşya ve site sakinlerinin güvenliği.",
+                "<b>Ek Fırsatlar:</b> Yönetim / sakinler için geçerli Eşarj, MinyCenter vb. marka indirimleri."
+            ],
+            "Axa": [
+                "<b>Ekstra İndirim:</b> Bir BES sözleşmesi başlatılması durumunda konut/site tekliflerinde %25 net indirim.",
+                "<b>Teminat Zenginliği:</b> Yakıt sızması, makine kırılması, kar ağırlığı, elektrik hasarları ve elektronik cihaz koruması."
+            ],
+            "Neova": [
+                "<b>Net Kategorizasyon:</b> Bina içi, dış zemin, sosyal mekanlar ve havuz/GES gibi donanımların şeffaf tanımı.",
+                "<b>Personel Sorumluluğu:</b> Kapıcı, bekçi veya taşeronların 3. şahıslara verebileceği zararlarda yönetici güvencesi."
+            ],
+            "Türkiye": [
+                "<b>Yönetici Yükü Hafifletme:</b> Site yöneticilerinin üzerindeki ağır mali ve hukuki sorumluluğu devralma.",
+                "<b>Zengin Asistans:</b> Acil tesisat, doktor, otel hizmeti ve profesyonel ev/güvenlik organizasyonu.",
+                "<b>Ekstra Teminatlar:</b> İşveren mali mesuliyet, emniyeti suistimal, taşınan para, taşınmaza bağlı hukuksal koruma."
+            ]
+        },
+        "Tamamlayıcı Sağlık Sigortası": {
+            "Aksigorta": [
+                "<b>Bağımsız Sigortalama:</b> 18 yaş altındaki çocuklar ebeveyni olmaksızın tek başına poliçe sahibi olabilir.",
+                "<b>Ücretsiz Hizmetler:</b> 18+ Check-up, Mamografi, PSA ve Kapsamlı Diş (polisaj dahil).",
+                "<b>Ağ ve Bekleme:</b> 4.000'i aşkın kurum ağı; yatarak tedavide sadece 3 ay bekleme süresi."
+            ],
+            "Axa": [
+                "<b>65 Yaş Sınırı:</b> Yönetmelikte 60 olan ÖBYG taahhüt sınırı müşteri lehine 65 yaşa çıkarılmıştır.",
+                "<b>AXA Plus Bebeği:</b> İlk 30 günde bildirilen bebeklere bekleme süresiz ÖBYG ve doğumsal risk güvencesi.",
+                "<b>Geniş Seçenek:</b> 650'ye yakın hastane ile en yaygın özel hastane ağı; yılda 10 vaka ayakta tedavi hakkı."
+            ],
+            "Hepiyi": [
+                "<b>Dr. Online Ekstrası:</b> Ayakta tedavi limitinden DÜŞMEDEN 30 defa ücretsiz (10 psikolog, 10 diyetisyen, 10 branş) online görüşme.",
+                "<b>ÖBYG Avantajı:</b> 64 yaşından önce ÖBYG kazananlar, 64 yaşından sonra ek prim ödemeden devam eder.",
+                "<b>Fark Ücretleri:</b> Kamu üniversite hastanelerinde öğretim üyesi fark tutarlarının geri ödenmesi."
+            ],
+            "Neova": [
+                "<b>Vefa Paketi:</b> Sigortalının anne-babasına özel online pratisyen görüşmesi ve kurumlarda indirim.",
+                "<b>Sünnet Teminatı:</b> 0-12 yaş erkek çocukları için özel sünnet hizmeti karşılama.",
+                "<b>Yurt Dışı Teminatı:</b> Fatura ibrazıyla yılda 1 kez 200 USD limitli yurt dışı doktor muayenesi desteği."
+            ],
+            "Quick": [
+                "<b>Esnek Planlar:</b> Aynı poliçe içinde aile bireylerine farklı plan ve network ağları seçebilme özgürlüğü.",
+                "<b>Trafik Kazası TSS:</b> Normal hastalıkları kapsamasa da sadece trafik kazası giderlerini + online diyetisyen/psikolog içeren çok ekonomik bir alternatif ürün.",
+                "<b>Ebeveynsiz Çocuk:</b> 18 yaş altı çocukların ebeveynsiz sigortalanabilmesi (14 günden itibaren)."
+            ],
+            "Türkiye": [
+                "<b>Genç TSS (16-25 Yaş):</b> Gençlere özel sabit prim, cilt bakımı, spor salonu üyeliği, SPA ve uçak bileti indirimleri.",
+                "<b>Ekonomik Yapı:</b> Aynı poliçede 2 ve üzeri kişi için %10 Aile İndirimi; primlerin vergiden düşülebilmesi.",
+                "<b>Göz & Diş:</b> Yılda 1 kez göz muayene ve diş muayene ücretsiz destek paketleri."
+            ]
+        }
+    };
+
+    // ====== ÇAPRAZ SATIŞ KAMPANYALARI ======
     const PAZARLAMA_KAMPANYALAR = {
-      "dask_konut": {
-        baslik: "1. DASK ➔ Konut Sigortası",
-        cumleler: [
-          "DASK poliçeniz evinizin sadece binasını korur; eşyalarınızı ve su baskını risklerini güvenceye almak için çok küçük bir farkla Konut Sigortası ekleyelim.",
-          "DASK işleminiz hazır, ancak evinizdeki değerli eşyalarınız güvencesiz kalmasın. Konut poliçesiyle tam koruma sağlamamızı ister misiniz?"
-        ]
-      },
-      "arac_konut": {
-        baslik: "2. Kasko / Trafik ➔ Konut Sigortası",
-        cumleler: [
-          "Aracınızı güvenceye aldık, peki yaşam alanınız için de aynı özeni gösterelim mi? Konut sigortasıyla evinizi her türlü riske karşı koruyabiliriz."
-        ]
-      },
-      "arac_tss": {
-        baslik: "3. Kasko / Trafik ➔ Tamamlayıcı Sağlık Sigortası (TSS)",
-        cumleler: [
-          "Aracınızın kaskosu tamam, peki kendi sağlığınız? Özel hastanelerde fark ücreti ödemeden tedavi olabileceğiniz TSS teklifimizi incelemek ister misiniz?"
-        ]
-      },
-      "konut_ferdi": {
-        baslik: "4. Konut ➔ Ferdi Kaza / Hayat Sigortası",
-        cumleler: [
-          "Evinizi her türlü riske karşı koruma altına aldık. Peki beklenmeyen bir kaza durumunda ailenizin yaşam standardını kim koruyacak? Ferdi kaza poliçesi ekleyelim."
-        ]
-      },
-      "tss_oss": {
-        baslik: "5. TSS ➔ Özel Sağlık Sigortası (ÖSS)",
-        cumleler: [
-          "Tamamlayıcı Sağlık poliçenizi uzun süredir kullanıyorsunuz. Bütçenizi çok yormadan, limitleri çok daha geniş olan Özel Sağlık Sigortası'na geçiş yapalım mı?"
-        ]
-      },
-      "tss_kasko": {
-        baslik: "6. TSS ➔ Kasko Sigortası",
-        cumleler: [
-          "Sağlığınızı Özel Hastanelerde güvence altına almışsınız, ancak sistemimizde aracınız için kasko görünmüyor. Onu da tek elde toplayalım mı?"
-        ]
-      }
+      "dask_konut": { baslik: "1. DASK ➔ Konut", cumleler: ["DASK poliçeniz evinizin sadece binasını korur; eşyalarınızı da güvenceye alalım mı?"] },
+      "arac_konut": { baslik: "2. Kasko/Trafik ➔ Konut", cumleler: ["Aracınızı güvenceye aldık, evinizi de koruyalım mı?"] },
+      "arac_tss": { baslik: "3. Kasko/Trafik ➔ TSS", cumleler: ["Aracınız tamam, peki kendi sağlığınız? TSS ile özel hastane farkı ödemeyin."] },
+      "konut_ferdi": { baslik: "4. Konut ➔ Ferdi Kaza", cumleler: ["Eviniz güvende, kaza durumunda ailenizin standardını da koruyalım."] },
+      "tss_oss": { baslik: "5. TSS ➔ Özel Sağlık", cumleler: ["Limitleri çok daha geniş olan Özel Sağlık Sigortası'na geçiş yapalım mı?"] },
+      "tss_kasko": { baslik: "6. TSS ➔ Kasko", cumleler: ["Sağlığınız güvende, ancak sistemimizde kaskonuz görünmüyor. Onu da tek elde toplayalım mı?"] }
     };
     
     // TAB YÖNETİMİ
@@ -472,32 +691,18 @@
       if (ad === "dersler") yukleDersler();
     }
 
-    // ====== PDF YÜKLEME ======
     async function pdfSecildi(event) {
         const file = event.target.files[0];
         if (!file) return;
-        
         const durum = document.getElementById("pdf-durum");
-        durum.classList.remove("hidden");
-        durum.innerHTML = `<span>Yükleniyor ve Yapay Zeka Okuyor...</span>`;
-        
-        const formData = new FormData();
-        formData.append("file", file);
-        
+        durum.classList.remove("hidden"); durum.innerHTML = `<span>Yükleniyor ve Yapay Zeka Okuyor...</span>`;
+        const formData = new FormData(); formData.append("file", file);
         try {
             const res = await fetch(API + "/api/upload-parse", { method: "POST", body: formData });
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.detail || "PDF okunurken hata oluştu");
-            }
+            if (!res.ok) throw new Error(await res.json().detail || "Hata");
             const data = await res.json();
-            
             durum.innerHTML = `<span class="text-green-600 text-sm">Başarılı! Form açılıyor...</span>`;
-            setTimeout(() => {
-                durum.classList.add("hidden");
-                alert(`PDF Başarıyla Analiz Edildi!\nMüşteri: ${data.ad || ''} ${data.soyad || ''}\nŞirket: ${data.sigorta_sirketi || ''}\n(Sistemde mock modal yerine bu alert gösteriliyor. Datalar parse edilip gelmiştir.)`);
-            }, 1000);
-            
+            setTimeout(() => { durum.classList.add("hidden"); alert("PDF Analiz Edildi!"); }, 1000);
         } catch (e) {
             durum.innerHTML = `<span class="text-red-500 text-sm">Hata: ${e.message}</span>`;
             setTimeout(() => durum.classList.add("hidden"), 3000);
@@ -505,487 +710,280 @@
         event.target.value = "";
     }
 
-    // ====== PAZARLAMA (ÇAPRAZ SATIŞ) ======
-    async function yuklePazarlama() {
-        try {
-            document.getElementById("pazarlama-sekmeler").innerHTML = '<p class="text-xs text-slate-400 italic p-2">Hesaplanıyor...</p>';
-            const data = await api("/api/pazarlama");
-            pazarlamaDataCache = data;
-            renderPazarlamaSekmeler();
-            pazarlamaSekmeSec("dask_konut");
-        } catch(e) { console.error("Pazarlama hatası:", e); }
-    }
-
-    function renderPazarlamaSekmeler() {
-        const container = document.getElementById("pazarlama-sekmeler");
-        container.innerHTML = Object.keys(PAZARLAMA_KAMPANYALAR).map(key => {
-            const adet = pazarlamaDataCache[key] ? pazarlamaDataCache[key].length : 0;
-            return `
-            <button onclick="pazarlamaSekmeSec('${key}')" id="btn-paz-${key}" class="w-full text-left px-4 py-4 rounded-xl text-sm font-bold transition-all flex justify-between items-center bg-slate-50 text-slate-500 hover:bg-brand-navy/5 hover:text-brand-navy border border-transparent">
-                <span class="pr-2 leading-tight">${PAZARLAMA_KAMPANYALAR[key].baslik}</span>
-                <span class="${adet > 0 ? 'bg-red-500 text-white' : 'bg-slate-300 text-slate-600'} text-xs px-2.5 py-1 rounded-lg shrink-0 shadow-sm">${adet}</span>
-            </button>
-            `;
-        }).join("");
-    }
-
-    function pazarlamaSekmeSec(key) {
-        aktifPazarlamaSekmesi = key;
-        Object.keys(PAZARLAMA_KAMPANYALAR).forEach(k => {
-            const btn = document.getElementById("btn-paz-" + k);
-            if(btn) {
-                if (k === key) {
-                    btn.classList.add("bg-brand-navy", "text-brand-gold", "border-brand-navy");
-                    btn.classList.remove("bg-slate-50", "text-slate-500", "border-transparent");
-                    btn.querySelector("span:last-child").className = "bg-brand-gold text-brand-navy text-xs px-2.5 py-1 rounded-lg shrink-0 shadow-sm";
-                } else {
-                    btn.classList.remove("bg-brand-navy", "text-brand-gold", "border-brand-navy");
-                    btn.classList.add("bg-slate-50", "text-slate-500", "border-transparent");
-                    const isZero = !(pazarlamaDataCache[k] && pazarlamaDataCache[k].length > 0);
-                    btn.querySelector("span:last-child").className = (isZero ? "bg-slate-300 text-slate-600" : "bg-red-500 text-white") + " text-xs px-2.5 py-1 rounded-lg shrink-0 shadow-sm";
-                }
-            }
-        });
-        
-        const kampanya = PAZARLAMA_KAMPANYALAR[key];
-        document.getElementById("pazarlama-liste-baslik").textContent = kampanya.baslik;
-        
-        const cumleUl = document.getElementById("pazarlama-liste-cumle");
-        cumleUl.innerHTML = kampanya.cumleler.map(c => `<li>${c}</li>`).join("");
-        document.getElementById("pazarlama-liste-cumle-kutu").classList.remove("hidden");
-        
-        const liste = pazarlamaDataCache[key] || [];
-        const tbody = document.getElementById("pazarlama-tbody");
-        const emptyMsg = document.getElementById("pazarlama-empty");
-        
-        if(liste.length === 0) {
-            tbody.innerHTML = ""; emptyMsg.classList.remove("hidden");
-        } else {
-            emptyMsg.classList.add("hidden");
-            tbody.innerHTML = liste.map(item => `
-                <tr class="hover:bg-slate-50 transition-colors group">
-                    <td class="px-5 py-3 font-semibold text-brand-navy text-[13px]">${item.ad_soyad}</td>
-                    <td class="px-5 py-3 text-slate-600 font-bold">${item.telefon}</td>
-                    <td class="px-5 py-3 text-slate-500 text-xs">${item.dayanak}</td>
-                    <td class="px-5 py-3 text-center">
-                        <span class="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-1.5 rounded-lg whitespace-nowrap">
-                            Bitiş: ${item.bitis}
-                        </span>
-                    </td>
-                </tr>
-            `).join("");
-        }
-    }
-
-    function pazarlamaListeyiYazdir() {
-        const liste = pazarlamaDataCache[aktifPazarlamaSekmesi];
-        if (!liste || liste.length === 0) { alert("Bu kampanya için liste boş!"); return; }
-        
-        const baslik = PAZARLAMA_KAMPANYALAR[aktifPazarlamaSekmesi].baslik;
-        
-        let printHTML = `<html><head><title>${baslik} - Satış Listesi</title>
-        <style>body { font-family: Arial, sans-serif; padding: 20px; font-size: 13px; } h2 { text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; } table { width: 100%; border-collapse: collapse; margin-bottom: 30px; } th, td { border: 1px solid #ddd; padding: 10px; text-align: left; } th { background-color: #f5f5f5; } .checkbox-box { width: 18px; height: 18px; border: 1.5px solid #000; display: inline-block; } @media print { button { display: none; } }</style>
-        </head><body>`;
-        
-        printHTML += `<h2>KAMPANYA: ${baslik}</h2>
-        <table><thead><tr><th>Müşteri Adı Soyadı</th><th>Telefon</th><th>Tetikleyici Biten Poliçe</th><th>Bitiş Tarihi</th><th>Arandı Mı?</th></tr></thead><tbody>`;
-        
-        liste.forEach(item => {
-            printHTML += `<tr>
-                <td><strong>${item.ad_soyad}</strong></td>
-                <td>${item.telefon}</td>
-                <td>${item.dayanak}</td>
-                <td>${item.bitis}</td>
-                <td style="text-align:center;"><div class="checkbox-box"></div></td>
-            </tr>`;
-        });
-        
-        printHTML += `</tbody></table><div style="text-align: center; margin-top:20px;"><button onclick="window.print()" style="padding: 10px 20px; background-color: #0A192F; color: white; border:none; border-radius:5px; cursor:pointer;">Yazdır / PDF İndir</button></div></body></html>`;
-        
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(printHTML); printWindow.document.close();
-    }
-
-
-    // ====== SAYFALAMA VE MÜŞTERİ / POLİÇE TABLOLARI ======
-    function renderPagination(containerId, data, onClickFnName) {
-      const cont = document.getElementById(containerId);
-      if (!cont) return;
-      if (!data || data.total === 0) { cont.innerHTML = ""; return; }
-      let btnEski = `<button onclick="window.${onClickFnName}(${data.page - 1})" ${data.page === 1 ? 'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg font-bold text-xs"' : 'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg hover:bg-brand-navyhover transition-colors font-bold text-xs"'}>Önceki</button>`;
-      let btnYeni = `<button onclick="window.${onClickFnName}(${data.page + 1})" ${data.page >= data.pages ? 'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg font-bold text-xs"' : 'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg hover:bg-brand-navyhover transition-colors font-bold text-xs"'}>Sonraki</button>`;
-      cont.innerHTML = `<div class="text-[11px] text-slate-500 font-semibold">Toplam <strong>${data.total}</strong> kayıttan <strong>${(data.page-1)*data.limit + 1} - ${Math.min(data.page*data.limit, data.total)}</strong> arası gösteriliyor.</div><div class="flex gap-2">${btnEski}${btnYeni}</div>`;
-    }
-
-    window.musteriSayfaDegistir = function(page) { yukleMusteriler(document.getElementById("musteri-ara").value, page); };
-    window.policeSayfaDegistir = function(page) { yuklePoliceler(page); };
-
-    function para(n) { return (n == null || n === "") ? "—" : Number(n).toLocaleString("tr-TR", { style: "currency", currency: "TRY" }); }
-    function tarih(d) { return !d ? "—" : new Date(d + "T00:00:00").toLocaleDateString("tr-TR"); }
-    function seviyeSinif(seviye) {
-      if (seviye === "kirmizi") return { wrap: "border-l-4 border-l-red-500", badge: "bg-red-50 text-red-600 border border-red-100" };
-      if (seviye === "sari") return { wrap: "border-l-4 border-l-amber-400", badge: "bg-amber-50 text-amber-600 border border-amber-100" };
-      return { wrap: "border-l-4 border-l-slate-200", badge: "bg-slate-100 text-slate-500 border border-slate-200" };
-    }
-
-    const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
-    document.getElementById("ay-ismi").textContent = aylar[new Date().getMonth()];
-
-    async function api(path, opts) {
-      const res = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...opts });
-      if (!res.ok) { let msg = "Hata"; try { const j = await res.json(); msg = j.detail || msg; } catch(_) {} throw new Error(msg); }
-      return res.status === 204 ? null : res.json();
-    }
-
-    document.getElementById("musteri-ara").addEventListener("input", (e) => {
-        clearTimeout(window.searchTimeout);
-        window.searchTimeout = setTimeout(() => yukleMusteriler(e.target.value, 1), 500);
-    });
-    document.getElementById("police-ara").addEventListener("input", (e) => {
-        clearTimeout(window.searchTimeoutPol);
-        window.searchTimeoutPol = setTimeout(() => yuklePoliceler(1), 500);
-    });
-
-    async function yukleMusteriler(q = "", page = 1) {
-      const qs = `?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`;
-      const data = await api("/api/musteriler" + qs);
-      const tbody = document.getElementById("musteri-tbody");
-      if (!data.items || data.items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400 text-xs italic">Kayıt bulunamadı.</td></tr>`;
-        renderPagination("musteri-pagination", null, "musteriSayfaDegistir");
-        return;
-      }
-      let html = ''; let sonHarf = '';
-      data.items.forEach((m) => {
-        const adSoyad = `${m.ad || ''} ${m.soyad || ''}`.trim();
-        const ilkHarf = adSoyad.charAt(0).toLocaleUpperCase('tr-TR');
-        if (ilkHarf !== sonHarf && !q) {
-          sonHarf = ilkHarf;
-          html += `<tr class="bg-brand-navy/5 font-bold text-brand-navy text-xs"><td colspan="6" class="px-5 py-2 tracking-wider">${sonHarf}</td></tr>`;
-        }
-        let dagilimHtml = '<span class="text-slate-400 italic text-xs">Yok</span>';
-        if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) {
-          dagilimHtml = Object.entries(m.aktif_police_sayilari).map(([tur, adet]) => `<span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1 rounded border border-slate-200 mr-1 mb-1 inline-block">${tur}: ${adet}</span>`).join("");
-        }
-        html += `<tr class="hover:bg-slate-50 cursor-pointer transition-colors group">
-          <td class="px-5 py-3 font-semibold text-brand-navy flex items-center gap-2"><div class="w-6 h-6 rounded bg-brand-navy/5 text-brand-navy flex items-center justify-center text-[10px] uppercase">${ilkHarf}</div>${adSoyad}</td>
-          <td class="px-5 py-3 text-slate-600 text-xs">${m.telefon || "—"}</td>
-          <td class="px-5 py-3">${dagilimHtml}</td>
-          <td class="px-5 py-3 text-xs text-slate-500">${m.portfoy_sorumlusu || "—"}</td>
-          <td class="px-5 py-3 text-xs text-slate-400">${m.tc_kimlik || "—"}</td>
-          <td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
-            <button class="text-slate-500 hover:text-brand-navy text-xs font-bold mr-2">Düzenle</button>
-          </td>
-        </tr>`;
-      });
-      tbody.innerHTML = html;
-      renderPagination("musteri-pagination", data, "musteriSayfaDegistir");
-    }
-
-    window.policeSekmeSec = function(sekme) {
-        aktifPoliceSekmesi = sekme;
-        document.getElementById('btn-sekme-aktif').className = sekme === 'aktif' ? "pb-2 border-b-2 border-brand-navy text-brand-navy font-bold" : "pb-2 border-b-2 border-transparent text-slate-400 hover:text-brand-navy transition-colors";
-        document.getElementById('btn-sekme-eski').className = sekme === 'eski' ? "pb-2 border-b-2 border-brand-navy text-brand-navy font-bold" : "pb-2 border-b-2 border-transparent text-slate-400 hover:text-brand-navy transition-colors";
-        yuklePoliceler(1);
-    };
-
-    async function yuklePoliceler(page = 1) {
-        const q = document.getElementById("police-ara").value;
-        const qs = `?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`;
-        const data = await api("/api/policeler" + qs);
-        const tbody = document.getElementById("police-tbody");
-        if (!data || !data.items || data.items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-400 text-xs italic">Kayıt bulunamadı.</td></tr>`;
-            renderPagination("police-pagination", null, "policeSayfaDegistir");
-            return;
-        }
-        tbody.innerHTML = data.items.map(p => {
-            let durumGosterim = p.durum.toUpperCase();
-            let bgRenk = p.durum === 'aktif' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
-            
-            if (aktifPoliceSekmesi === 'eski') {
-                if (p.durum === 'iptal') {
-                    durumGosterim = "İPTAL";
-                    bgRenk = "text-slate-600 bg-slate-200";
-                } else if (p.suresi_dolmus) {
-                    durumGosterim = "SÜRESİ DOLDU";
-                    bgRenk = "text-amber-600 bg-amber-50";
-                }
-            }
-
-            return `<tr class="hover:bg-slate-50 border-b border-slate-100 group">
-                <td class="px-5 py-3 font-bold text-brand-navy text-xs">${p.police_no}</td>
-                <td class="px-5 py-3 text-xs font-medium">${p.musteri_ad} ${p.musteri_soyad}</td>
-                <td class="px-5 py-3 text-xs text-slate-500">${p.sigorta_sirketi} <br> <span class="font-bold text-slate-700">${p.sigorta_turu}</span></td>
-                <td class="px-5 py-3 text-xs">${tarih(p.bitis_tarihi)}</td>
-                <td class="px-5 py-3 text-xs"><span class="${bgRenk} px-2 py-1 rounded font-bold">${durumGosterim}</span></td>
-                <td class="px-5 py-3 text-xs font-bold text-brand-gold">${para(p.prim)}</td>
-                <td class="px-5 py-3 text-right text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button class="text-red-400 hover:text-red-600 font-bold">Sil</button>
-                </td>
-            </tr>`;
-        }).join("");
-        renderPagination("police-pagination", data, "policeSayfaDegistir");
-    }
-
-    function renderPoliceListesi(listeData, containerId) {
-      const el = document.getElementById(containerId);
-      let yenilenenler = [];
-      try { yenilenenler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e) {}
-      
-      const filtrelenmis = listeData.filter(p => !yenilenenler.includes(p.id));
-      
-      if (!filtrelenmis.length) { 
-        el.innerHTML = `<p class="text-sm text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200 text-center">Bu kriterde poliçe bulunmuyor.</p>`; 
-        return; 
-      }
-      filtrelenmis.sort((a, b) => (a.kalan_gun ?? 999) - (b.kalan_gun ?? 999));
-
-      el.innerHTML = filtrelenmis.map((p) => {
-        const s = seviyeSinif(p.uyar_seviyesi);
-        const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
-        return `<div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex items-center justify-between ${s.wrap} group">
-          <div class="flex items-center gap-3">
-            <div>
-              <p class="font-bold text-brand-navy text-[13px] leading-none mb-1">${ad || "Bilinmeyen"} <span class="text-[9px] font-normal text-slate-400 ml-1">#${p.police_no}</span></p>
-              <p class="text-[10px] font-medium text-slate-500">${p.sigorta_sirketi} · <strong class="text-brand-navy">${p.sigorta_turu}</strong></p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold px-2 py-1 rounded ${s.badge}">${tarih(p.bitis_tarihi)}</span>
-            <button onclick="policeYenilendiSoru(${p.id}, '${ad.replace(/'/g, "\\'")}', '${p.police_no}')" class="bg-slate-100 text-slate-400 hover:bg-brand-navy hover:text-brand-gold text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1">
-              ✓ Yenilendi
-            </button>
-          </div>
-        </div>`;
-      }).join("");
-    }
-
-    async function yukleDashboard() {
-      const [ozet, liste7Gun, listeAylik] = await Promise.all([
-          api("/api/ozet"), api("/api/policeler/yaklasan?gun=7"), api("/api/policeler/bu-ay")
-      ]);
-      buAyBitenlerCache = listeAylik;
-      
-      const ozetData = [
-        { t: "Kayıtlı Müşteri", v: ozet.musteri_sayisi },
-        { t: "Toplam Poliçe", v: ozet.police_sayisi },
-        { t: "Aktif Poliçe", v: ozet.aktif_police },
-        { t: "Yaklaşan (7G)", v: ozet.yaklasan_7_gun },
-      ];
-      document.getElementById("ozet-kartlar").innerHTML = ozetData.map(d => `<div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-400 uppercase">${d.t}</p><p class="text-2xl font-sans font-black tracking-tight text-brand-navy mt-2">${d.v}</p></div>`).join("");
-      renderPoliceListesi(liste7Gun, "yaklasan-liste");
-      renderPoliceListesi(listeAylik, "aylik-liste");
-    }
-
-    function policeYenilendiSoru(id, musteriAd, policeNo) {
-      if (confirm(`"${musteriAd}" müşterisinin #${policeNo} numaralı poliçesinin yenilendiğine emin misiniz?`)) {
-        let yenilenenler = [];
-        try { yenilenenler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e) {}
-        if (!yenilenenler.includes(id)) {
-          yenilenenler.push(id);
-          localStorage.setItem("altun_yenilenen_policeler", JSON.stringify(yenilenenler));
-        }
-        yukleDashboard();
-      }
-    }
-
-    // ====== FİNANSAL ANALİZ ======
-    window.yukleFinansalHazirlik = async function() {
-        try {
-            const res = await api("/api/finansal/filtreler");
-            
-            document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + res.sirketler.map(s => `<option value="${s}">${s}</option>`).join('');
-            document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + res.danismanlar.map(d => `<option value="${d}">${d}</option>`).join('');
-            
-            const bransDiv = document.getElementById("fin-brans-container");
-            bransDiv.innerHTML = res.branslar.map(b => `
-                <label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
-                    <input type="checkbox" value="${b}" class="fin-brans-cb rounded text-brand-navy focus:ring-brand-navy"> ${b}
-                </label>
-            `).join('');
-
-        } catch (e) {
-            console.error("Filtreler yüklenemedi", e);
-        }
-    };
-
-    window.calistirFinansalRapor = async function() {
-        const seciliBranslar = Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb => cb.value);
-
-        const payload = {
-            baslangic: document.getElementById("fin-start").value || null,
-            bitis: document.getElementById("fin-end").value || null,
-            sirket: document.getElementById("fin-sirket").value || null,
-            danisman: document.getElementById("fin-sorumlu").value || null,
-            branslar: seciliBranslar
-        };
-
-        try {
-            const btn = event.currentTarget;
-            btn.innerHTML = "Hesaplanıyor..."; btn.disabled = true;
-
-            const res = await fetch(API + "/api/finansal/rapor", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }).then(r => r.json());
-
-            document.getElementById("fin-metrics").classList.remove("hidden");
-            document.getElementById("fin-details").classList.remove("hidden");
-
-            document.getElementById("fin-ciro").textContent = para(res.ciro);
-            document.getElementById("fin-kar").textContent = para(res.kar);
-            document.getElementById("fin-adet").textContent = res.adet + " Adet";
-
-            const formatList = (dict) => Object.entries(dict).map(([k, v]) => `
-                <div class="flex justify-between py-2 border-b border-slate-50 last:border-0">
-                    <span class="text-sm font-semibold text-slate-600">${k}</span>
-                    <span class="text-sm font-bold text-brand-navy">${v} Adet</span>
-                </div>
-            `).join('') || '<span class="text-slate-400 italic text-sm">Veri yok.</span>';
-
-            document.getElementById("fin-brans-liste").innerHTML = formatList(res.brans_dagilimi);
-            document.getElementById("fin-sirket-liste").innerHTML = formatList(res.sirket_dagilimi);
-
-            btn.innerHTML = "Raporu Oluştur"; btn.disabled = false;
-        } catch (e) {
-            alert("Rapor çekilirken hata oluştu.");
-            console.error(e);
-        }
-    };
-
-    // ====== EĞİTİM MERKEZİ (YENİLENMİŞ) ======
+    // ====== EĞİTİM MERKEZİ & SATIŞ ASİSTAN MODÜLÜ ======
     async function yukleDersler() {
         try {
             const data = await api("/api/dersler/liste");
             const katDiv = document.getElementById("ders-kategoriler");
-            
-            if(Object.keys(data).length === 0) {
-                katDiv.innerHTML = '<span class="text-xs italic text-slate-400">PDF bulunamadı.</span>';
-                return;
-            }
+            if(Object.keys(data).length === 0) { katDiv.innerHTML = '<span class="text-xs italic text-slate-400">Sunum bulunamadı.</span>'; return; }
 
-            // Kategori butonlarını şık tasarımla basıyoruz
             katDiv.innerHTML = Object.keys(data).map(k =>
-                `<button data-kat="${k}" onclick="dersKategoriGoster('${k}')" class="kategori-btn text-left w-full px-4 py-3 rounded-xl font-bold transition-all flex justify-between items-center mb-2">
-                    ${k} <span class="badge px-2 py-0.5 rounded-md text-xs shadow-sm transition-colors">${data[k].length}</span>
+                `<button data-kat="${k}" onclick="dersKategoriGoster('${k}')" class="kategori-btn text-left w-full px-5 py-3.5 rounded-2xl font-bold transition-all flex justify-between items-center mb-2 hover:bg-slate-50 text-slate-500">
+                    ${k} <span class="badge px-2.5 py-1 rounded-lg text-xs font-black shadow-sm transition-colors bg-slate-200 text-slate-600">${data[k].length}</span>
                 </button>`
             ).join("");
             
             window.dersDataCache = data;
             dersKategoriGoster(Object.keys(data)[0]);
-        } catch(e) {
-            console.error("Dersler yüklenemedi.", e);
-        }
+        } catch(e) { console.error("Dersler yüklenemedi.", e); }
     }
 
     window.dersKategoriGoster = function(kategori) {
-        document.getElementById("secilen-kategori-baslik").textContent = kategori + " Sunumları";
+        document.getElementById("secilen-kategori-baslik").innerHTML = `${kategori} Sunumları`;
         const dosyalar = window.dersDataCache[kategori] || [];
         const icerik = document.getElementById("ders-icerik");
         
-        // Sol menü aktif class işlemleri
         document.querySelectorAll('.kategori-btn').forEach(btn => {
             if(btn.dataset.kat === kategori) {
-                btn.classList.add('bg-brand-navy', 'text-white', 'shadow-md');
-                btn.classList.remove('text-brand-navy', 'hover:bg-brand-navy/5');
-                btn.querySelector('.badge').classList.add('bg-white/20', 'text-white');
+                btn.classList.add('bg-brand-navy', 'text-brand-gold', 'shadow-md');
+                btn.classList.remove('text-slate-500', 'hover:bg-slate-50');
+                btn.querySelector('.badge').classList.add('bg-brand-gold', 'text-brand-navy');
                 btn.querySelector('.badge').classList.remove('bg-slate-200', 'text-slate-600');
             } else {
-                btn.classList.remove('bg-brand-navy', 'text-white', 'shadow-md');
-                btn.classList.add('text-brand-navy', 'hover:bg-brand-navy/5');
-                btn.querySelector('.badge').classList.remove('bg-white/20', 'text-white');
+                btn.classList.remove('bg-brand-navy', 'text-brand-gold', 'shadow-md');
+                btn.classList.add('text-slate-500', 'hover:bg-slate-50');
+                btn.querySelector('.badge').classList.remove('bg-brand-gold', 'text-brand-navy');
                 btn.querySelector('.badge').classList.add('bg-slate-200', 'text-slate-600');
             }
         });
 
         if (dosyalar.length === 0) {
-            icerik.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center py-12 px-4 bg-white border border-dashed border-slate-300 rounded-2xl h-full">
-                <svg class="w-16 h-16 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                <p class='text-slate-500 font-medium text-center'>Bu kategoriye henüz sunum yüklenmemiş.</p>
-            </div>`;
+            icerik.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 px-4 bg-white border-2 border-dashed border-slate-300 rounded-3xl h-full"><p class='text-slate-500 font-bold'>Bu kategoriye henüz sunum eklenmemiş.</p></div>`;
             return;
         }
         
-        // PDF kartlarının yeni şık tasarımı. (Uzantıları ve alt tireleri siliyoruz)
         icerik.innerHTML = dosyalar.map(f => {
             let temizAd = f.replace('.pdf','').replace('.PDF','').replace(/_/g, ' ');
+            // Oyunlaştırılmış, modern tıklanabilir kart
             return `
-            <a href="/dersler/${encodeURIComponent(f)}" target="_blank" class="relative group bg-white border border-slate-200 rounded-2xl p-5 hover:border-brand-gold hover:shadow-xl transition-all duration-300 flex flex-col h-44 overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-brand-gold/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
+            <div onclick="acDersDetay('${kategori}', '${encodeURIComponent(f)}', '${temizAd.replace(/'/g, "\\'")}')" class="relative group bg-white border-2 border-transparent rounded-[24px] p-6 hover:border-brand-gold/30 hover:shadow-[0_20px_40px_rgba(10,25,47,0.06)] hover:-translate-y-2 transition-all duration-300 flex flex-col h-56 overflow-hidden cursor-pointer">
+                
+                <div class="absolute top-0 right-0 w-32 h-32 bg-brand-navy/5 rounded-bl-[100px] -z-10 group-hover:scale-[1.5] group-hover:bg-brand-gold/10 transition-transform duration-500"></div>
+                
                 <div class="flex-1 flex flex-col items-center justify-center text-center">
-                    <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-3 group-hover:-translate-y-1 group-hover:shadow-md transition-all">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+                    <div class="w-14 h-14 bg-red-50 text-red-500 rounded-[20px] flex items-center justify-center mb-4 group-hover:-translate-y-2 group-hover:shadow-md transition-all duration-300">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
                     </div>
-                    <h4 class="font-bold text-brand-navy text-sm leading-snug break-words">${temizAd}</h4>
+                    <h4 class="font-black text-brand-navy text-[15px] leading-tight break-words uppercase px-2">${temizAd}</h4>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-slate-400">PDF SUNUM</span>
-                    <span class="text-[10px] font-bold text-brand-gold flex items-center gap-1 group-hover:text-brand-navy transition-colors">
-                        Görüntüle <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                
+                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[10px] font-black tracking-widest text-slate-400 group-hover:text-brand-gold transition-colors">SATIŞ İPUÇLARI</span>
+                    <span class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-navy group-hover:text-brand-gold transition-colors shadow-sm">
+                        <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                     </span>
                 </div>
-            </a>
+            </div>
             `;
         }).join("");
     }
 
+    // Modal açılış ve veri doldurma mantığı
+    window.acDersDetay = function(kategori, dosyaAdiEncode, temizAd) {
+        document.getElementById("detay-baslik").textContent = temizAd;
+        document.getElementById("detay-kategori-badge").textContent = kategori;
+        document.getElementById("detay-pdf-btn").href = `/dersler/${dosyaAdiEncode}`;
+        
+        const cAd = temizAd.toUpperCase();
+        let sirket = null;
+        if (cAd.includes("AXA")) sirket = "Axa";
+        else if (cAd.includes("NEOVA")) sirket = "Neova";
+        else if (cAd.includes("QUICK") || cAd.includes("QUİCK")) sirket = "Quick";
+        else if (cAd.includes("HEPİYİ") || cAd.includes("HEPIYI")) sirket = "Hepiyi";
+        else if (cAd.includes("TÜRKİYE") || cAd.includes("TURKIYE")) sirket = "Türkiye";
+        else if (cAd.match(/\bAK\b/) || cAd.includes("AKKASKO") || cAd.includes("AKSİGORTA") || cAd.includes("AKSIGORTA")) sirket = "Aksigorta";
 
-    // Aylık Liste Yazdırma
-    function aylikListeyiYazdir() {
-        if (!buAyBitenlerCache || buAyBitenlerCache.length === 0) {
-            alert("Bu ay bitecek (yenilenebilir) poliçe bulunamadı!"); return;
+        const argumanAlani = document.getElementById("detay-argumanlar");
+        
+        if (sirket && SATIS_ARGUMANLARI[kategori] && SATIS_ARGUMANLARI[kategori][sirket]) {
+            const listItems = SATIS_ARGUMANLARI[kategori][sirket].map(item => `
+                <div class="flex items-start gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-brand-gold/40 transition-colors">
+                    <div class="w-6 h-6 shrink-0 rounded-full bg-brand-gold/20 flex items-center justify-center mt-0.5">
+                        <svg class="w-3.5 h-3.5 text-brand-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <p class="text-[13px] text-slate-600 leading-relaxed">${item}</p>
+                </div>
+            `).join("");
+            argumanAlani.innerHTML = `<div class="flex flex-col gap-3">${listItems}</div>`;
+        } else {
+            argumanAlani.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-10 bg-white rounded-3xl border border-slate-100">
+                    <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="text-sm font-medium text-slate-400 px-8 text-center">Bu sunuma ait özel satış argümanı bulunmamaktadır.<br>Sağ menüden PDF'i görüntüleyebilirsiniz.</p>
+                </div>
+            `;
         }
-        const gruplar = {};
-        buAyBitenlerCache.forEach(p => {
-            const brans = p.sigorta_turu || "Diğer";
-            if (!gruplar[brans]) gruplar[brans] = [];
-            gruplar[brans].push(p);
+        
+        document.getElementById("ders-detay-modal").classList.remove("hidden");
+    };
+
+    window.kapatDersDetay = function() {
+        document.getElementById("ders-detay-modal").classList.add("hidden");
+    };
+
+
+    // ====== SAYFALAMA VE LİSTELER (Özetleştirildi) ======
+    async function api(path, opts) {
+      const res = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...opts });
+      if (!res.ok) { let msg = "Hata"; try { msg = (await res.json()).detail || msg; } catch(_) {} throw new Error(msg); }
+      return res.status === 204 ? null : res.json();
+    }
+    
+    async function yuklePazarlama() {
+        document.getElementById("pazarlama-sekmeler").innerHTML = '<p class="text-xs text-slate-400 italic p-2">Hesaplanıyor...</p>';
+        pazarlamaDataCache = await api("/api/pazarlama");
+        document.getElementById("pazarlama-sekmeler").innerHTML = Object.keys(PAZARLAMA_KAMPANYALAR).map(key => {
+            const adet = pazarlamaDataCache[key] ? pazarlamaDataCache[key].length : 0;
+            return `<button onclick="pazarlamaSekmeSec('${key}')" id="btn-paz-${key}" class="w-full text-left px-4 py-4 rounded-xl text-sm font-bold transition-all flex justify-between items-center bg-slate-50 text-slate-500"><span class="pr-2">${PAZARLAMA_KAMPANYALAR[key].baslik}</span><span class="${adet > 0 ? 'bg-red-500 text-white' : 'bg-slate-300 text-slate-600'} text-xs px-2.5 py-1 rounded-lg shrink-0 shadow-sm">${adet}</span></button>`;
+        }).join("");
+        pazarlamaSekmeSec("dask_konut");
+    }
+
+    window.pazarlamaSekmeSec = function(key) {
+        aktifPazarlamaSekmesi = key;
+        Object.keys(PAZARLAMA_KAMPANYALAR).forEach(k => {
+            const btn = document.getElementById("btn-paz-" + k);
+            if(btn) {
+                if (k === key) {
+                    btn.classList.add("bg-brand-navy", "text-brand-gold", "border-brand-navy"); btn.classList.remove("bg-slate-50", "text-slate-500");
+                    btn.querySelector("span:last-child").className = "bg-brand-gold text-brand-navy text-xs px-2.5 py-1 rounded-lg shrink-0";
+                } else {
+                    btn.classList.remove("bg-brand-navy", "text-brand-gold"); btn.classList.add("bg-slate-50", "text-slate-500");
+                    btn.querySelector("span:last-child").className = (!(pazarlamaDataCache[k] && pazarlamaDataCache[k].length > 0) ? "bg-slate-300 text-slate-600" : "bg-red-500 text-white") + " text-xs px-2.5 py-1 rounded-lg shrink-0";
+                }
+            }
         });
-        const ayIsmi = aylar[new Date().getMonth()] + " " + new Date().getFullYear();
-        let printHTML = `<html><head><title>${ayIsmi} Yenileme Listesi</title><style>body { font-family: Arial, sans-serif; padding: 20px; font-size: 12px; } h2 { text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; } table { width: 100%; border-collapse: collapse; margin-bottom: 30px; } th, td { border: 1px solid #000; padding: 8px; text-align: left; } th { background-color: #f0f0f0; } .checkbox-box { width: 20px; height: 20px; border: 1.5px solid #000; } @media print { button { display: none; } } </style></head><body>`;
-        for (const [brans, policeler] of Object.entries(gruplar)) {
-            policeler.sort((a, b) => new Date(a.bitis_tarihi) - new Date(b.bitis_tarihi));
-            printHTML += `<h2>BRANŞ: ${brans.toUpperCase()}</h2><table><thead><tr><th>Bitiş Tarihi</th><th>Müşteri Adı Soyadı</th><th>Şirket</th><th>Poliçe No</th><th>Durum</th></tr></thead><tbody>`;
-            policeler.forEach(p => {
-                const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ").toUpperCase();
-                const tarihTR = new Date(p.bitis_tarihi + "T00:00:00").toLocaleDateString("tr-TR");
-                printHTML += `<tr><td>${tarihTR}</td><td><strong>${ad}</strong></td><td>${p.sigorta_sirketi || "-"}</td><td>${p.police_no || "-"}</td><td style="text-align:center;"><div class="checkbox-box"></div></td></tr>`;
-            });
-            printHTML += `</tbody></table>`;
+        document.getElementById("pazarlama-liste-baslik").textContent = PAZARLAMA_KAMPANYALAR[key].baslik;
+        document.getElementById("pazarlama-liste-cumle").innerHTML = PAZARLAMA_KAMPANYALAR[key].cumleler.map(c => `<li>${c}</li>`).join("");
+        document.getElementById("pazarlama-liste-cumle-kutu").classList.remove("hidden");
+        const liste = pazarlamaDataCache[key] || [];
+        const tbody = document.getElementById("pazarlama-tbody");
+        if(liste.length === 0) { tbody.innerHTML = ""; document.getElementById("pazarlama-empty").classList.remove("hidden"); }
+        else {
+            document.getElementById("pazarlama-empty").classList.add("hidden");
+            tbody.innerHTML = liste.map(item => `<tr class="hover:bg-slate-50"><td class="px-5 py-3 font-semibold text-brand-navy text-[13px]">${item.ad_soyad}</td><td class="px-5 py-3 text-slate-600 font-bold">${item.telefon}</td><td class="px-5 py-3 text-slate-500 text-xs">${item.dayanak}</td><td class="px-5 py-3 text-center"><span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1.5 rounded-lg">Bitiş: ${item.bitis}</span></td></tr>`).join("");
         }
-        printHTML += `<div style="text-align: center;"><button onclick="window.print()" style="padding: 10px 20px; background-color: #0A192F; color: white;">PDF Olarak Kaydet / Yazdır</button></div></body></html>`;
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(printHTML); printWindow.document.close();
+    }
+
+    function renderPagination(c, data, fName) {
+      if (!document.getElementById(c)) return;
+      if (!data || data.total === 0) { document.getElementById(c).innerHTML = ""; return; }
+      let b1 = `<button onclick="window.${fName}(${data.page - 1})" ${data.page===1?'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs"':'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg text-xs"'}>Önceki</button>`;
+      let b2 = `<button onclick="window.${fName}(${data.page + 1})" ${data.page>=data.pages?'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs"':'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg text-xs"'}>Sonraki</button>`;
+      document.getElementById(c).innerHTML = `<div class="text-[11px] text-slate-500 font-semibold">${data.total} kayıttan ${(data.page-1)*data.limit + 1}-${Math.min(data.page*data.limit, data.total)}</div><div class="flex gap-2">${b1}${b2}</div>`;
+    }
+    
+    window.musteriSayfaDegistir = function(page) { yukleMusteriler(document.getElementById("musteri-ara").value, page); };
+    window.policeSayfaDegistir = function(page) { yuklePoliceler(page); };
+
+    function para(n) { return (n==null || n==="") ? "—" : Number(n).toLocaleString("tr-TR", { style:"currency", currency:"TRY" }); }
+    function tarih(d) { return !d ? "—" : new Date(d + "T00:00:00").toLocaleDateString("tr-TR"); }
+    function seviyeSinif(s) { return s==="kirmizi" ? { w:"border-l-4 border-l-red-500", b:"bg-red-50 text-red-600" } : s==="sari" ? { w:"border-l-4 border-l-amber-400", b:"bg-amber-50 text-amber-600" } : { w:"border-l-4 border-l-slate-200", b:"bg-slate-100 text-slate-500" }; }
+
+    document.getElementById("musteri-ara").addEventListener("input", (e) => { clearTimeout(window.s1); window.s1 = setTimeout(() => yukleMusteriler(e.target.value, 1), 500); });
+    document.getElementById("police-ara").addEventListener("input", (e) => { clearTimeout(window.s2); window.s2 = setTimeout(() => yuklePoliceler(1), 500); });
+
+    async function yukleMusteriler(q = "", page = 1) {
+      const qs = `?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`;
+      const data = await api("/api/musteriler" + qs);
+      if (!data.items || data.items.length === 0) { document.getElementById("musteri-tbody").innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400 text-xs italic">Bulunamadı.</td></tr>`; renderPagination("musteri-pagination", null, "musteriSayfaDegistir"); return; }
+      let html = ''; let sonHarf = '';
+      data.items.forEach(m => {
+        const ad = `${m.ad||''} ${m.soyad||''}`.trim(); const ilk = ad.charAt(0).toLocaleUpperCase('tr-TR');
+        if (ilk !== sonHarf && !q) { sonHarf = ilk; html += `<tr class="bg-brand-navy/5 font-bold text-brand-navy text-xs"><td colspan="6" class="px-5 py-2">${sonHarf}</td></tr>`; }
+        let d = '<span class="text-slate-400 italic text-xs">Yok</span>';
+        if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) d = Object.entries(m.aktif_police_sayilari).map(([t, a]) => `<span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1 rounded border mr-1 mb-1 inline-block">${t}: ${a}</span>`).join("");
+        html += `<tr class="hover:bg-slate-50 cursor-pointer group"><td class="px-5 py-3 font-semibold text-brand-navy flex items-center gap-2"><div class="w-6 h-6 rounded bg-brand-navy/5 flex items-center justify-center text-[10px]">${ilk}</div>${ad}</td><td class="px-5 py-3 text-slate-600 text-xs">${m.telefon||"—"}</td><td class="px-5 py-3">${d}</td><td class="px-5 py-3 text-xs text-slate-500">${m.portfoy_sorumlusu||"—"}</td><td class="px-5 py-3 text-xs text-slate-400">${m.tc_kimlik||"—"}</td><td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100"><button class="text-slate-500 hover:text-brand-navy text-xs font-bold mr-2">Düzenle</button></td></tr>`;
+      });
+      document.getElementById("musteri-tbody").innerHTML = html; renderPagination("musteri-pagination", data, "musteriSayfaDegistir");
+    }
+
+    window.policeSekmeSec = function(s) { aktifPoliceSekmesi = s; document.getElementById('btn-sekme-aktif').className = s==='aktif' ? "pb-2 border-b-2 border-brand-navy text-brand-navy font-bold" : "pb-2 border-b-2 border-transparent text-slate-400"; document.getElementById('btn-sekme-eski').className = s==='eski' ? "pb-2 border-b-2 border-brand-navy text-brand-navy font-bold" : "pb-2 border-b-2 border-transparent text-slate-400"; yuklePoliceler(1); };
+
+    async function yuklePoliceler(page = 1) {
+        const q = document.getElementById("police-ara").value;
+        const data = await api(`/api/policeler?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`);
+        if (!data || !data.items || data.items.length === 0) { document.getElementById("police-tbody").innerHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-400 text-xs italic">Bulunamadı.</td></tr>`; renderPagination("police-pagination", null, "policeSayfaDegistir"); return; }
+        document.getElementById("police-tbody").innerHTML = data.items.map(p => {
+            let dur = p.durum.toUpperCase(); let bg = p.durum==='aktif'?'text-green-600 bg-green-50':'text-red-600 bg-red-50';
+            if (aktifPoliceSekmesi==='eski') { if(p.durum==='iptal'){ dur="İPTAL"; bg="text-slate-600 bg-slate-200"; } else if(p.suresi_dolmus){ dur="SÜRESİ DOLDU"; bg="text-amber-600 bg-amber-50"; } }
+            return `<tr class="hover:bg-slate-50 border-b border-slate-100 group"><td class="px-5 py-3 font-bold text-brand-navy text-xs">${p.police_no}</td><td class="px-5 py-3 text-xs font-medium">${p.musteri_ad} ${p.musteri_soyad}</td><td class="px-5 py-3 text-xs text-slate-500">${p.sigorta_sirketi} <br> <span class="font-bold text-slate-700">${p.sigorta_turu}</span></td><td class="px-5 py-3 text-xs">${tarih(p.bitis_tarihi)}</td><td class="px-5 py-3 text-xs"><span class="${bg} px-2 py-1 rounded font-bold">${dur}</span></td><td class="px-5 py-3 text-xs font-bold text-brand-gold">${para(p.prim)}</td><td class="px-5 py-3 text-right text-xs opacity-0 group-hover:opacity-100"><button class="text-red-400 hover:text-red-600 font-bold">Sil</button></td></tr>`;
+        }).join("");
+        renderPagination("police-pagination", data, "policeSayfaDegistir");
+    }
+
+    function renderPoliceListesi(liste, cId) {
+      const el = document.getElementById(cId);
+      let yeniler = []; try { yeniler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e){}
+      const flt = liste.filter(p => !yeniler.includes(p.id));
+      if (!flt.length) { el.innerHTML = `<p class="text-sm text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200 text-center">Poliçe bulunmuyor.</p>`; return; }
+      flt.sort((a,b)=>(a.kalan_gun??999)-(b.kalan_gun??999));
+      el.innerHTML = flt.map(p => {
+        const s = seviyeSinif(p.uyar_seviyesi); const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
+        return `<div class="bg-white border rounded-xl p-3 shadow-sm flex items-center justify-between ${s.w} group"><div class="flex items-center gap-3"><div><p class="font-bold text-brand-navy text-[13px] leading-none mb-1">${ad||"Bilinmeyen"} <span class="text-[9px] font-normal text-slate-400">#${p.police_no}</span></p><p class="text-[10px] font-medium text-slate-500">${p.sigorta_sirketi} · <strong class="text-brand-navy">${p.sigorta_turu}</strong></p></div></div><div class="flex items-center gap-2"><span class="text-[10px] font-bold px-2 py-1 rounded ${s.b}">${tarih(p.bitis_tarihi)}</span><button onclick="policeYenilendiSoru(${p.id}, '${ad.replace(/'/g, "\\'")}', '${p.police_no}')" class="bg-slate-100 text-slate-400 hover:bg-brand-navy hover:text-brand-gold text-[10px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all">✓ Yenilendi</button></div></div>`;
+      }).join("");
+    }
+
+    async function yukleDashboard() {
+      const [ozet, l7, lAy] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=7"), api("/api/policeler/bu-ay")]);
+      buAyBitenlerCache = lAy;
+      document.getElementById("ozet-kartlar").innerHTML = [ {t:"Kayıtlı Müşteri", v:ozet.musteri_sayisi}, {t:"Toplam Poliçe", v:ozet.police_sayisi}, {t:"Aktif Poliçe", v:ozet.aktif_police}, {t:"Yaklaşan (7G)", v:ozet.yaklasan_7_gun}].map(d => `<div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-400 uppercase">${d.t}</p><p class="text-2xl font-sans font-black tracking-tight text-brand-navy mt-2">${d.v}</p></div>`).join("");
+      renderPoliceListesi(l7, "yaklasan-liste"); renderPoliceListesi(lAy, "aylik-liste");
+    }
+
+    function policeYenilendiSoru(id, musteriAd, policeNo) {
+      if (confirm(`"${musteriAd}" müşterisinin #${policeNo} poliçesi yenilendi mi?`)) {
+        let yeniler = []; try { yeniler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e){}
+        if (!yeniler.includes(id)) { yeniler.push(id); localStorage.setItem("altun_yenilenen_policeler", JSON.stringify(yeniler)); }
+        yukleDashboard();
+      }
+    }
+
+    window.yukleFinansalHazirlik = async function() {
+        try {
+            const res = await api("/api/finansal/filtreler");
+            document.getElementById("fin-sirket").innerHTML = '<option value="">Tümü</option>' + res.sirketler.map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById("fin-sorumlu").innerHTML = '<option value="">Tümü</option>' + res.danismanlar.map(d => `<option value="${d}">${d}</option>`).join('');
+            document.getElementById("fin-brans-container").innerHTML = res.branslar.map(b => `<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium"><input type="checkbox" value="${b}" class="fin-brans-cb rounded text-brand-navy focus:ring-brand-navy"> ${b}</label>`).join('');
+        } catch (e) { console.error("Filtreler yüklenemedi", e); }
+    };
+
+    window.calistirFinansalRapor = async function() {
+        const p = { baslangic: document.getElementById("fin-start").value||null, bitis: document.getElementById("fin-end").value||null, sirket: document.getElementById("fin-sirket").value||null, danisman: document.getElementById("fin-sorumlu").value||null, branslar: Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb=>cb.value) };
+        try {
+            const btn = event.currentTarget; btn.innerHTML = "Hesaplanıyor..."; btn.disabled = true;
+            const res = await fetch(API + "/api/finansal/rapor", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) }).then(r=>r.json());
+            document.getElementById("fin-metrics").classList.remove("hidden"); document.getElementById("fin-details").classList.remove("hidden");
+            document.getElementById("fin-ciro").textContent = para(res.ciro); document.getElementById("fin-kar").textContent = para(res.kar); document.getElementById("fin-adet").textContent = res.adet + " Adet";
+            const fmt = (dict) => Object.entries(dict).map(([k,v]) => `<div class="flex justify-between py-2 border-b border-slate-50 last:border-0"><span class="text-sm font-semibold text-slate-600">${k}</span><span class="text-sm font-bold text-brand-navy">${v} Adet</span></div>`).join('') || '<span class="text-slate-400 italic text-sm">Veri yok.</span>';
+            document.getElementById("fin-brans-liste").innerHTML = fmt(res.brans_dagilimi); document.getElementById("fin-sirket-liste").innerHTML = fmt(res.sirket_dagilimi);
+            btn.innerHTML = "Raporu Oluştur"; btn.disabled = false;
+        } catch (e) { alert("Hata oluştu."); }
+    };
+
+    function aylikListeyiYazdir() {
+        if (!buAyBitenlerCache || !buAyBitenlerCache.length) { alert("Poliçe bulunamadı!"); return; }
+        const g = {}; buAyBitenlerCache.forEach(p => { const b = p.sigorta_turu||"Diğer"; if(!g[b]) g[b]=[]; g[b].push(p); });
+        let h = `<html><head><title>Yenileme Listesi</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}h2{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}table{width:100%;border-collapse:collapse;margin-bottom:30px;}th,td{border:1px solid #000;padding:8px;text-align:left;}th{background-color:#f0f0f0;}.bx{width:20px;height:20px;border:1.5px solid #000;}@media print{button{display:none;}}</style></head><body>`;
+        for (const [b, pl] of Object.entries(g)) {
+            pl.sort((x,y) => new Date(x.bitis_tarihi)-new Date(y.bitis_tarihi));
+            h += `<h2>BRANŞ: ${b.toUpperCase()}</h2><table><thead><tr><th>Bitiş</th><th>Müşteri</th><th>Şirket</th><th>Poliçe No</th><th>Durum</th></tr></thead><tbody>`;
+            pl.forEach(p => { h += `<tr><td>${new Date(p.bitis_tarihi+"T00:00:00").toLocaleDateString("tr-TR")}</td><td><strong>${[p.musteri_ad,p.musteri_soyad].filter(Boolean).join(" ").toUpperCase()}</strong></td><td>${p.sigorta_sirketi||"-"}</td><td>${p.police_no||"-"}</td><td style="text-align:center;"><div class="bx"></div></td></tr>`; });
+            h += `</tbody></table>`;
+        }
+        h += `<div style="text-align:center;"><button onclick="window.print()" style="padding:10px 20px;background:#0A192F;color:white;">Yazdır</button></div></body></html>`;
+        const w = window.open('','_blank'); w.document.write(h); w.document.close();
     }
 
     async function sistemiTemizleVeBirlestir() {
-        if(confirm("DİKKAT: Sistemdeki tüm müşteriler düzenlenecek, ad/soyadları büyük harfe çevrilecek ve gereksiz şirket ekleri temizlenerek birleştirilecek. Devam edilsin mi?")) {
-            try {
-                const button = event.currentTarget;
-                const oldText = button.innerHTML;
-                button.innerHTML = "İşleniyor..."; button.disabled = true;
-                const res = await api("/api/sistemi-temizle");
-                alert(res.mesaj || "İşlem başarıyla tamamlandı!");
-                yukleMusteriler(document.getElementById("musteri-ara").value, 1);
-                button.innerHTML = oldText; button.disabled = false;
-            } catch(e) { alert("Hata: " + e.message); }
+        if(confirm("Tüm müşteriler düzenlenip birleştirilecek. Devam edilsin mi?")) {
+            try { const b = event.currentTarget; const old = b.innerHTML; b.innerHTML = "İşleniyor..."; b.disabled = true; const res = await api("/api/sistemi-temizle"); alert(res.mesaj); yukleMusteriler(document.getElementById("musteri-ara").value, 1); b.innerHTML = old; b.disabled = false; } catch(e) { alert("Hata: " + e.message); }
         }
     }
 
-    function musteriFormu() { alert("Manuel form açılacak (Modal örneği)"); }
-    function policeFormu() { alert("Manuel form açılacak (Modal örneği)"); }
-    function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
-
-    document.addEventListener('click', function(event) {
-        var isClickInside = document.getElementById('fin-brans-menu')?.contains(event.target);
-        var isClickBtn = event.target.closest('button[onclick*="fin-brans-menu"]');
-        if (!isClickInside && !isClickBtn) {
-            document.getElementById('fin-brans-menu')?.classList.add('hidden');
-        }
-    });
+    const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]; document.getElementById("ay-ismi").textContent = aylar[new Date().getMonth()];
+    function musteriFormu() { alert("Modal örneği"); } function policeFormu() { alert("Modal örneği"); } function modalKapat() { document.getElementById("modal").classList.add("hidden"); }
+    document.addEventListener('click', function(e) { if (!document.getElementById('fin-brans-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-brans-menu"]')) document.getElementById('fin-brans-menu')?.classList.add('hidden'); });
 
     yukleDashboard(); 
   </script>

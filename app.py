@@ -23,7 +23,7 @@ DERSLER_DIR = BASE_DIR / "dersler"
 DERSLER_DIR.mkdir(exist_ok=True)
 
 # =========================================================================
-# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR (KULLANICI TALEBİ - 15.09.2026) 🔴
+# 🔴 ASLA BOZULMAYACAK SABİT KURALLAR (KULLANICI TALEBİ - 16.09.2026) 🔴
 # =========================================================================
 
 ZORUNLU_SIRKETLER = [
@@ -50,7 +50,6 @@ YENILENEBILIR_BRANSLAR = [
     "DASK", "Konut ve Eşya Sigortaları", "İş Yeri", "Ferdi Kaza"
 ]
 
-# Gelen kirli veriyi zorunlu listeye çevirme sözlüğü
 SIRKET_ESLESMELERI = {
     "türkiye": "Türkiye Sigorta", "turkiye": "Türkiye Sigorta", "anonim": "Türkiye Sigorta", "a.ş.": "Türkiye Sigorta",
     "axa": "Axa Sigorta", "doğa": "Doğa Sigorta", "doga": "Doğa Sigorta",
@@ -78,14 +77,12 @@ def standardize_metin(metin, sozluk, zorunlu_liste=None):
     if not metin: return "Diğer"
     m_lower = metin.strip().lower()
     for key, val in sozluk.items():
-        if key in m_lower:
-            return val
+        if key in m_lower: return val
     if zorunlu_liste:
         for zorunlu in zorunlu_liste:
             if zorunlu.lower() in m_lower: return zorunlu
     return metin.strip().title()
 
-# VERİTABANI BAĞLANTISI
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     DB_PATH = BASE_DIR / "acente_crm.db"
@@ -142,22 +139,18 @@ def init_db():
 
 def get_db():
     db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    try: yield db
+    finally: db.close()
 
 def eski_policeleri_otomatik_temizle():
     db = SessionLocal()
     try:
         sinir_tarihi = date.today() - timedelta(days=90)
         eski_policeler = db.query(Police).filter(Police.bitis_tarihi < sinir_tarihi).all()
-        silinen_sayi = len(eski_policeler)
-        if silinen_sayi > 0:
-            for p in eski_policeler:
-                db.delete(p)
+        if len(eski_policeler) > 0:
+            for p in eski_policeler: db.delete(p)
             db.commit()
-    except Exception as e:
+    except Exception:
         db.rollback()
     finally:
         db.close()
@@ -165,29 +158,12 @@ def eski_policeleri_otomatik_temizle():
 app = FastAPI(title="Altun Kardeşler CRM", version="3.9.1")
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
 @app.on_event("startup")
 def on_startup():
     init_db()
-    
-    # 🔴 TÜM VERİLERİ SIFIRLAMA (Kullanıcı Talebi) 🔴
-    db = SessionLocal()
-    try:
-        db.query(Police).delete()
-        db.query(Musteri).delete()
-        db.commit()
-        print("--- DİKKAT: TÜM MÜŞTERİ VE POLİÇE VERİLERİ SİLİNDİ (Temiz Başlangıç) ---")
-    except Exception as e:
-        db.rollback()
-    finally:
-        db.close()
-    
     eski_policeleri_otomatik_temizle()
 
 def normalize_string(s: str) -> str:
@@ -221,14 +197,11 @@ def sistemi_temizle(db: Session = Depends(get_db)):
 
         birlesen_sayisi = 0
         tum_musteriler = db.query(Musteri.id, Musteri.ad, Musteri.soyad, Musteri.tc_kimlik, Musteri.telefon).all()
-        
         gruplar = {}
         for m in tum_musteriler:
             anahtar = gelismis_firma_temizle(f"{m.ad} {m.soyad}")
             if not anahtar: continue
-            
-            if anahtar not in gruplar:
-                gruplar[anahtar] = []
+            if anahtar not in gruplar: gruplar[anahtar] = []
             gruplar[anahtar].append(m.id)
 
         for anahtar, m_ids in gruplar.items():
@@ -304,12 +277,14 @@ def api_pazarlama(db: Session = Depends(get_db)):
 
 @app.get("/api/dersler/liste")
 def api_dersler_liste():
-    # KULLANICI TALEBİ: "Diğer" kaldırıldı. Sadece var olan dosya isimlerine göre temiz dizilim.
+    # Güncelleme: Kategoriler tam kullanıcının istediği gibi detaylı kırılımlara ayrıldı.
     kategoriler = {
         "Kasko Sigortası": [], 
-        "Tamamlayıcı & Özel Sağlık": [], 
+        "Tamamlayıcı Sağlık Sigortası": [], 
+        "Özel Sağlık Sigortası": [], 
         "Konut Sigortası": [], 
-        "İş Yeri & All Risk": [],
+        "İş Yeri Sigortası": [],
+        "Mühendislik & All Risk": [],
         "Nakliyat Sigortası": [],
         "Site & Ortak Alan": []
     }
@@ -321,19 +296,22 @@ def api_dersler_liste():
             
             if "KASKO" in fname: 
                 kategoriler["Kasko Sigortası"].append(f.name)
-            elif "TSS" in fname or "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname: 
-                kategoriler["Tamamlayıcı & Özel Sağlık"].append(f.name)
+            elif "TSS" in fname or "TAMAMLAYICI" in fname: 
+                kategoriler["Tamamlayıcı Sağlık Sigortası"].append(f.name)
+            elif "OSS" in fname or "ÖSS" in fname or "SAĞLIK" in fname or "SAGLIK" in fname or "ÖZEL" in fname: 
+                kategoriler["Özel Sağlık Sigortası"].append(f.name)
             elif "KONUT" in fname or "DASK" in fname or "DEPREM" in fname: 
                 kategoriler["Konut Sigortası"].append(f.name)
-            elif "İŞYERİ" in fname or "ISYERI" in fname or "ALLRISK" in fname or "ALLRİSK" in fname: 
-                kategoriler["İş Yeri & All Risk"].append(f.name)
+            elif "İŞYERİ" in fname or "ISYERI" in fname: 
+                kategoriler["İş Yeri Sigortası"].append(f.name)
+            elif "ALLRISK" in fname or "ALLRİSK" in fname or "MÜHENDİSLİK" in fname or "INSAAT" in fname or "İNŞAAT" in fname: 
+                kategoriler["Mühendislik & All Risk"].append(f.name)
             elif "NAKLİYAT" in fname or "NAKLIYAT" in fname: 
                 kategoriler["Nakliyat Sigortası"].append(f.name)
             elif "SİTE" in fname or "SITE" in fname: 
                 kategoriler["Site & Ortak Alan"].append(f.name)
             else:
-                # Olası kaçaklar için en genel torba (Diğer yerine İş Yeri/Kurumsal'a dahil edilecek)
-                kategoriler["İş Yeri & All Risk"].append(f.name)
+                kategoriler["İş Yeri Sigortası"].append(f.name)
                 
     return {k: sorted(v) for k, v in kategoriler.items() if len(v) > 0}
 
