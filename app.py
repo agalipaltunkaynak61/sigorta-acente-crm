@@ -166,6 +166,19 @@ def on_startup():
     init_db()
     eski_policeleri_otomatik_temizle()
 
+# ✅ LOGO DOSYASINI OKUYAN ENDPOINT (YENİ)
+@app.get("/api/logo")
+def get_logo():
+    olasi_isimler = ["vektorel_logo.svg", "logo.svg", "logo.png", "logo.jpg", "logo.jpeg"]
+    for isim in olasi_isimler:
+        dosya_yolu = BASE_DIR / isim
+        if dosya_yolu.exists():
+            return FileResponse(dosya_yolu)
+    
+    # Dosya bulunamazsa varsayılan metin tabanlı SVG döndür (Kırık resim çıkmasın diye)
+    yedek_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150"><text x="200" y="75" font-family="Arial" font-size="30" font-weight="bold" fill="#0A192F" text-anchor="middle">ALTUN KARDEŞLER</text><text x="200" y="110" font-family="Arial" font-size="18" fill="#C6A25D" text-anchor="middle">SİGORTA</text></svg>"""
+    return Response(content=yedek_svg, media_type="image/svg+xml")
+
 def normalize_string(s: str) -> str:
     if not s: return ""
     s = s.upper().replace("İ", "I").replace("I", "I").replace("Ş", "S").replace("Ğ", "G").replace("Ü", "U").replace("Ö", "O").replace("Ç", "C")
@@ -277,7 +290,6 @@ def api_pazarlama(db: Session = Depends(get_db)):
 
 @app.get("/api/dersler/liste")
 def api_dersler_liste():
-    # Güncelleme: Kategoriler tam kullanıcının istediği gibi detaylı kırılımlara ayrıldı.
     kategoriler = {
         "Kasko Sigortası": [], 
         "Tamamlayıcı Sağlık Sigortası": [], 
