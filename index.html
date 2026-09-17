@@ -611,7 +611,7 @@
                    </div>
                    <div class="lg:col-span-2">
                        <label class="block text-xs font-bold text-slate-500 mb-1">Brüt Prim / İade Prim (TL)</label>
-                       <input type="number" id="form-prim" step="0.01" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-green-700 focus:border-brand-navy bg-green-50 text-right" placeholder="0.00" />
+                       <input type="text" id="form-prim" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-green-700 focus:border-brand-navy bg-green-50 text-right" placeholder="0.00" />
                    </div>
                    <div class="lg:col-span-2">
                        <label class="block text-xs font-bold text-slate-500 mb-1">Araç / Ek Bilgi</label>
@@ -754,7 +754,7 @@
             ],
             "Axa": [
                 "<b>Ek Teminat Zenginliği:</b> Makine kırılmasında kâr kaybı ve hareketli makine geniş kasko imkânı.",
-                "<b>Elektronik Cihaz Artıları:</b> Seyyar cihaz sevkiyatı ve manyetik bant/disk fiziki hasar güvencesi.",
+                "<b>Elektronik Cihaz Artıları:</b> Seyyar cihaz sevkiyatı ve magnetik bant/disk fiziki hasar güvencesi.",
                 "<b>Proje Kapsamı:</b> Enkaz kaldırma, geçici şantiye tesisleri ve ekspres nakliye masrafları güvencesi."
             ],
             "Neova": [
@@ -1017,6 +1017,7 @@
         document.getElementById("ai-musteri-ara").value = "";
     }
 
+    // YENİ GÜNCELLENEN KAYIT FONKSİYONU
     async function policeyiKaydetV2() {
         const hataP = document.getElementById("ai-modal-hata");
         hataP.classList.add("hidden");
@@ -1038,16 +1039,20 @@
                 if (!kullanilacakMusteriId) throw new Error("Lütfen listeden müşteri seçin.");
             }
 
+            // DÜZELTME: Virgülü noktaya çevirip hata fırlatmasını engelliyoruz
+            let primDegeri = document.getElementById("form-prim").value;
+            if(primDegeri) primDegeri = primDegeri.replace(',', '.');
+
+            // DÜZELTME: Veritabanında (app.py) henüz bulunmayan islem_tipi ve uretim_kaynagi 
+            // json payload içerisinden çıkarıldı. Çökmeyi engelleyecektir.
             const policePayload = {
                 musteri_id: kullanilacakMusteriId,
-                islem_tipi: document.getElementById("form-islem-tipi").value,
-                uretim_kaynagi: document.getElementById("form-uretim-kaynagi").value,
                 police_no: document.getElementById("form-police-no").value || "-",
                 sigorta_sirketi: document.getElementById("form-sirket").value,
                 sigorta_turu: document.getElementById("form-brans").value,
                 baslangic_tarihi: document.getElementById("form-baslangic").value || new Date().toISOString().split('T')[0],
                 bitis_tarihi: document.getElementById("form-bitis").value || new Date().toISOString().split('T')[0],
-                prim: parseFloat(document.getElementById("form-prim").value) || 0,
+                prim: parseFloat(primDegeri) || 0,
                 arac_bilgisi: document.getElementById("form-arac").value,
                 pdf_dosya_adi: sonYuklenenDosyaAdi
             };
@@ -1172,10 +1177,19 @@
         document.getElementById("ders-detay-modal").classList.add("hidden");
     };
 
-
+    // DÜZELTME: API Hatası geldiğinde ekranda "Hata: Hata" yerine 
+    // gerçek sorunu okuyabilmek için try-catch mekanizması güçlendirildi
     async function api(path, opts) {
       const res = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...opts });
-      if (!res.ok) { let msg = "Hata"; try { msg = (await res.json()).detail || msg; } catch(_) {} throw new Error(msg); }
+      if (!res.ok) {
+          let msg = "Sunucu Hatası (" + res.status + ")";
+          try {
+              const text = await res.text();
+              try { msg = JSON.parse(text).detail || msg; }
+              catch(e) { msg = text.length < 100 ? text : msg; }
+          } catch(_) {}
+          throw new Error(msg);
+      }
       return res.status === 204 ? null : res.json();
     }
     
