@@ -147,15 +147,28 @@ class DosyaDepo(Base):
     veri = Column(LargeBinary, nullable=False)
 
 def check_and_upgrade_db():
-    with engine.begin() as conn:
+    # PostgreSQL'de transaction kilitlenmelerini önlemek için
+    # her bir kolonu kendi bağımsız bağlantısında kontrol edip ekliyoruz.
+    kolonlar = [
+        ("islem_turu", "VARCHAR(50) DEFAULT 'Yeni'"),
+        ("uretim_kaynagi", "VARCHAR(50) DEFAULT 'Kendi'"),
+        ("komisyon", "FLOAT DEFAULT 0.0")
+    ]
+    
+    for kolon_adi, kolon_tipi in kolonlar:
+        kolon_var = True
         try:
-            conn.execute(text("SELECT uretim_kaynagi FROM policeler LIMIT 1"))
+            with engine.connect() as conn:
+                conn.execute(text(f"SELECT {kolon_adi} FROM policeler LIMIT 1"))
         except Exception:
+            kolon_var = False
+            
+        if not kolon_var:
             try:
-                conn.execute(text("ALTER TABLE policeler ADD COLUMN uretim_kaynagi VARCHAR(50) DEFAULT 'Kendi'"))
-                conn.execute(text("ALTER TABLE policeler ADD COLUMN komisyon FLOAT DEFAULT 0.0"))
+                with engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE policeler ADD COLUMN {kolon_adi} {kolon_tipi}"))
             except Exception as e:
-                print("DB Upgrade Error:", e)
+                print(f"DB Upgrade Hatası ({kolon_adi}):", e)
 
 def init_db():
     Base.metadata.create_all(bind=engine)
@@ -463,7 +476,6 @@ def api_musteri_olustur(payload: dict, db: Session = Depends(get_db)):
             if gelismis_firma_temizle(f"{m.ad} {m.soyad}") == norm_anahtar:
                 existing = m; break
 
-    # Yalnızca geçerli sütun adlarını modele işliyoruz (Frontend hatalarını bloklar)
     valid_keys = {"ad", "soyad", "telefon", "email", "tc_kimlik", "adres", "notlar", "portfoy_sorumlusu"}
 
     if existing:
@@ -559,7 +571,6 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
         temiz_sirket = standardize_metin(payload.get("sigorta_sirketi"), SIRKET_ESLESMELERI, ZORUNLU_SIRKETLER)
         temiz_brans = standardize_metin(payload.get("sigorta_turu"), BRANS_ESLESMELERI, ZORUNLU_BRANSLAR)
 
-        # HATA ÇÖZÜMÜ: Eğer poliçe kaydedilirken Müşteri seçilmemişse, girilen verilerden otomatik müşteri yaratılır.
         musteri_id = payload.get("musteri_id")
         if not musteri_id:
             m_ad = (payload.get("musteri_ad") or payload.get("ad") or "").strip().upper()
@@ -600,7 +611,7 @@ def api_police_olustur(payload: dict, db: Session = Depends(get_db)):
                 hesaplanan_komisyon *= 0.5
                 
             police = Police(
-                musteri_id=musteri_id, # BURASI GÜNCELLENDİ (Internal Server Error düzeltildi)
+                musteri_id=musteri_id,
                 police_no=police_no, sigorta_turu=temiz_brans, 
                 sigorta_sirketi=temiz_sirket, islem_turu=islem_tipi, uretim_kaynagi=uretim_kaynagi,
                 baslangic_tarihi=baslangic, bitis_tarihi=bitis, prim=prim_deger, komisyon=hesaplanan_komisyon,
@@ -688,7 +699,6 @@ async def api_upload_parse(file: UploadFile = File(...)):
                 ayiklanan["musteri_eslesti"] = False
                 ayiklanan["mesaj"] = "Yeni müşteri. Lütfen bilgileri kontrol edip kaydedin."
                 
-            # Önyüz formunda (Yeni Müşteri Kutusunda) kaybolmasın diye her zaman değer gönderiyoruz
             if "telefon" not in ayiklanan:
                 ayiklanan["telefon"] = ""
             if "portfoy_sorumlusu" not in ayiklanan:
