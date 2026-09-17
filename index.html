@@ -209,53 +209,30 @@
     <section id="view-pazarlama" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
         <div>
-            <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Pazarlama ve Çapraz Satış</h2>
-            <p class="text-sm font-medium text-slate-500 mt-1">Mevcut poliçesi son 30 gün içinde bitecek müşterilere satılabilecek potansiyel fırsatlar listesi.</p>
+            <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Akıllı Satış ve Pazarlama Asistanı</h2>
+            <p class="text-sm font-medium text-slate-500 mt-1">Yapay zeka tarafından analiz edilmiş çapraz satış fırsatları ve iletişim taktikleri.</p>
         </div>
+        <button onclick="pazarlamaListeyiYazdir()" class="bg-brand-navy text-brand-gold font-bold px-5 py-2.5 rounded-lg hover:bg-brand-navyhover transition-colors shadow flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Tüm Planı İndir (PDF)
+        </button>
       </div>
 
-      <div class="flex flex-col md:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
-        <!-- Sol Menü -->
-        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-4 h-full flex flex-col shrink-0">
-          <h3 class="font-bold text-xs text-slate-400 uppercase mb-4 px-2 shrink-0">Satış Fırsatları (Kampanyalar)</h3>
-          <div id="pazarlama-sekmeler" class="flex-1 overflow-y-auto flex flex-col gap-2"></div>
-        </div>
-        
-        <!-- Sağ Liste -->
-        <div class="w-full md:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full flex flex-col min-h-0">
-          <div class="mb-5 shrink-0">
-            <div class="flex items-center justify-between border-b pb-2 mb-3">
-              <h3 id="pazarlama-liste-baslik" class="text-lg font-bold text-brand-navy">Kampanya Seçin</h3>
-              <button onclick="pazarlamaListeyiYazdir()" class="text-xs bg-brand-navy text-brand-gold font-bold px-4 py-2 rounded-lg hover:bg-brand-navyhover transition-colors shadow flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                PDF İndir
-              </button>
-            </div>
-            
-            <div id="pazarlama-liste-cumle-kutu" class="bg-brand-gold/5 border border-brand-gold/30 p-4 rounded-xl hidden flex flex-col gap-2">
-                <p class="text-[11px] font-bold text-brand-gold uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                    Müşteriyi Aradığınızda Alternatif Söylemler:
-                </p>
-                <ul id="pazarlama-liste-cumle" class="text-sm font-medium text-slate-700 leading-relaxed list-disc pl-5 space-y-1"></ul>
-            </div>
-          </div>
-          
-          <div class="flex-1 overflow-y-auto border border-slate-200 rounded-lg">
+      <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <div class="flex-1 overflow-y-auto">
             <table class="w-full text-sm relative">
               <thead class="bg-slate-50 border-b border-slate-200 text-left text-slate-500 text-xs font-bold sticky top-0 z-10">
                 <tr>
                   <th class="px-5 py-4">Müşteri</th>
                   <th class="px-5 py-4">Telefon</th>
-                  <th class="px-5 py-4">Biten Poliçe (Tetikleyici)</th>
-                  <th class="px-5 py-4">Diğer Fırsatlar</th>
+                  <th class="px-5 py-4 w-1/4">Biten Poliçe (Tetikleyici)</th>
+                  <th class="px-5 py-4">Çapraz Satış Fırsatları</th>
                   <th class="px-5 py-4 text-center">Bitiş</th>
                 </tr>
               </thead>
               <tbody id="pazarlama-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
-            <div id="pazarlama-empty" class="hidden text-center py-12 text-slate-400 text-sm italic">Bu kampanya için uygun müşteri bulunamadı. Harika!</div>
-          </div>
+            <div id="pazarlama-empty" class="hidden text-center py-12 text-slate-400 text-sm italic">Uygun müşteri bulunamadı. Harika!</div>
         </div>
       </div>
     </section>
@@ -374,7 +351,6 @@
           <div><label class="block text-xs font-bold text-slate-500 mb-1">Dönem 1 Başlangıç</label><input type="date" id="fin-start" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
           <div><label class="block text-xs font-bold text-slate-500 mb-1">Dönem 1 Bitiş</label><input type="date" id="fin-end" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
           
-          <!-- Çoklu Seçim Filtreleri (Tümü seçeneği JS ile eklenecek) -->
           <div class="relative">
             <label class="block text-xs font-bold text-slate-500 mb-1">Şirket (Çoklu)</label>
             <button type="button" onclick="document.getElementById('fin-sirket-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
@@ -406,7 +382,6 @@
           </div>
         </div>
 
-        <!-- Kıyaslama Dates (Hidden by default) -->
         <div id="fin-kiyas-container" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4 items-start p-4 bg-brand-gold/5 border border-brand-gold/20 rounded-xl mb-4">
           <div><label class="block text-xs font-bold text-brand-navy mb-1">Dönem 2 Başlangıç</label><input type="date" id="fin-start-2" class="w-full border border-brand-gold/30 rounded-lg px-3 py-2 text-sm bg-white" /></div>
           <div><label class="block text-xs font-bold text-brand-navy mb-1">Dönem 2 Bitiş</label><input type="date" id="fin-end-2" class="w-full border border-brand-gold/30 rounded-lg px-3 py-2 text-sm bg-white" /></div>
@@ -663,11 +638,10 @@
     // ===== AYARLAR VE VERİ YAPILARI =====
     const API = "";
     let aktifPoliceSekmesi = 'aktif';
-    let aktifPazarlamaSekmesi = 'dask_konut';
     const perPage = 10;
     
     let buAyBitenlerCache = [];
-    let pazarlamaDataCache = {};
+    let pazarlamaDataCache = []; // Yeni JSON yapısına göre artık burası Array (Liste)
     window.dersDataCache = {};
 
     // Komisyon oranları ve kurallar hafızada tutuluyor (App.py ile backend'de kurgulanacak).
@@ -886,15 +860,6 @@
             ]
         }
     };
-
-    const PAZARLAMA_KAMPANYALAR = {
-      "dask_konut": { baslik: "1. DASK ➔ Konut", cumleler: ["DASK poliçeniz evinizin sadece binasını korur; eşyalarınızı da güvenceye alalım mı?"] },
-      "arac_konut": { baslik: "2. Kasko/Trafik ➔ Konut", cumleler: ["Aracınızı güvenceye aldık, evinizi de koruyalım mı?"] },
-      "arac_tss": { baslik: "3. Kasko/Trafik ➔ TSS", cumleler: ["Aracınız tamam, peki kendi sağlığınız? TSS ile özel hastane farkı ödemeyin."] },
-      "konut_ferdi": { baslik: "4. Konut ➔ Ferdi Kaza", cumleler: ["Eviniz güvende, kaza durumunda ailenizin standardını da koruyalım."] },
-      "tss_oss": { baslik: "5. TSS ➔ Özel Sağlık", cumleler: ["Limitleri çok daha geniş olan Özel Sağlık Sigortası'na geçiş yapalım mı?"] },
-      "tss_kasko": { baslik: "6. TSS ➔ Kasko", cumleler: ["Sağlığınız güvende, ancak sistemimizde kaskonuz görünmüyor. Onu da tek elde toplayalım mı?"] }
-    };
     
     // TAB YÖNETİMİ
     document.querySelectorAll(".nav-btn").forEach((btn) => btn.addEventListener("click", () => goster(btn.dataset.view)));
@@ -1099,9 +1064,6 @@
         }
     }
 
-
-    // ====== DİĞER ORİJİNAL KODLAR (Çoklu Seçim Tümü Mantığı Eklendi) ======
-    
     async function yukleDersler() {
         try {
             const data = await api("/api/dersler/liste");
@@ -1217,106 +1179,82 @@
       return res.status === 204 ? null : res.json();
     }
     
+    // === YENİ YAPAY ZEKA ÇAPRAZ SATIŞ MODÜLÜ FONKSİYONLARI ===
+    
     async function yuklePazarlama() {
-        document.getElementById("pazarlama-sekmeler").innerHTML = '<p class="text-xs text-slate-400 italic p-2">Hesaplanıyor...</p>';
-        pazarlamaDataCache = await api("/api/pazarlama");
-        document.getElementById("pazarlama-sekmeler").innerHTML = Object.keys(PAZARLAMA_KAMPANYALAR).map(key => {
-            const adet = pazarlamaDataCache[key] ? pazarlamaDataCache[key].length : 0;
-            return `<button onclick="pazarlamaSekmeSec('${key}')" id="btn-paz-${key}" class="w-full text-left px-4 py-4 rounded-xl text-sm font-bold transition-all flex justify-between items-center bg-slate-50 text-slate-500"><span class="pr-2">${PAZARLAMA_KAMPANYALAR[key].baslik}</span><span class="${adet > 0 ? 'bg-red-500 text-white' : 'bg-slate-300 text-slate-600'} text-xs px-2.5 py-1 rounded-lg shrink-0 shadow-sm">${adet}</span></button>`;
-        }).join("");
-        pazarlamaSekmeSec("dask_konut");
-    }
-
-    window.pazarlamaSekmeSec = function(key) {
-        aktifPazarlamaSekmesi = key;
-        Object.keys(PAZARLAMA_KAMPANYALAR).forEach(k => {
-            const btn = document.getElementById("btn-paz-" + k);
-            if(btn) {
-                if (k === key) {
-                    btn.classList.add("bg-brand-navy", "text-brand-gold", "border-brand-navy"); btn.classList.remove("bg-slate-50", "text-slate-500");
-                    btn.querySelector("span:last-child").className = "bg-brand-gold text-brand-navy text-xs px-2.5 py-1 rounded-lg shrink-0";
-                } else {
-                    btn.classList.remove("bg-brand-navy", "text-brand-gold"); btn.classList.add("bg-slate-50", "text-slate-500");
-                    btn.querySelector("span:last-child").className = (!(pazarlamaDataCache[k] && pazarlamaDataCache[k].length > 0) ? "bg-slate-300 text-slate-600" : "bg-red-500 text-white") + " text-xs px-2.5 py-1 rounded-lg shrink-0";
-                }
-            }
-        });
-        
-        document.getElementById("pazarlama-liste-baslik").textContent = PAZARLAMA_KAMPANYALAR[key].baslik;
-        document.getElementById("pazarlama-liste-cumle").innerHTML = PAZARLAMA_KAMPANYALAR[key].cumleler.map(c => `<li>${c}</li>`).join("");
-        document.getElementById("pazarlama-liste-cumle-kutu").classList.remove("hidden");
-        
-        const liste = pazarlamaDataCache[key] || [];
         const tbody = document.getElementById("pazarlama-tbody");
-        
-        if(liste.length === 0) { 
-            tbody.innerHTML = ""; document.getElementById("pazarlama-empty").classList.remove("hidden"); 
-        } else {
-            document.getElementById("pazarlama-empty").classList.add("hidden");
-            tbody.innerHTML = liste.map(item => {
-                let digerKampanyalar = [];
-                for(let k in pazarlamaDataCache) {
-                    if(k !== key && pazarlamaDataCache[k]) {
-                        if(pazarlamaDataCache[k].find(x => x.ad_soyad === item.ad_soyad || x.telefon === item.telefon)) {
-                            digerKampanyalar.push(PAZARLAMA_KAMPANYALAR[k].baslik.split('➔')[1].trim());
-                        }
-                    }
-                }
-                
-                let digerHtml = digerKampanyalar.length > 0 
-                    ? digerKampanyalar.map(d => `<span class="bg-brand-navy text-brand-gold font-bold text-[9px] uppercase px-1.5 py-0.5 rounded shadow-sm">${d}</span>`).join('') 
-                    : '<span class="text-[10px] text-slate-400 font-medium">-</span>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-400 italic font-medium">Yapay zeka analiz ediyor, lütfen bekleyin...</td></tr>';
 
-                return `
+        try {
+            // Arayüz artık app.py'den doğrudan liste halinde JSON gelmesini bekliyor.
+            const liste = await api("/api/pazarlama"); 
+            pazarlamaDataCache = liste;
+
+            if (!liste || liste.length === 0) {
+                tbody.innerHTML = "";
+                document.getElementById("pazarlama-empty").classList.remove("hidden");
+                return;
+            }
+
+            document.getElementById("pazarlama-empty").classList.add("hidden");
+
+            tbody.innerHTML = liste.map(item => `
                 <tr class="hover:bg-slate-50">
-                    <td class="px-5 py-3 font-semibold text-brand-navy text-[13px]">${item.ad_soyad}</td>
-                    <td class="px-5 py-3 text-slate-600 font-bold">${item.telefon}</td>
-                    <td class="px-5 py-3 text-slate-500 text-xs">${item.dayanak}</td>
-                    <td class="px-5 py-3"><div class="flex flex-wrap gap-1">${digerHtml}</div></td>
-                    <td class="px-5 py-3 text-center"><span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1.5 rounded-lg">Bitiş: ${item.bitis}</span></td>
-                </tr>`;
-            }).join("");
+                    <td class="px-5 py-4 font-bold text-brand-navy text-[13px]">${item.musteri}</td>
+                    <td class="px-5 py-4 text-slate-600 font-bold">${item.telefon}</td>
+                    <td class="px-5 py-4 text-slate-500 text-xs font-medium">${item.biten_police}</td>
+                    <td class="px-5 py-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${item.diger_firsatlar.split(',').map(f => `<span class="bg-brand-navy text-brand-gold font-bold text-[9px] uppercase px-1.5 py-0.5 rounded shadow-sm">${f.trim()}</span>`).join('')}
+                        </div>
+                    </td>
+                    <td class="px-5 py-4 text-center"><span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1.5 rounded-lg">${item.bitis}</span></td>
+                </tr>
+                <tr class="bg-brand-gold/5 border-b-2 border-slate-100">
+                    <td colspan="5" class="px-5 py-3">
+                        <div class="flex gap-3 items-start">
+                            <span class="bg-brand-gold text-brand-navy text-[9px] font-black uppercase px-2 py-1 rounded shrink-0 flex items-center gap-1 shadow-sm">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                AI SATIŞ NOTU
+                            </span>
+                            <p class="text-xs text-slate-700 font-medium italic mt-0.5">${item.calisan_notu}</p>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-red-500 italic font-medium">Veri yüklenemedi. app.py tarafının yapay zeka analizini doğru döndüğünden emin olun.</td></tr>`;
         }
     }
 
     window.pazarlamaListeyiYazdir = function() {
-        const key = aktifPazarlamaSekmesi;
-        const liste = pazarlamaDataCache[key] || [];
+        const liste = pazarlamaDataCache || [];
         if(!liste.length) { alert("Yazdırılacak veri bulunamadı."); return; }
 
-        let h = `<html><head><title>${PAZARLAMA_KAMPANYALAR[key].baslik} - Pazarlama Listesi</title>
+        let h = `<html><head><title>Yapay Zeka Destekli Satış Planı</title>
         <style>
             body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#333;}
             h2{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;color:#0A192F;}
             table{width:100%;border-collapse:collapse;margin-bottom:30px;}
             th,td{border:1px solid #ddd;padding:10px;text-align:left;}
             th{background-color:#0A192F;color:white;}
-            .diger{background-color:#f8f9fa;font-size:10px;color:#555;padding:2px 4px;border-radius:4px;border:1px solid #ccc;margin-right:4px;}
+            .ai-note{background-color:#fefce8; font-style: italic; color: #854d0e;}
             @media print{button{display:none;}}
         </style></head><body>`;
         
-        h += `<h2>Kampanya: ${PAZARLAMA_KAMPANYALAR[key].baslik}</h2>
-              <table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe (Tetikleyici)</th><th>Diğer Listelerdeki Durumu</th><th>Bitiş Tarihi</th></tr></thead><tbody>`;
+        h += `<h2>Yapay Zeka Destekli Çapraz Satış Planı</h2>
+              <table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe (Tetikleyici)</th><th>Çapraz Satış Fırsatları</th><th>Bitiş Tarihi</th></tr></thead><tbody>`;
 
         liste.forEach(item => {
-            let digerKampanyalar = [];
-            for(let k in pazarlamaDataCache) {
-                if(k !== key && pazarlamaDataCache[k]) {
-                    if(pazarlamaDataCache[k].find(x => x.ad_soyad === item.ad_soyad || x.telefon === item.telefon)) {
-                        digerKampanyalar.push(PAZARLAMA_KAMPANYALAR[k].baslik.split('➔')[1].trim());
-                    }
-                }
-            }
-            let digerMetin = digerKampanyalar.length > 0 
-                ? digerKampanyalar.map(d => `<span class="diger">${d}</span>`).join('') 
-                : "-";
-
             h += `<tr>
-                <td><strong>${item.ad_soyad}</strong></td>
+                <td><strong>${item.musteri}</strong></td>
                 <td>${item.telefon}</td>
-                <td>${item.dayanak}</td>
-                <td>${digerMetin}</td>
+                <td>${item.biten_police}</td>
+                <td><strong>${item.diger_firsatlar}</strong></td>
                 <td><strong>${item.bitis}</strong></td>
+            </tr>
+            <tr class="ai-note">
+                <td colspan="5"><strong>📞 Çalışan Satış Taktiği:</strong> ${item.calisan_notu}</td>
             </tr>`;
         });
 
