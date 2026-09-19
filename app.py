@@ -147,8 +147,6 @@ class DosyaDepo(Base):
     veri = Column(LargeBinary, nullable=False)
 
 def check_and_upgrade_db():
-    # PostgreSQL'de transaction kilitlenmelerini önlemek için
-    # her bir kolonu kendi bağımsız bağlantısında kontrol edip ekliyoruz.
     kolonlar = [
         ("islem_turu", "VARCHAR(50) DEFAULT 'Yeni'"),
         ("uretim_kaynagi", "VARCHAR(50) DEFAULT 'Kendi'"),
@@ -282,48 +280,79 @@ def api_pazarlama(db: Session = Depends(get_db)):
         
     musteriler = {m.id: m for m in db.query(Musteri).filter(Musteri.id.in_(musteri_dict.keys())).all()}
     
-    sonuclar = {
-        "dask_konut": [], "arac_konut": [], "arac_tss": [],
-        "konut_ferdi": [], "tss_oss": [], "tss_kasko": []
+    # 🔴 BURASI YENİ: Akıllı Çapraz Satış Mantığı
+    CAPRAZ_SATIS_KURALLARI = {
+        "Kasko Sigortası": {
+            "firsatlar": ["Tamamlayıcı Sağlık Sigortası", "Konut ve Eşya Sigortaları"],
+            "taktik": 'Yüksek Gelir / Risk Bilinci Yüksek: Aracını kaskolatan müşteri harcama yapmaya yatkındır. "Aracınızı güvenceye aldık, peki sağlığınızı ve evinizi?" kurgusuyla yüksek dönüşüm sağlar.'
+        },
+        "DASK": {
+            "firsatlar": ["Konut ve Eşya Sigortaları", "Ferdi Kaza"],
+            "taktik": 'Zorunlu Alıcı / Eksiği Tamamlama: DASK sadece binanın kaba yapısını ve düşük limitleri kapsar. "DASK eşyalarınızı kapsamaz" söylemiyle konut/eşya poliçesi satma ihtimali çok yüksektir.'
+        },
+        "Trafik Sigortası": {
+            "firsatlar": ["Kasko Sigortası", "Ferdi Kaza", "Özel Paket / Destek"],
+            "taktik": 'Sadece Zorunluluk Satın Alan: Trafik sigortası karşı tarafı korur. Sürücüye "Kendi aracınız ve canınız güvende mi?" teklifiyle kasko, asistan paketleri veya ferdi kaza sunulur.'
+        },
+        "Tamamlayıcı Sağlık Sigortası": {
+            "firsatlar": ["Kasko Sigortası", "Konut ve Eşya Sigortaları", "Ferdi Kaza"],
+            "taktik": 'Aile ve Konfor Odaklı: Sağlığına ve ailesine önem veren kitle. Ev ve araç koruma çözümlerine olumlu yanıt verirler.'
+        },
+        "İş Yeri": {
+            "firsatlar": ["Nakliyat", "Allrisk", "Ferdi Kaza"],
+            "taktik": 'Ticari / B2B Segment: Ticari işletmelerin mal sevkiyatı için Nakliyat, montaj/proje riskleri için Allrisk ihtiyaçları doğar. Ayrıca iş yeri sahibine şahsi Kasko/TSS çapraz satışı yapılabilir.'
+        },
+        "Yat / Denizcilik": {
+            "firsatlar": ["Kasko Sigortası", "Konut ve Eşya Sigortaları", "Allrisk"],
+            "taktik": 'A+ Gelir Grubu: Premium müşteri segmentidir. Lüks araç, gayrimenkul ve özel varlık sigortalarında fiyat hassasiyetleri düşük, kabul oranları yüksektir.'
+        },
+        "Tarım": {
+            "firsatlar": ["Trafik Sigortası", "Ferdi Kaza", "Konut ve Eşya Sigortaları"],
+            "taktik": 'Üretici Segmenti: Geçim kaynağını sigortalayan üreticinin araç ve yaşam alanı koruma ihtiyaçlarına odaklanılır.'
+        }
     }
+
+    sonuclar = []
     
     for m_id, policeler in musteri_dict.items():
         m = musteriler.get(m_id)
         if not m: continue
-        branslar = set(p.sigorta_turu for p in policeler if p.sigorta_turu)
         
-        def get_expiring(b_types):
-            for p in policeler:
-                if p.sigorta_turu in b_types and (p.bitis_tarihi - bugun).days <= 30: return p
-            return None
-
-        ad_soyad = f"{m.ad} {m.soyad}".strip()
-        tel = m.telefon or "-"
-
-        if "DASK" in branslar and "Konut ve Eşya Sigortaları" not in branslar:
-            p = get_expiring(["DASK"])
-            if p: sonuclar["dask_konut"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
-                
-        if ("Kasko Sigortası" in branslar or "Trafik Sigortası" in branslar) and "Konut ve Eşya Sigortaları" not in branslar:
-            p = get_expiring(["Kasko Sigortası", "Trafik Sigortası"])
-            if p: sonuclar["arac_konut"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
-
-        if ("Kasko Sigortası" in branslar or "Trafik Sigortası" in branslar) and "Tamamlayıcı Sağlık Sigortası" not in branslar:
-            p = get_expiring(["Kasko Sigortası", "Trafik Sigortası"])
-            if p: sonuclar["arac_tss"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
-
-        if "Konut ve Eşya Sigortaları" in branslar and "Ferdi Kaza" not in branslar:
-            p = get_expiring(["Konut ve Eşya Sigortaları"])
-            if p: sonuclar["konut_ferdi"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
-
-        if "Tamamlayıcı Sağlık Sigortası" in branslar and "Özel Sağlık Sigortası" not in branslar:
-            p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
-            if p: sonuclar["tss_oss"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
-                
-        if "Tamamlayıcı Sağlık Sigortası" in branslar and "Kasko Sigortası" not in branslar:
-            p = get_expiring(["Tamamlayıcı Sağlık Sigortası"])
-            if p: sonuclar["tss_kasko"].append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": tel, "dayanak": p.sigorta_turu, "bitis": p.bitis_tarihi.strftime("%d.%m.%Y")})
+        # Müşterinin halihazırda sahip olduğu branşları filtrelemek için sakla
+        sahip_olunan_branslar = set(p.sigorta_turu for p in policeler if p.sigorta_turu)
+        
+        # Fırsatı aynı kişiye defalarca göstermemek için
+        eklenen_firsatlar = set()
+        
+        for p in policeler:
+            kalan_gun = (p.bitis_tarihi - bugun).days
+            
+            # Sadece bitimine 30 gün kalanlar pazarlama tetikleyicisidir
+            if 0 <= kalan_gun <= 30:
+                kural = CAPRAZ_SATIS_KURALLARI.get(p.sigorta_turu)
+                if kural:
+                    # Müşteride henüz bulunmayan sigortaları ayır
+                    yeni_firsatlar = [b for b in kural["firsatlar"] if b not in sahip_olunan_branslar]
                     
+                    if yeni_firsatlar:
+                        anahtar = f"{m.id}_{p.sigorta_turu}"
+                        if anahtar not in eklenen_firsatlar:
+                            sonuclar.append({
+                                "musteri_id": m.id,
+                                "ad_soyad": f"{m.ad} {m.soyad}".strip(),
+                                "telefon": m.telefon or "-",
+                                "tetikleyici_police": p.sigorta_turu,
+                                "dayanak": p.sigorta_turu, # Frontend ile uyumluluk için
+                                "firsatlar": " + ".join(yeni_firsatlar),
+                                "taktik": kural["taktik"],
+                                "bitis": p.bitis_tarihi.strftime("%d.%m.%Y"),
+                                "kalan_gun": kalan_gun
+                            })
+                            eklenen_firsatlar.add(anahtar)
+                            
+    # Sonuçları bitiş tarihine göre sırala (Acil olan en üstte)
+    sonuclar.sort(key=lambda x: x["kalan_gun"])
+    
     return sonuclar
 
 @app.get("/api/dersler/liste")
