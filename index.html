@@ -1,58 +1,213 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Altun Kardeşler Sigorta CRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { 
-            sans: ['Inter', 'sans-serif'], 
-            serif: ['Playfair Display', 'serif'] 
-          },
-          colors: { 
-            brand: { 
-              navy: "#0A192F",
-              navyhover: "#112240",  
-              gold: "#C6A25D",
-              goldhover: "#A88645", 
-              light: "#F4F7F6",
-              white: "#FFFFFF",
-              muted: "#64748b"
-            } 
-          },
-        },
-      },
-    };
-  </script>
-  <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #C6A25D; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #0A192F; }
-    .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    
-    .scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Altun Kardeşler Sigorta CRM</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23061337'/%3E%3Cpath d='M14 46 32 14l18 32h-9l-9-17-9 17z' fill='%23C0A265'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+<style>
+/* ===== TASARIM DEĞİŞKENLERİ (logo: lacivert + altın + kırık beyaz) ===== */
+:root{
+  --navy:#061337; --navy-2:#0D2250; --navy-3:#16306B;
+  --gold:#C0A265; --gold-d:#9C7F45; --gold-l:#E7D09A; --gold-bg:#FBF6EA;
+  --bg:#F6F6F5; --card:#fff; --line:#E7E5E0; --line-2:#F0EEEA;
+  --ink:#0E1A33; --muted:#6B7385; --faint:#9AA1B2;
+  --ok:#16794C; --ok-bg:#E8F6EE; --warn:#B7791F; --warn-bg:#FFF6DF; --bad:#C0392B; --bad-bg:#FDECEA;
+  --r:14px; --sh:0 1px 2px rgba(6,19,55,.04),0 4px 16px rgba(6,19,55,.05); --sh-lg:0 24px 60px rgba(6,19,55,.28);
+  --side:76px; --side-open:252px; --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p{margin:0} button{font:inherit;color:inherit;cursor:pointer;border:0;background:none} input,select,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+::selection{background:var(--navy);color:#fff}
+::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-thumb{background:#d8d3c6;border-radius:8px} ::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.serif{font-family:'Playfair Display',Georgia,serif}
+.muted{color:var(--muted)} .faint{color:var(--faint)} .right{text-align:right} .center{text-align:center}
+.row{display:flex;align-items:center;gap:10px} .wrap{flex-wrap:wrap} .grow{flex:1;min-width:0} .between{justify-content:space-between}
 
-    .dropdown-content { max-height: 250px; overflow-y: auto; }
-  </style>
+/* ===== YERLEŞİM ===== */
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);background:linear-gradient(180deg,var(--navy),#0A1B44);z-index:100;display:flex;flex-direction:column;transition:width .35s var(--ease);overflow:hidden;box-shadow:4px 0 24px rgba(6,19,55,.18)}
+.sidebar:hover{width:var(--side-open)}
+.logo-tile{margin:14px 12px 8px;background:#f6f6f5;border-radius:14px;padding:8px 5px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sidebar:hover .logo-tile{padding:10px 12px}
+.logo-tile svg{width:100%;height:auto;display:block}
+.logo-mini{aspect-ratio:486/314}.logo-full{aspect-ratio:830/500}
+.logo-mini{display:block}.logo-full{display:none!important}
+.sidebar:hover .logo-mini{display:none!important}.sidebar:hover .logo-full{display:block!important}
+.nav{flex:1;padding:10px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;overflow-x:hidden}
+.nav-btn{position:relative;display:flex;align-items:center;gap:14px;height:46px;padding:0 15px;border-radius:12px;color:rgba(255,255,255,.62);white-space:nowrap;transition:background .2s,color .2s,transform .15s}
+.nav-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-btn:active{transform:scale(.97)}
+.nav-btn.on{background:rgba(192,162,101,.16);color:#fff}
+.nav-btn.on::before{content:"";position:absolute;left:-10px;top:10px;bottom:10px;width:4px;border-radius:0 4px 4px 0;background:var(--gold)}
+.nav-btn.on svg{color:var(--gold-l)}
+.nav-btn span{opacity:0;transition:opacity .25s;font-weight:500}.sidebar:hover .nav-btn span{opacity:1}
+.side-foot{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+.lvl{display:flex;align-items:center;gap:12px;padding:8px 6px;color:#fff;white-space:nowrap}
+.lvl-badge{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;box-shadow:0 0 0 3px rgba(192,162,101,.25)}
+.lvl-txt{opacity:0;transition:opacity .25s;min-width:150px}.sidebar:hover .lvl-txt{opacity:1}
+.lvl-txt b{font-size:12px;display:block}.lvl-bar{height:5px;background:rgba(255,255,255,.14);border-radius:5px;margin-top:5px;overflow:hidden}
+.lvl-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-l));border-radius:5px;transition:width .8s var(--ease)}
+.lvl-txt small{font-size:10px;color:rgba(255,255,255,.55)}
+.sound{display:flex;align-items:center;gap:14px;height:38px;padding:0 15px;border-radius:10px;color:rgba(255,255,255,.55);font-size:12px;white-space:nowrap;width:100%}
+.sound:hover{background:rgba(255,255,255,.07);color:#fff}
+.sound .t{opacity:0;transition:opacity .25s}.sidebar:hover .sound .t{opacity:1}
+main{margin-left:var(--side);padding:26px 32px 60px;min-height:100vh}
+.view{max-width:1240px;margin:0 auto;animation:viewIn .45s var(--ease)}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.page-head h2{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--navy);letter-spacing:-.01em}
+.page-head p{color:var(--muted);margin-top:2px}
+
+/* ===== BİLEŞENLER ===== */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:11px;font-weight:600;font-size:13px;white-space:nowrap;transition:transform .15s var(--ease),box-shadow .2s,background .2s,color .2s,border-color .2s;user-select:none}
+.btn:hover{transform:translateY(-2px)} .btn:active{transform:translateY(0) scale(.97)} .btn[disabled]{opacity:.55;pointer-events:none}
+.btn-p{background:var(--navy);color:#fff;box-shadow:0 4px 14px rgba(6,19,55,.22)} .btn-p:hover{background:var(--navy-2);box-shadow:0 8px 22px rgba(6,19,55,.28)}
+.btn-g{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--navy);box-shadow:0 4px 14px rgba(192,162,101,.35)} .btn-g:hover{box-shadow:0 8px 22px rgba(192,162,101,.5)}
+.btn-o{background:#fff;color:var(--navy);border:1px solid var(--line)} .btn-o:hover{border-color:var(--gold);box-shadow:var(--sh)}
+.btn-d{background:var(--bad-bg);color:var(--bad)} .btn-sm{height:32px;padding:0 12px;font-size:12px;border-radius:9px}
+.btn .rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:rip .6s linear;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+.icon-btn{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--muted);transition:all .2s}.icon-btn:hover{background:var(--line-2);color:var(--navy);transform:scale(1.08)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.card-h{padding:14px 18px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;color:var(--navy)}
+.card-b{padding:16px 18px}
+.input,.select,.textarea{width:100%;height:40px;border:1px solid var(--line);border-radius:11px;padding:0 13px;background:#fff;outline:none;transition:border-color .2s,box-shadow .25s}
+.textarea{height:auto;min-height:74px;padding:10px 13px;resize:vertical}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(192,162,101,.18)}
+.input.err{border-color:var(--bad);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+label.lbl{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.02em}
+.search{position:relative;flex:1;min-width:220px}.search svg{position:absolute;left:12px;top:11px;color:var(--faint)}.search .input{padding-left:38px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:var(--line-2);color:var(--muted);white-space:nowrap}
+.chip.gold{background:var(--gold-bg);color:var(--gold-d);border:1px solid #EBDDB8}.chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.bad{background:var(--bad-bg);color:var(--bad)}.chip.navy{background:var(--navy);color:var(--gold-l)}
+.table-wrap{overflow:auto;max-height:calc(100vh - 290px)}
+table{width:100%;border-collapse:collapse}
+th{position:sticky;top:0;background:#FAF9F6;text-align:left;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line);z-index:1}
+td.nw,th.nw{white-space:nowrap}
+td{padding:12px 16px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+tbody tr{transition:background .15s,box-shadow .15s} tbody tr.click{cursor:pointer} tbody tr:hover{background:#FCFAF4;box-shadow:inset 3px 0 0 var(--gold)}
+tr.grp td{background:var(--gold-bg);font-weight:800;color:var(--gold-d);padding:6px 16px;font-size:12px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy-3));color:var(--gold-l);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.pager{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--line-2);font-size:12px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.kpi{padding:18px;position:relative;overflow:hidden;transition:transform .25s var(--ease),box-shadow .25s}.kpi:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(6,19,55,.1)}
+.kpi::after{content:"";position:absolute;right:-24px;top:-24px;width:90px;height:90px;border-radius:50%;background:var(--gold-bg)}
+.kpi small{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;position:relative;z-index:1}
+.kpi b{display:block;font-size:34px;font-weight:800;color:var(--navy);margin-top:6px;position:relative;z-index:1;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+.list{display:flex;flex-direction:column;gap:8px;padding:14px;max-height:430px;overflow:auto}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:12px;background:#fff;transition:transform .2s var(--ease),box-shadow .2s}
+.item:hover{transform:translateX(4px);box-shadow:var(--sh)} .item.red{border-left-color:var(--bad)} .item.amber{border-left-color:#E0A526}
+.item .grow>*{display:block}.item b{color:var(--navy)} .item small{color:var(--muted);font-size:11.5px}
+.empty{padding:34px 16px;text-align:center;color:var(--faint);font-style:italic}
+.skel{background:linear-gradient(90deg,#efece5 25%,#f8f6f1 37%,#efece5 63%);background-size:400% 100%;animation:sk 1.3s infinite;border-radius:8px;height:16px}
+@keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px;border:2px dashed #D9D3C3;border-radius:var(--r);background:#fff;text-align:center;cursor:pointer;position:relative;transition:all .25s var(--ease);margin-bottom:14px}
+.drop:hover,.drop.over{border-color:var(--gold);background:var(--gold-bg);transform:translateY(-2px)}
+.drop .ic{width:46px;height:46px;border-radius:50%;background:var(--gold-bg);color:var(--gold-d);display:grid;place-items:center;transition:transform .3s var(--ease)}.drop:hover .ic{transform:scale(1.12) rotate(-6deg)}
+.drop-busy{position:absolute;inset:0;background:rgba(6,19,55,.92);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;font-weight:700;z-index:2}
+.spin{width:30px;height:30px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:14px}.tab{padding:9px 2px;font-weight:600;color:var(--faint);border-bottom:2px solid transparent;transition:color .2s}.tab.on{color:var(--navy);border-color:var(--gold)}.tab:hover{color:var(--navy)}
+.seg{display:inline-flex;background:var(--line-2);border-radius:11px;padding:3px}.seg button{padding:7px 14px;border-radius:9px;font-weight:600;font-size:13px;color:var(--muted);transition:all .2s}.seg button.on{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(6,19,55,.2)}
+
+/* ===== MODAL / ÇEKMECE ===== */
+.overlay{position:fixed;inset:0;background:rgba(6,19,55,.55);backdrop-filter:blur(4px);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .25s}
+@keyframes fade{from{opacity:0}}
+.modal{background:#fff;border-radius:22px;width:100%;max-width:880px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh-lg);animation:pop .4s var(--ease)}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.96)}}
+.modal-h{background:linear-gradient(120deg,var(--navy),var(--navy-2));color:#fff;padding:18px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.modal-h h3{font-size:19px} .modal-h p{font-size:12px;color:var(--gold-l);margin-top:2px}
+.modal-b{padding:24px 26px;overflow:auto;background:var(--bg);display:flex;flex-direction:column;gap:22px}
+.modal-f{padding:14px 26px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;background:#fff}
+.sec{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;position:relative}
+.sec>.tag{position:absolute;top:-10px;left:18px;background:var(--navy);color:var(--gold-l);font-size:10px;font-weight:800;letter-spacing:.09em;padding:3px 11px;border-radius:8px}
+.sec>.tag.g{background:var(--gold);color:var(--navy)}
+.fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.fgrid .s2{grid-column:span 2}.fgrid .s4{grid-column:span 4}
+.drawer-wrap{position:fixed;inset:0;z-index:140;display:flex;justify-content:flex-end;background:rgba(6,19,55,.38);animation:fade .25s}
+.drawer{width:min(820px,100%);height:100%;background:#fff;box-shadow:var(--sh-lg);display:flex;flex-direction:column;animation:slide .45s var(--ease)}
+@keyframes slide{from{transform:translateX(60px);opacity:0}}
+.drawer-top{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line-2)}
+.drawer-body{flex:1;overflow:auto;padding:26px 44px 110px}
+.savebar{position:sticky;bottom:0;margin:0 -44px -110px;padding:14px 44px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:transform .4s var(--ease),opacity .3s,visibility .4s}
+.savebar.show{transform:none;opacity:1;visibility:visible;pointer-events:auto}
+
+/* ===== MÜŞTERİ KARTI (Notion tarzı) ===== */
+.k-icon{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--navy),var(--navy-3));color:var(--gold-l);display:grid;place-items:center;font-size:24px;font-weight:800;margin-bottom:12px;box-shadow:0 8px 22px rgba(6,19,55,.25)}
+.k-title{width:100%;border:0;outline:0;font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--navy);padding:2px 0;background:transparent;border-bottom:2px solid transparent;transition:border-color .2s;letter-spacing:-.01em}
+.k-title:focus{border-color:var(--gold)} .k-title::placeholder{color:#c9c4b6}
+.k-sub{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 18px}
+.ring{--p:0;width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--p)*1%),var(--line-2) 0);display:grid;place-items:center;flex:none;transition:--p 1s}
+.ring i{width:42px;height:42px;border-radius:50%;background:#fff;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;color:var(--navy)}
+.props{display:flex;flex-direction:column;margin-bottom:8px}
+.prop{display:grid;grid-template-columns:210px 1fr;align-items:center;gap:8px;min-height:40px;border-radius:9px;padding:0 6px;transition:background .15s}
+.prop:hover{background:#FAF9F6}
+.prop>label{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13.5px;font-weight:500}
+.prop>label svg{color:var(--faint)}
+.pv{width:100%;border:1px solid transparent;background:transparent;outline:0;border-radius:8px;padding:7px 10px;font-size:14px;font-weight:500;color:var(--ink);transition:all .2s;min-height:34px}
+.pv:hover{background:#F3F1EB}.pv:focus{background:#fff;border-color:var(--gold);box-shadow:0 0 0 3px rgba(192,162,101,.18)}
+.pv::placeholder{color:#c2bdae;font-weight:400}.pv.dirty{background:var(--gold-bg);border-color:#EBDDB8}
+textarea.pv{resize:vertical;min-height:58px;line-height:1.5}select.pv{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA1B2' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.k-h{display:flex;align-items:center;gap:10px;margin:26px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--line);font-weight:800;color:var(--navy);font-size:15px}
+.k-h small{font-weight:500;color:var(--muted);margin-left:auto}
+.pf{display:grid;grid-template-columns:1.4fr .6fr 1fr 1.2fr;gap:8px;align-items:center;padding:9px 6px;border-radius:9px;transition:background .15s}
+.pf:hover{background:#FAF9F6}.pf.head{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;padding-bottom:4px}.pf.head:hover{background:none}
+.pf .n{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:8px;background:var(--navy);color:var(--gold-l);font-weight:800;font-size:12px}
+.pf.zero{opacity:.45}
+.pf.total{border-top:1px solid var(--line);margin-top:4px;font-weight:800;color:var(--navy)}
+.opps{display:flex;gap:8px;flex-wrap:wrap}
+.opp{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px dashed var(--gold);color:var(--gold-d);background:var(--gold-bg);font-weight:700;font-size:12.5px;transition:all .2s var(--ease)}
+.opp:hover{background:var(--gold);color:var(--navy);border-style:solid;transform:translateY(-2px) scale(1.03);box-shadow:0 6px 16px rgba(192,162,101,.4)}
+.opp small{font-weight:500;opacity:.8}
+.mini td,.mini th{padding:8px 10px;font-size:12.5px}
+
+/* ===== TOAST / PALET ===== */
+#toasts{position:fixed;top:18px;right:18px;z-index:400;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{pointer-events:auto;min-width:290px;max-width:380px;background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(6,19,55,.22);border:1px solid var(--line);padding:13px 15px;display:flex;gap:12px;align-items:flex-start;position:relative;overflow:hidden;animation:tin .5s var(--ease)}
+.toast.out{animation:tout .35s forwards}
+@keyframes tin{from{transform:translateX(120%) scale(.9);opacity:0}} @keyframes tout{to{transform:translateX(120%);opacity:0}}
+.toast .ti{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff}
+.toast.ok .ti{background:var(--ok)}.toast.err .ti{background:var(--bad)}.toast.info .ti{background:var(--navy)}.toast.xp .ti{background:linear-gradient(135deg,var(--gold),var(--gold-d))}.toast.warn .ti{background:#E0A526}
+.toast .ti svg{width:18px;height:18px;stroke-width:2.6}.toast.ok .ti svg,.toast.err .ti svg{stroke-dasharray:30;stroke-dashoffset:30;animation:draw .5s .2s forwards}@keyframes draw{to{stroke-dashoffset:0}}
+.toast b{display:block;color:var(--navy);font-size:13.5px}.toast p{font-size:12.5px;color:var(--muted);margin-top:1px}
+.toast .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--gold);animation:bar linear forwards}@keyframes bar{from{width:100%}to{width:0}}
+.pal{width:100%;max-width:600px;background:#fff;border-radius:18px;box-shadow:var(--sh-lg);overflow:hidden;animation:pop .3s var(--ease);align-self:flex-start;margin-top:12vh}
+.pal input{width:100%;border:0;outline:0;padding:18px 22px;font-size:16px;border-bottom:1px solid var(--line)}
+.pal-l{max-height:380px;overflow:auto;padding:8px}
+.pal-i{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer}.pal-i.on,.pal-i:hover{background:var(--gold-bg)}
+.pal-i small{color:var(--muted);margin-left:auto;font-size:11.5px}
+.pal-h{padding:6px 12px;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
+kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px;font-family:inherit;color:var(--muted)}
+.dd{position:relative}.dd-m{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh-lg);z-index:60;max-height:250px;overflow:auto;padding:8px}
+.dd-m label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px}.dd-m label:hover{background:var(--line-2)}
+.res{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh-lg);z-index:60;max-height:220px;overflow:auto}
+.res div{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--line-2)}.res div:hover{background:var(--gold-bg)}
+.ders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;align-content:start}
+.ders{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 16px 16px;text-align:center;cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;display:flex;flex-direction:column;align-items:center;gap:12px}
+.ders:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(6,19,55,.12);border-color:var(--gold)}
+.ders .pdf{width:52px;height:52px;border-radius:16px;background:var(--bad-bg);color:var(--bad);display:grid;place-items:center;transition:transform .3s var(--ease)}.ders:hover .pdf{transform:scale(1.12) rotate(-5deg)}
+.ders h4{font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--navy)}
+.katbtn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:11px 14px;border-radius:12px;font-weight:600;color:var(--muted);transition:all .2s}.katbtn:hover{background:var(--line-2);color:var(--navy)}.katbtn.on{background:var(--navy);color:var(--gold-l);box-shadow:0 6px 16px rgba(6,19,55,.2)}
+.arg{display:flex;gap:12px;align-items:flex-start;background:#fff;padding:14px 16px;border:1px solid var(--line);border-radius:14px;transition:border-color .2s,transform .2s}.arg:hover{border-color:var(--gold);transform:translateX(3px)}
+.arg .ck{width:24px;height:24px;border-radius:50%;background:var(--gold-bg);color:var(--gold-d);display:grid;place-items:center;flex:none}
+.arg p{font-size:13px;color:#3a4256;line-height:1.55}
+.bar-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2)}.bar-row:last-child{border:0}
+.bar-row i{display:block;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold-l));flex:none}
+@media (max-width:900px){main{padding:18px 14px 60px}.fgrid{grid-template-columns:1fr 1fr}.fgrid .s2,.fgrid .s4{grid-column:span 2}.prop{grid-template-columns:1fr}.drawer-body{padding:20px 18px 110px}.savebar{margin:0 -18px -110px;padding:12px 18px}.pf{grid-template-columns:1fr 1fr}.k-title{font-size:28px}}
+@media print{.sidebar,.btn,#toasts{display:none!important}main{margin:0}}
+</style>
 </head>
-<body class="bg-brand-light text-slate-800 min-h-screen antialiased selection:bg-brand-navy selection:text-white flex overflow-hidden relative">
+<body>
 
-  <!-- HAREKETLİ SOL PANEL (SIDEBAR) -->
-  <aside class="group w-20 hover:w-64 bg-brand-white border-r border-slate-200 flex flex-col z-[100] shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 h-screen absolute top-0 left-0 hover:shadow-2xl overflow-hidden">
-    
-    <!-- SVG LOGO ALANI -->
-    <div class="h-40 flex items-center justify-center border-b border-slate-100 p-4 bg-brand-light/30 shrink-0">
-        <svg class="w-full h-full object-contain drop-shadow-sm" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+<!-- Logo (tek kez tanımlanır; genişlemiş/daralmış görünümde farklı kırpılır) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="logo-art">
             <path fill="#f6f6f5" d="M0 0h1024v1024H0z"/>
             <defs><linearGradient id="a" x1="403.657" x2="387.458" y1="529.595" y2="259.401" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#061337"/><stop offset="1" stop-color="#364563"/></linearGradient></defs>
             <path fill="url(#a)" d="M295.506 531.247a29.6 29.6 0 0 1-6.535-7.479c-6.433-10.546-2.071-18.007 2.783-27.708 3.478-6.951 7.145-13.818 10.708-20.723a6309 6309 0 0 0 30.499-59.631l49.064-97.192c8.3-16.466 16.343-33.124 25.193-49.297 3.917-7.16 12.289-11.556 20.186-12.777 8.411-1.393 19.913 2.439 24.806 9.67 7.717 11.404 14.147 25.351 20.482 37.68l40.089 78.584c-6.12 3.224-12.727 5.88-19.172 8.392-8.251 3.628-15.515 6.037-23.95 9.107-1.643.373-2.749.673-4.453.777l-33.778-67.991-48.119 96.278c31.58 3.208 52.834 2.536 83.758-6.52 7.342 13.783 14.123 29.824 21.456 43.082-37.889 15.464-88.121 16.172-127.334 5.69-7.396 14.68-14.712 30.074-22.223 44.549.717 4.932-2.854 10.186-6.313 13.397-6.816 6.453-11.798 9.576-21.586 9.315-4.488-.12-10.88-1.214-14.395-4.344-1.118-.996-1.018-1.584-1.166-2.859"/>
@@ -126,539 +281,654 @@
             <path fill="url(#m)" d="M614.606 672.547c6.21 2.966 20.73 1.216 28.093 1.484.826.03 2.822-.756 4.552-.848.829 2.504.664 9.335.652 12.19-4.937-8.944-2.765-9.125-14.26-8.906-.129 9.352-.298 22.731.207 31.888 1.962 1.584 3.035 1.281 5.35 2.188l.13.695c-2.157 1.1-15.521 1.402-17.049-.349l.772-.743c1.713-.249 2.886-.202 4.151-1.33 1.716-3.266.999-26.779.989-32.413-10.558-.11-9.107.168-14.223 8.914-.108-3.962.355-8.752.636-12.77"/>
             <path fill="#031336" d="M368.292 674.157c6.422-.286 12.311-.263 18.704.361-1.438.612-7.205 2.039-7.287 3.412-.354 5.963-1.556 25.835.168 30.712 1.821 2.089 2.732.537 5.092 2.62-3.491 1.373-14.656.568-18.624.307 2.251-.896 4.763-1.718 7.067-2.527.37-4.537 1.252-30.036-1.124-32.332-1.463-.395-2.028-.568-3.482-1.155z"/>
             <path fill="#010313" d="M375.635 664.233a3.087 3.087 0 1 1 1.605 5.962 3.087 3.087 0 0 1-1.605-5.962"/>
-        </svg>
-    </div>
+</g></defs></svg>
 
-    <!-- Navigasyon -->
-    <nav class="flex flex-col gap-2 py-6 px-3 flex-1 overflow-y-auto overflow-x-hidden">
-      <button data-view="dashboard" class="nav-btn w-full h-14 rounded-xl flex items-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all px-3">
-        <div class="w-8 flex justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 transition-opacity duration-300 font-medium">Ana Ekran</span>
-      </button>
-      <button data-view="musteriler" class="nav-btn w-full h-14 rounded-xl flex items-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all px-3">
-        <div class="w-8 flex justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 transition-opacity duration-300 font-medium">Müşteriler</span>
-      </button>
-      <button data-view="policeler" class="nav-btn w-full h-14 rounded-xl flex items-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all px-3">
-        <div class="w-8 flex justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 transition-opacity duration-300 font-medium">Poliçeler</span>
-      </button>
-      <button data-view="finansal" class="nav-btn w-full h-14 rounded-xl flex items-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all px-3">
-        <div class="w-8 flex justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 transition-opacity duration-300 font-medium">Finansal Analiz</span>
-      </button>
-      <button data-view="pazarlama" class="nav-btn w-full h-14 rounded-xl flex items-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all px-3">
-        <div class="w-8 flex justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg></div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 transition-opacity duration-300 font-medium">Pazarlama & Çapraz Satış</span>
-      </button>
-      <button data-view="dersler" class="nav-btn w-full h-14 rounded-xl flex items-center text-slate-400 hover:bg-slate-50 hover:text-brand-navy transition-all px-3">
-        <div class="w-8 flex justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 transition-opacity duration-300 font-medium">Eğitim Merkezi</span>
-      </button>
-    </nav>
-    <div class="p-4 border-t border-slate-100 flex justify-center group-hover:justify-start">
-        <div class="w-8 h-8 rounded-full bg-brand-navy/5 flex items-center justify-center text-brand-navy font-bold text-xs shrink-0" title="2026 Versiyon">V4</div>
-        <span class="opacity-0 group-hover:opacity-100 whitespace-nowrap ml-3 text-xs text-slate-400 self-center font-medium transition-all">Sistem Aktif</span>
-    </div>
-  </aside>
-
-  <!-- ANA İÇERİK ALANI -->
-  <main class="flex-1 overflow-y-auto h-screen p-6 md:p-8 ml-20 relative bg-brand-light">
-    
-    <!-- DASHBOARD -->
-    <section id="view-dashboard" class="fade-in max-w-7xl mx-auto h-full flex flex-col">
-      <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
-        <div>
-          <h2 class="text-3xl font-serif font-bold text-brand-navy tracking-tight mb-1">Portföy Özeti</h2>
-          <p class="text-sm font-medium text-slate-500">Bitişi yaklaşan poliçeler (0–3 gün <span class="text-red-500">Kırmızı</span> · 4–7 gün <span class="text-amber-500">Sarı</span>)</p>
-        </div>
-      </div>
-      
-      <div id="ozet-kartlar" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0"></div>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
-        <!-- YAKLAŞAN (7 GÜN) -->
-        <div class="bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <div class="bg-white p-4 border-b border-slate-200 shrink-0">
-            <h3 class="text-base font-bold text-brand-navy flex items-center gap-2">
-              <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              Acil Yenilemeler (Son 7 Gün)
-            </h3>
-          </div>
-          <div id="yaklasan-liste" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-        </div>
-
-        <!-- BU AY BİTENLER -->
-        <div class="bg-slate-50 rounded-xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm relative hover:shadow-md transition-shadow">
-          <div class="bg-white p-4 border-b border-slate-200 shrink-0 flex justify-between items-center">
-            <h3 class="text-base font-bold text-brand-navy flex items-center gap-2">
-              <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              Yıllık Yenilenecekler (<span id="ay-ismi" class="text-slate-500 font-medium">...</span>)
-            </h3>
-            <button onclick="aylikListeyiYazdir()" class="text-xs bg-brand-navy text-brand-gold font-bold px-4 py-2 rounded-lg hover:bg-brand-navyhover transition-colors shadow flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Listeyi İndir (PDF)
-            </button>
-          </div>
-          <div id="aylik-liste" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PAZARLAMA VE ÇAPRAZ SATIŞ MODÜLÜ -->
-    <section id="view-pazarlama" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
-        <div>
-            <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Akıllı Satış ve Pazarlama Asistanı</h2>
-            <p class="text-sm font-medium text-slate-500 mt-1">Yapay zeka tarafından analiz edilmiş çapraz satış fırsatları ve iletişim taktikleri.</p>
-        </div>
-        <button onclick="pazarlamaListeyiYazdir()" class="bg-brand-navy text-brand-gold font-bold px-5 py-2.5 rounded-lg hover:bg-brand-navyhover transition-colors shadow flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-            Tüm Planı İndir (PDF)
-        </button>
-      </div>
-
-      <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <div class="flex-1 overflow-y-auto">
-            <table class="w-full text-sm relative">
-              <thead class="bg-slate-50 border-b border-slate-200 text-left text-slate-500 text-xs font-bold sticky top-0 z-10">
-                <tr>
-                  <th class="px-5 py-4">Müşteri</th>
-                  <th class="px-5 py-4">Telefon</th>
-                  <th class="px-5 py-4 w-1/4">Biten Poliçe (Tetikleyici)</th>
-                  <th class="px-5 py-4">Çapraz Satış Fırsatları</th>
-                  <th class="px-5 py-4 text-center">Bitiş</th>
-                </tr>
-              </thead>
-              <tbody id="pazarlama-tbody" class="divide-y divide-slate-100"></tbody>
-            </table>
-            <div id="pazarlama-empty" class="hidden text-center py-12 text-slate-400 text-sm italic">Uygun müşteri bulunamadı. Harika!</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- MÜŞTERİLER -->
-    <section id="view-musteriler" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
-        <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Müşteriler</h2>
-        <div class="flex gap-3 w-full md:w-auto">
-          <button onclick="sistemiTemizleVeBirlestir()" class="bg-amber-100 text-amber-700 border border-amber-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-200 transition-all shadow-sm shrink-0 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            Sistemi Temizle & Birleştir
-          </button>
-          <div class="relative flex-1 md:w-64">
-            <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input id="musteri-ara" type="search" placeholder="Ad, telefon, TCKN ara…" class="w-full pl-9 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-navy bg-slate-50" />
-          </div>
-          <button onclick="policeFormunuAc()" class="bg-brand-navy text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-brand-navyhover transition-all shadow-sm shrink-0 whitespace-nowrap">+ Yeni</button>
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1 min-h-0">
-        <div class="flex-1 overflow-y-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200 text-left text-slate-500 text-xs font-bold sticky top-0 z-10">
-              <tr>
-                <th class="px-5 py-4">Ad Soyad</th>
-                <th class="px-5 py-4">Telefon</th>
-                <th class="px-5 py-4">Aktif Branş Dağılımı</th>
-                <th class="px-5 py-4">Danışman</th>
-                <th class="px-5 py-4">TCKN / VKN</th>
-                <th class="px-5 py-4 text-right">İşlem</th>
-              </tr>
-            </thead>
-            <tbody id="musteri-tbody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-        <div id="musteri-pagination" class="shrink-0 flex items-center justify-between p-4 bg-white border-t border-slate-200"></div>
-      </div>
-    </section>
-
-    <!-- POLİÇELER -->
-    <section id="view-policeler" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
-        <h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Poliçeler</h2>
-        <div class="flex gap-3 w-full md:w-auto items-center">
-          <div class="relative flex-1 md:w-72">
-            <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input id="police-ara" type="search" placeholder="Poliçe no, müşteri veya şirket ara…" class="w-full pl-9 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-navy bg-slate-50" />
-          </div>
-          <button onclick="policeFormunuAc()" class="bg-brand-navy text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-brand-navyhover transition-all shadow-sm shrink-0 whitespace-nowrap">+ Manuel Ekle</button>
-        </div>
-      </div>
-
-      <!-- PDF SÜRÜKLE BIRAK ALANI -->
-      <label for="pdf-input" id="pdf-drop" class="mb-4 shrink-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 bg-white rounded-xl p-6 text-center cursor-pointer hover:border-brand-gold hover:bg-brand-gold/5 transition-all group block relative">
-        <input id="pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" onchange="pdfSecildiV2(event)" />
-        <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:scale-110 group-hover:bg-brand-gold/10 transition-all pointer-events-none mb-1">
-          <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-        </div>
-        <p class="font-bold text-brand-navy text-base pointer-events-none">Yapay Zeka ile Poliçe Oku</p>
-        <p class="text-xs text-slate-500 pointer-events-none">Poliçe PDF'ini sürükleyin veya tıklayın.</p>
-        
-        <!-- Yükleniyor Göstergesi -->
-        <div id="pdf-durum" class="hidden absolute inset-0 bg-brand-navy/90 backdrop-blur-md rounded-xl flex flex-col items-center justify-center z-10 font-bold text-white text-lg transition-all shadow-inner">
-            <svg class="animate-spin h-8 w-8 text-brand-gold mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span id="pdf-durum-text" class="animate-pulse">Yükleniyor ve Yapay Zeka Okuyor...</span>
-        </div>
-      </label>
-
-      <div class="flex gap-4 mb-4 text-sm font-semibold border-b border-slate-200 shrink-0">
-        <button onclick="policeSekmeSec('aktif')" id="btn-sekme-aktif" class="pb-2 border-b-2 border-brand-navy text-brand-navy">Aktif Poliçeler</button>
-        <button onclick="policeSekmeSec('eski')" id="btn-sekme-eski" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-brand-navy transition-colors">Eski / İptal</button>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1 min-h-0">
-        <div class="flex-1 overflow-y-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200 text-left text-slate-500 text-xs font-bold sticky top-0 z-10">
-              <tr>
-                <th class="px-5 py-4">Poliçe No</th>
-                <th class="px-5 py-4">Müşteri</th>
-                <th class="px-5 py-4">Şirket / Branş</th>
-                <th class="px-5 py-4">Bitiş</th>
-                <th class="px-5 py-4">Durum</th>
-                <th class="px-5 py-4">Prim</th>
-                <th class="px-5 py-4 text-right">İşlem</th>
-              </tr>
-            </thead>
-            <tbody id="police-tbody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-        <div id="police-pagination" class="shrink-0 flex items-center justify-between p-4 bg-white border-t border-slate-200"></div>
-      </div>
-    </section>
-
-    <!-- FİNANSAL ANALİZ -->
-    <section id="view-finansal" class="hidden fade-in max-w-7xl mx-auto h-full flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
-        <div><h2 class="text-2xl font-serif font-bold text-brand-navy tracking-tight">Finansal Raporlama</h2></div>
-      </div>
-      
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6 shrink-0 relative z-20">
-        <div class="flex items-center justify-between mb-4 border-b pb-3 border-slate-100">
-            <h3 class="font-bold text-brand-navy text-sm">Rapor Parametreleri</h3>
-            <label class="flex items-center gap-2 text-xs font-bold text-brand-navy cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm">
-                <input type="checkbox" id="fin-kiyas-aktif" onchange="document.getElementById('fin-kiyas-container').classList.toggle('hidden', !this.checked)" class="rounded text-brand-navy w-3.5 h-3.5 focus:ring-brand-navy"> 
-                Dönem Kıyaslaması Yap (Dönem 2'yi Ekle)
-            </label>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start mb-4">
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Dönem 1 Başlangıç</label><input type="date" id="fin-start" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">Dönem 1 Bitiş</label><input type="date" id="fin-end" class="w-full border rounded-lg px-3 py-2 text-sm bg-slate-50" /></div>
-          
-          <div class="relative">
-            <label class="block text-xs font-bold text-slate-500 mb-1">Şirket (Çoklu)</label>
-            <button type="button" onclick="document.getElementById('fin-sirket-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
-              <span class="truncate">Şirket Seç...</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div id="fin-sirket-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
-              <div id="fin-sirket-container" class="flex flex-col gap-1"></div>
-            </div>
-          </div>
-
-          <div class="relative">
-            <label class="block text-xs font-bold text-slate-500 mb-1">Danışman (Çoklu)</label>
-            <button type="button" onclick="document.getElementById('fin-sorumlu-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
-              <span class="truncate">Danışman Seç...</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div id="fin-sorumlu-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
-              <div id="fin-sorumlu-container" class="flex flex-col gap-1"></div>
-            </div>
-          </div>
-          
-          <div class="relative">
-            <label class="block text-xs font-bold text-slate-500 mb-1">Branş (Çoklu)</label>
-            <button type="button" onclick="document.getElementById('fin-brans-menu').classList.toggle('hidden')" class="w-full text-left border rounded-lg px-3 py-2 text-sm bg-slate-50 flex justify-between items-center">
-              <span class="truncate">Branş Seç...</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div id="fin-brans-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 dropdown-content p-2">
-              <div id="fin-brans-container" class="flex flex-col gap-1"></div>
-            </div>
-          </div>
-        </div>
-
-        <div id="fin-kiyas-container" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4 items-start p-4 bg-brand-gold/5 border border-brand-gold/20 rounded-xl mb-4">
-          <div><label class="block text-xs font-bold text-brand-navy mb-1">Dönem 2 Başlangıç</label><input type="date" id="fin-start-2" class="w-full border border-brand-gold/30 rounded-lg px-3 py-2 text-sm bg-white" /></div>
-          <div><label class="block text-xs font-bold text-brand-navy mb-1">Dönem 2 Bitiş</label><input type="date" id="fin-end-2" class="w-full border border-brand-gold/30 rounded-lg px-3 py-2 text-sm bg-white" /></div>
-          <div class="md:col-span-3 flex items-center text-[11px] font-medium text-slate-500 italic mt-6">
-              * Kıyaslama seçildiğinde, Dönem 1 (Asıl) ve Dönem 2 (Kıyas) verileri ayrı ayrı hesaplanır. Panellerdeki oklar (▲▼) iki dönem arasındaki farkı temsil eder.
-          </div>
-        </div>
-
-        <div class="pt-2 border-t border-slate-100 flex items-center justify-end">
-          <button onclick="calistirFinansalRapor()" class="bg-brand-navy text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-brand-navyhover transition-all shadow-sm">Raporu Oluştur</button>
-        </div>
-      </div>
-      
-      <div class="flex-1 overflow-y-auto relative z-10">
-        <div id="fin-metrics" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 hidden">
-          <div class="bg-brand-navy text-white rounded-xl p-6 shadow-sm flex flex-col justify-center">
-              <p class="text-xs font-bold mb-2 text-slate-300">Toplam Üretim (Ciro)</p>
-              <div id="fin-ciro"></div>
-          </div>
-          <div class="bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-center">
-              <p class="text-xs font-bold mb-2 text-slate-500">Tahmini Net Komisyon Karı</p>
-              <div id="fin-kar"></div>
-          </div>
-          <div class="bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-center">
-              <p class="text-xs font-bold mb-2 text-slate-500">Toplam Satış Adedi</p>
-              <div id="fin-adet"></div>
-          </div>
-        </div>
-        <div id="fin-details" class="grid grid-cols-1 md:grid-cols-2 gap-5 hidden pb-4">
-          <div class="bg-white rounded-xl shadow-sm border"><div class="bg-slate-50 px-4 py-3 border-b font-bold text-xs text-brand-navy">Branş Dağılımı</div><div class="p-4" id="fin-brans-liste">Veri Yok</div></div>
-          <div class="bg-white rounded-xl shadow-sm border"><div class="bg-slate-50 px-4 py-3 border-b font-bold text-xs text-brand-navy">Şirket Dağılımı</div><div class="p-4" id="fin-sirket-liste">Veri Yok</div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- EĞİTİM MERKEZİ -->
-    <section id="view-dersler" class="hidden fade-in h-full flex flex-col max-w-7xl mx-auto">
-      
-      <!-- Akademi Hero Banner -->
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 bg-brand-navy p-6 rounded-2xl shadow-lg shrink-0 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-        <div class="relative z-10">
-            <h2 class="text-3xl font-serif font-bold text-brand-gold tracking-tight mb-1">Eğitim Merkezi & Satış Asistanı</h2>
-            <p class="text-sm text-slate-300 font-medium">Satış ekipleri için sunumlar ve "Müşteriyi İkna Etme" argümanları</p>
-        </div>
-      </div>
-      
-      <div class="flex-1 gap-6 pb-4 flex flex-col md:flex-row overflow-hidden">
-        <!-- Sol Menü -->
-        <div class="w-full md:w-1/4 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-full flex flex-col shrink-0">
-            <h3 class="font-black text-[11px] tracking-widest text-slate-400 uppercase mb-4 px-2">Kategoriler</h3>
-            <div id="ders-kategoriler" class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1"></div>
-        </div>
-        
-        <!-- Sağ İçerik -->
-        <div class="w-full md:w-3/4 bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-inner h-full flex flex-col min-h-0 relative">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 shrink-0">
-                <h3 id="secilen-kategori-baslik" class="text-xl font-bold text-brand-navy flex items-center gap-2">Sunumlar</h3>
-            </div>
-            
-            <div id="ders-icerik" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 content-start pr-2 pb-4 pt-1">
-                <!-- Şık Oyunlaştırılmış PDF Kartları Buraya Gelecek -->
-            </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-  
-  <!-- DERS / SATIŞ ARGÜMANLARI ÖZEL MODALI -->
-  <div id="ders-detay-modal" class="hidden fixed inset-0 bg-brand-navy/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md transition-all">
-      <div class="bg-white rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] w-full max-w-4xl max-h-[90vh] overflow-hidden relative flex flex-col scale-in border-4 border-white">
-          
-          <!-- Kapat Butonu -->
-          <button onclick="kapatDersDetay()" class="absolute top-6 right-6 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 p-2.5 rounded-full transition-colors z-20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-          
-          <!-- Modal Üst Alan -->
-          <div class="bg-gradient-to-r from-brand-navy to-brand-navyhover p-8 shrink-0 relative overflow-hidden">
-              <div class="absolute top-0 right-0 w-80 h-80 bg-brand-gold opacity-10 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-              <span id="detay-kategori-badge" class="bg-brand-gold text-brand-navy text-[11px] font-black tracking-widest px-3 py-1 rounded-full uppercase shadow-sm">KATEGORİ</span>
-              <h3 id="detay-baslik" class="text-3xl md:text-4xl font-serif font-bold text-white mt-4 mb-2 pr-16 drop-shadow-md">Sunum Başlığı</h3>
-              <p class="text-brand-light/80 text-sm font-medium">Müşteriye Sunulacak Temel Avantajlar ve Satış Argümanları</p>
-          </div>
-          
-          <!-- Modal Alt Alan (Argümanlar + Buton) -->
-          <div class="flex-1 overflow-y-auto p-8 bg-slate-50 flex flex-col md:flex-row gap-8">
-              <!-- Sol Panel (Eylem / İndirme) -->
-              <div class="w-full md:w-64 shrink-0 flex flex-col gap-4 order-2 md:order-1">
-                  <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center sticky top-0">
-                      <div class="w-20 h-20 bg-red-50 text-red-500 rounded-[20px] flex items-center justify-center mx-auto mb-4 border border-red-100 shadow-inner">
-                          <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
-                      </div>
-                      <h4 class="font-bold text-brand-navy text-sm mb-2">Orijinal Doküman</h4>
-                      <p class="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Limitleri, özel koşulları ve poliçe şartlarını pdf üzerinden inceleyebilirsiniz.</p>
-                      <a href="#" id="detay-pdf-btn" target="_blank" class="block w-full py-3.5 px-4 bg-brand-gold text-brand-navy font-black text-sm rounded-xl hover:bg-brand-goldhover hover:shadow-[0_10px_20px_rgba(198,162,93,0.3)] hover:-translate-y-1 transition-all">PDF'İ GÖRÜNTÜLE</a>
-                  </div>
-              </div>
-              
-              <!-- Sağ Panel (Argümanlar Listesi) -->
-              <div class="flex-1 order-1 md:order-2">
-                  <h4 class="text-brand-navy font-bold text-lg mb-4 flex items-center gap-2 border-b border-slate-200 pb-3">
-                      <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
-                      Müşteri Neden Bu Şirketi Seçmeli?
-                  </h4>
-                  <div id="detay-argumanlar" class="space-y-4">
-                      <!-- JS Dolduracak -->
-                  </div>
-              </div>
-          </div>
-      </div>
+<aside class="sidebar" id="sidebar">
+  <div class="logo-tile" title="Altun Kardeşler Sigorta">
+    <svg class="logo-mini" viewBox="272 240 486 314"><use href="#logo-art"/></svg>
+    <svg class="logo-full" viewBox="110 236 830 500"><use href="#logo-art"/></svg>
   </div>
-
-  <!-- YENİ GELİŞTİRİLMİŞ AI POLİÇE VE MÜŞTERİ MODALI -->
-  <div id="ai-police-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-brand-navy/70 backdrop-blur-sm transition-opacity" onclick="aiModalKapat()"></div>
-    
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col relative scale-in overflow-hidden border-2 border-brand-gold/20">
-      
-      <!-- Başlık Alanı -->
-      <div class="bg-brand-navy px-8 py-5 flex items-center justify-between shrink-0">
-          <div class="flex items-center gap-4">
-              <div class="w-10 h-10 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              </div>
-              <div>
-                  <h3 class="text-xl font-bold text-white tracking-wide">Poliçe Kayıt Merkezi</h3>
-                  <p id="ai-modal-subtitle" class="text-xs text-brand-gold/80 font-medium mt-0.5">Yeni işlem. Lütfen bilgileri kontrol edip kaydedin.</p>
-              </div>
-          </div>
-          <button onclick="aiModalKapat()" class="text-slate-400 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-2 rounded-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto p-8 bg-slate-50 flex flex-col gap-8">
-          
-          <!-- 1. MÜŞTERİ BİLGİSİ -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative">
-              <div class="absolute -top-3 left-6 bg-brand-navy text-brand-gold text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">1. MÜŞTERİ BİLGİSİ</div>
-              
-              <div class="flex gap-2 mb-5 border-b border-slate-100 pb-3">
-                  <button id="btn-tab-mevcut" onclick="musteriTabGecis('mevcut')" class="px-4 py-2 font-bold text-sm rounded-lg transition-all bg-brand-navy text-white shadow-md">Mevcut Müşteri Seç</button>
-                  <button id="btn-tab-yeni" onclick="musteriTabGecis('yeni')" class="px-4 py-2 font-bold text-sm rounded-lg transition-all text-slate-500 hover:bg-slate-100">Yeni Müşteri Oluştur</button>
-              </div>
-
-              <!-- Mevcut Müşteri Arama -->
-              <div id="tab-mevcut" class="space-y-4">
-                  <div class="relative">
-                      <label class="block text-xs font-bold text-slate-500 mb-1">Müşteri Ara (Ad, Soyad, TCKN)</label>
-                      <input type="text" id="ai-musteri-ara" onkeyup="musteriAramaTetikle(this.value)" placeholder="Yazarak arayın..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:border-brand-navy focus:ring-1 focus:ring-brand-navy transition-all bg-slate-50" autocomplete="off" />
-                      <div id="ai-musteri-sonuclar" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-50"></div>
-                  </div>
-                  
-                  <div id="secili-musteri-kutu" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
-                      <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 bg-green-200 text-green-700 rounded-full flex items-center justify-center font-bold">✓</div>
-                          <div>
-                              <p class="text-sm font-bold text-green-800" id="secili-musteri-ad">Seçilen Müşteri</p>
-                              <p class="text-xs text-green-600 font-medium">Sistemde Mevcut</p>
-                          </div>
-                      </div>
-                      <button onclick="musteriSecimiIptal()" class="text-xs font-bold text-slate-400 hover:text-red-500 underline">Değiştir</button>
-                  </div>
-              </div>
-
-              <!-- Yeni Müşteri Formu -->
-              <div id="tab-yeni" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                      <label class="block text-xs font-bold text-slate-500 mb-1">Ad Soyad <span class="text-red-500">*</span></label>
-                      <input type="text" id="yeni-adsoyad" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:border-brand-navy bg-slate-50 uppercase" placeholder="Örn: MEHMET EMİR YILDIRIM" />
-                  </div>
-                  <div>
-                      <label class="block text-xs font-bold text-slate-500 mb-1">TCKN / VKN</label>
-                      <input type="text" id="yeni-tckn" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:border-brand-navy bg-slate-50" />
-                  </div>
-                  <div>
-                      <label class="block text-xs font-bold text-slate-500 mb-1">Telefon Numarası</label>
-                      <input type="text" id="yeni-telefon" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:border-brand-navy bg-slate-50" placeholder="05XX XXX XX XX" />
-                  </div>
-                  <div>
-                      <label class="block text-xs font-bold text-slate-500 mb-1">Portföy Sorumlusu</label>
-                      <input type="text" id="yeni-sorumlu" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:border-brand-navy bg-slate-50" placeholder="Danışman Adı" />
-                  </div>
-                  <div class="md:col-span-2">
-                      <p class="text-[11px] text-amber-600 font-medium bg-amber-50 p-2 rounded border border-amber-100">Not: Poliçe kaydedilirken bu bilgilerle sisteme otomatik yeni bir müşteri eklenecektir.</p>
-                  </div>
-              </div>
-          </div>
-
-          <!-- 2. POLİÇE BİLGİLERİ -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative">
-               <div class="absolute -top-3 left-6 bg-brand-gold text-brand-navy text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm">2. POLİÇE BİLGİLERİ</div>
-               
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                   
-                   <!-- EKLENEN YENİ ALANLAR -->
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">İşlem Tipi <span class="text-red-500">*</span></label>
-                       <select id="form-islem-tipi" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-brand-navy bg-slate-50 focus:border-brand-navy outline-none">
-                           <option value="Yeni">Yeni Poliçe (İlk Tanzim)</option>
-                           <option value="Yenileme">Yenileme Poliçesi (Tecdit)</option>
-                           <option value="Primli Zeyil">Primli Zeyil (Ek Prim)</option>
-                           <option value="İadeli Zeyil">İadeli Zeyil (İade Prim)</option>
-                           <option value="İptal">İptal Poliçesi (Fesih)</option>
-                       </select>
-                   </div>
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Üretim Kaynağı <span class="text-red-500">*</span></label>
-                       <select id="form-uretim-kaynagi" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-brand-navy bg-slate-50 focus:border-brand-navy outline-none">
-                           <option value="Kendi">Kendi Şirketimiz (Tam Komisyon)</option>
-                           <option value="Dışarıdan">Dışarıdan Üretim (Yarım Komisyon)</option>
-                       </select>
-                   </div>
-                   <!-- YENİ ALANLAR BİTİŞ -->
-
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Sigorta Şirketi <span class="text-red-500">*</span></label>
-                       <input type="text" id="form-sirket" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-brand-navy bg-slate-50" placeholder="Türkiye Sigorta vb." />
-                   </div>
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Poliçe Türü / Branş <span class="text-red-500">*</span></label>
-                       <input type="text" id="form-brans" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-brand-navy bg-slate-50" placeholder="Trafik Sigortası vb." />
-                   </div>
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Poliçe Numarası</label>
-                       <input type="text" id="form-police-no" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-brand-navy focus:border-brand-navy bg-slate-50" />
-                   </div>
-                   <div>
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Başlangıç Tarihi</label>
-                       <input type="date" id="form-baslangic" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:border-brand-navy bg-slate-50" />
-                   </div>
-                   <div>
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Bitiş Tarihi</label>
-                       <input type="date" id="form-bitis" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-red-600 focus:border-brand-navy bg-red-50" />
-                   </div>
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Brüt Prim / İade Prim (TL)</label>
-                       <input type="text" id="form-prim" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-green-700 focus:border-brand-navy bg-green-50 text-right" placeholder="0.00" />
-                   </div>
-                   <div class="lg:col-span-2">
-                       <label class="block text-xs font-bold text-slate-500 mb-1">Araç / Ek Bilgi</label>
-                       <input type="text" id="form-arac" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:border-brand-navy bg-slate-50" placeholder="Plaka, Marka vb." />
-                   </div>
-               </div>
-          </div>
-
-      </div>
-
-      <!-- Footer / Kaydet -->
-      <div class="bg-white p-5 border-t border-slate-100 flex items-center justify-between shrink-0">
-          <p id="ai-modal-hata" class="text-sm font-bold text-red-500 hidden px-4"></p>
-          <div class="flex gap-3 ml-auto">
-              <button type="button" onclick="aiModalKapat()" class="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Vazgeç</button>
-              <button type="button" onclick="policeyiKaydetV2()" class="bg-brand-navy text-brand-gold px-8 py-2.5 rounded-xl font-black text-sm shadow-md hover:-translate-y-0.5 transition-all">Sisteme Kaydet</button>
-          </div>
-      </div>
-
+  <nav class="nav" id="nav"></nav>
+  <div class="side-foot">
+    <button class="sound" id="ses-btn" onclick="sesAcKapat()" title="Ses efektleri"><span id="ses-ic"></span><span class="t" id="ses-txt">Ses efektleri: açık</span></button>
+    <div class="lvl" title="Çalıştıkça XP kazan!">
+      <div class="lvl-badge" id="lvl-n">1</div>
+      <div class="lvl-txt"><b id="lvl-t">Çaylak</b><div class="lvl-bar"><i id="lvl-bar" style="width:0"></i></div><small id="lvl-xp">0 XP</small></div>
     </div>
   </div>
+</aside>
 
-  <script>
-    // ===== AYARLAR VE VERİ YAPILARI =====
-    const API = "";
-    let aktifPoliceSekmesi = 'aktif';
-    const perPage = 10;
-    
-    let buAyBitenlerCache = [];
-    let pazarlamaDataCache = []; // Yeni JSON yapısına göre artık burası Array (Liste)
-    window.dersDataCache = {};
+<main>
+  <!-- ANA EKRAN -->
+  <section class="view" id="view-dashboard">
+    <div class="page-head">
+      <div><h2 id="karsilama">Portföy Özeti</h2><p>Bitişi yaklaşan poliçeler: <span style="color:var(--bad);font-weight:700">0–3 gün kırmızı</span> · <span style="color:#B7791F;font-weight:700">4–7 gün sarı</span></p></div>
+      <div class="row"><button class="btn btn-o" onclick="palAc()"><svg class="i"><use href="#i-search"/></svg>Ara <kbd>Ctrl K</kbd></button><button class="btn btn-g" onclick="policeFormunuAc()"><svg class="i"><use href="#i-plus"/></svg>Yeni Poliçe</button></div>
+    </div>
+    <div class="kpis" id="ozet-kartlar"></div>
+    <div class="grid2">
+      <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--bad)"><use href="#i-clock"/></svg>Acil Yenilemeler (7 gün)</span></div><div class="list" id="yaklasan-liste"></div></div>
+      <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--gold-d)"><use href="#i-calendar"/></svg>Bu Ay Yenilenecekler · <span id="ay-ismi" class="muted"></span></span><button class="btn btn-o btn-sm" onclick="aylikListeyiYazdir()"><svg class="i"><use href="#i-printer"/></svg>PDF</button></div><div class="list" id="aylik-liste"></div></div>
+      <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--gold-d)"><use href="#i-gift"/></svg>Yaklaşan Doğum Günleri</span><small class="muted" style="font-weight:500">14 gün</small></div><div class="list" id="dogum-liste"></div></div>
+    </div>
+  </section>
 
-    // Komisyon oranları ve kurallar hafızada tutuluyor (App.py ile backend'de kurgulanacak).
-    const ACENTE_KOMISYON_ORANLARI = {
-        "DASK": 15, "Konut ve Eşya Sigortaları": 20, "Trafik Sigortası": 10, "Kasko Sigortası": 17, 
-        "Ferdi Kaza": 25, "İş Yeri": 18, "Nakliyat": 12, "Tamamlayıcı Sağlık Sigortası": 20, 
-        "Tarım": 10, "Yat / Denizcilik": 12, "Allrisk": 12, "Özel Paket / Destek": 25
-    };
+  <!-- MÜŞTERİLER -->
+  <section class="view" id="view-musteriler" hidden>
+    <div class="page-head"><div><h2>Müşteriler</h2><p>Bir müşteriye tıklayarak kartını açın ve çapraz satış fırsatlarını görün.</p></div>
+      <div class="row wrap">
+        <button class="btn btn-o" onclick="sistemiTemizleVeBirlestir(this)" title="Mükerrer müşteri/poliçeleri birleştirir, şirket ve branş adlarını standartlaştırır"><svg class="i"><use href="#i-broom"/></svg>Temizle &amp; Birleştir</button>
+        <button class="btn btn-p" onclick="kartYeni()"><svg class="i"><use href="#i-plus"/></svg>Yeni Müşteri</button>
+      </div></div>
+    <div class="card"><div class="card-b row"><div class="search"><svg class="i"><use href="#i-search"/></svg><input id="musteri-ara" class="input" type="search" placeholder="Ad, telefon veya TCKN ara…" autocomplete="off"></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Aktif Branşlar</th><th>Danışman</th><th>TCKN / VKN</th><th></th></tr></thead><tbody id="musteri-tbody"></tbody></table></div><div class="pager" id="musteri-pagination"></div></div>
+  </section>
 
+  <!-- POLİÇELER -->
+  <section class="view" id="view-policeler" hidden>
+    <div class="page-head"><div><h2>Poliçeler</h2><p>Aynı poliçe numarası sistemde yalnızca bir kez bulunabilir.</p></div>
+      <div class="row wrap"><div class="search" style="min-width:280px"><svg class="i"><use href="#i-search"/></svg><input id="police-ara" class="input" type="search" placeholder="Poliçe no, müşteri veya şirket…" autocomplete="off"></div><button class="btn btn-p" onclick="policeFormunuAc()"><svg class="i"><use href="#i-plus"/></svg>Manuel Ekle</button></div></div>
+    <label class="drop" id="pdf-drop" for="pdf-input">
+      <input id="pdf-input" type="file" accept="application/pdf,.pdf" hidden>
+      <div class="ic"><svg class="i" style="width:22px;height:22px"><use href="#i-upload"/></svg></div>
+      <b style="color:var(--navy);font-size:15px">Yapay Zeka ile Poliçe Oku</b><span class="muted" style="font-size:12px">PDF'i buraya sürükleyin ya da tıklayın — bilgiler otomatik doldurulur.</span>
+      <div class="drop-busy" id="pdf-durum" hidden><div class="spin"></div><span id="pdf-durum-text">Yükleniyor ve yapay zeka okuyor…</span></div>
+    </label>
+    <div class="tabs"><button class="tab on" id="btn-sekme-aktif" onclick="policeSekmeSec('aktif')">Aktif Poliçeler</button><button class="tab" id="btn-sekme-eski" onclick="policeSekmeSec('eski')">Eski / İptal</button></div>
+    <div class="card"><div class="table-wrap" style="max-height:calc(100vh - 430px)"><table><thead><tr><th>Poliçe No</th><th>Müşteri</th><th>Şirket / Branş</th><th>Bitiş</th><th>Durum</th><th>Prim</th><th></th></tr></thead><tbody id="police-tbody"></tbody></table></div><div class="pager" id="police-pagination"></div></div>
+  </section>
+
+  <!-- FİNANSAL -->
+  <section class="view" id="view-finansal" hidden>
+    <div class="page-head"><div><h2>Finansal Raporlama</h2><p>Dönem, şirket, danışman ve branş bazında üretim ve komisyon.</p></div></div>
+    <div class="card" style="margin-bottom:16px;overflow:visible"><div class="card-h">Rapor Parametreleri
+      <label class="row muted" style="font-size:12px;font-weight:600;cursor:pointer"><input type="checkbox" id="fin-kiyas-aktif" onchange="$('#fin-kiyas-container').hidden=!this.checked">Dönem kıyaslaması yap</label></div>
+      <div class="card-b">
+        <div class="fgrid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+          <div><label class="lbl">Dönem 1 Başlangıç</label><input type="date" id="fin-start" class="input"></div>
+          <div><label class="lbl">Dönem 1 Bitiş</label><input type="date" id="fin-end" class="input"></div>
+          <div class="dd"><label class="lbl">Şirket</label><button type="button" class="input row between" onclick="ddAc('fin-sirket-menu')"><span id="fin-sirket-etiket">Tümü</span><svg class="i"><use href="#i-down"/></svg></button><div class="dd-m" id="fin-sirket-menu" hidden><div id="fin-sirket-container"></div></div></div>
+          <div class="dd"><label class="lbl">Danışman</label><button type="button" class="input row between" onclick="ddAc('fin-sorumlu-menu')"><span id="fin-sorumlu-etiket">Tümü</span><svg class="i"><use href="#i-down"/></svg></button><div class="dd-m" id="fin-sorumlu-menu" hidden><div id="fin-sorumlu-container"></div></div></div>
+          <div class="dd"><label class="lbl">Branş</label><button type="button" class="input row between" onclick="ddAc('fin-brans-menu')"><span id="fin-brans-etiket">Tümü</span><svg class="i"><use href="#i-down"/></svg></button><div class="dd-m" id="fin-brans-menu" hidden><div id="fin-brans-container"></div></div></div>
+        </div>
+        <div id="fin-kiyas-container" class="fgrid" hidden style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-top:14px;padding:14px;background:var(--gold-bg);border:1px solid #EBDDB8;border-radius:12px">
+          <div><label class="lbl">Dönem 2 Başlangıç</label><input type="date" id="fin-start-2" class="input"></div><div><label class="lbl">Dönem 2 Bitiş</label><input type="date" id="fin-end-2" class="input"></div>
+          <p class="muted" style="grid-column:span 2;font-size:12px;align-self:end">Oklar (▲▼) Dönem 1'in Dönem 2'ye göre farkını gösterir.</p></div>
+        <div class="right" style="margin-top:14px"><button class="btn btn-p" id="fin-run" onclick="calistirFinansalRapor(this)">Raporu Oluştur</button></div>
+      </div></div>
+    <div class="kpis" id="fin-metrics" hidden>
+      <div class="card kpi" style="background:var(--navy);border-color:var(--navy)"><small style="color:var(--gold-l)">Toplam Üretim (Ciro)</small><div id="fin-ciro" style="position:relative;z-index:1"></div></div>
+      <div class="card kpi"><small>Tahmini Net Komisyon</small><div id="fin-kar" style="position:relative;z-index:1"></div></div>
+      <div class="card kpi"><small>Toplam Satış Adedi</small><div id="fin-adet" style="position:relative;z-index:1"></div></div></div>
+    <div class="grid2" id="fin-details" hidden><div class="card"><div class="card-h">Branş Dağılımı</div><div class="card-b" id="fin-brans-liste"></div></div><div class="card"><div class="card-h">Şirket Dağılımı</div><div class="card-b" id="fin-sirket-liste"></div></div></div>
+  </section>
+
+  <!-- PAZARLAMA -->
+  <section class="view" id="view-pazarlama" hidden>
+    <div class="page-head"><div><h2>Akıllı Satış ve Pazarlama Asistanı</h2><p>Bitişi 30 gün içinde olan poliçelerin sahiplerine önerilen çapraz satış fırsatları ve iletişim taktikleri.</p></div>
+      <button class="btn btn-p" onclick="pazarlamaListeyiYazdir()"><svg class="i"><use href="#i-printer"/></svg>Tüm Planı İndir (PDF)</button></div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe</th><th>Çapraz Satış Fırsatları</th><th class="center">Bitiş</th></tr></thead><tbody id="pazarlama-tbody"></tbody></table><div id="pazarlama-empty" class="empty" hidden>Uygun müşteri bulunamadı. Harika!</div></div></div>
+  </section>
+
+  <!-- EĞİTİM -->
+  <section class="view" id="view-dersler" hidden>
+    <div class="card" style="background:linear-gradient(120deg,var(--navy),var(--navy-2));border:0;margin-bottom:18px;padding:26px 28px"><h2 class="serif" style="color:var(--gold-l);font-size:28px">Eğitim Merkezi &amp; Satış Asistanı</h2><p style="color:rgba(255,255,255,.7);margin-top:4px">Satış ekipleri için sunumlar ve "Müşteriyi İkna Etme" argümanları</p></div>
+    <div class="row" style="align-items:flex-start;gap:18px;flex-wrap:wrap">
+      <div class="card" style="width:270px;flex:none;padding:14px"><h3 style="font-size:11px;letter-spacing:.1em;color:var(--faint);margin:2px 6px 10px">KATEGORİLER</h3><div id="ders-kategoriler" class="col" style="display:flex;flex-direction:column;gap:4px"></div></div>
+      <div class="card grow" style="padding:20px;min-width:300px"><h3 id="secilen-kategori-baslik" style="font-size:18px;color:var(--navy);margin-bottom:16px">Sunumlar</h3><div id="ders-icerik" class="ders-grid"></div></div>
+    </div>
+  </section>
+</main>
+
+<div id="toasts"></div>
+<div id="katman"></div>
+
+<!-- İKON SEMBOLLERİ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></symbol>
+<symbol id="i-mega" viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3zM11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></symbol>
+<symbol id="i-brief" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M5 17H3v-5l2-5h14l2 5v5h-2M5 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0M9 17h6M3 12h18"/></symbol>
+<symbol id="i-build" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+<symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol>
+<symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol>
+<symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M16 16l-4-4-4 4M12 12v9M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></symbol>
+<symbol id="i-broom" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+</defs></svg>
+
+<script>
+/* ============================================================
+   YARDIMCILAR
+   ============================================================ */
+const API = "";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ic = (n, cls = "") => `<svg class="i ${cls}"><use href="#i-${n}"/></svg>`;
+const para = n => (n == null || n === "") ? "—" : Number(n).toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
+const tarih = d => !d ? "—" : new Date(String(d).slice(0, 10) + "T00:00:00").toLocaleDateString("tr-TR");
+const debounce = (fn, ms = 350) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const basHarf = s => (String(s || "?").trim().charAt(0) || "?").toLocaleUpperCase("tr-TR");
+const tamAd = m => `${m.ad || m.musteri_ad || ""} ${m.soyad || m.musteri_soyad || ""}`.trim();
+const waLink = (tel, msg = "") => { const d = String(tel || "").replace(/\D/g, ""); if (d.length < 10) return null; const n = d.length === 11 && d[0] === "0" ? "9" + d : d.length === 10 ? "90" + d : d; return `https://wa.me/${n}${msg ? "?text=" + encodeURIComponent(msg) : ""}`; };
+const guvenli = (k, v) => { try { return v === undefined ? JSON.parse(localStorage.getItem(k)) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } };
+
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...opts });
+  if (!res.ok) {
+    let msg = `Sunucu hatası (${res.status})`;
+    try { const j = await res.json(); msg = typeof j.detail === "string" ? j.detail : msg; } catch (e) {}
+    throw new Error(msg);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+/* ============================================================
+   OYUNLAŞTIRMA: toast, ses, konfeti, XP, ripple
+   ============================================================ */
+let sesAcik = guvenli("crm_ses") !== false, sesCtx = null;
+function ses(tip) {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!sesAcik || !AC) return;
+  try {
+    sesCtx ||= new AC(); const n = sesCtx.currentTime;
+    const notlar = { ok: [523, 659, 784], err: [240, 180], xp: [880, 1175], tik: [700], seviye: [523, 659, 784, 1047] }[tip] || [660];
+    notlar.forEach((f, i) => { const o = sesCtx.createOscillator(), g = sesCtx.createGain(), t = n + i * 0.09; o.type = tip === "err" ? "triangle" : "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); o.connect(g).connect(sesCtx.destination); o.start(t); o.stop(t + 0.22); });
+  } catch (e) {}
+}
+function sesGuncelle() { $("#ses-ic").innerHTML = ic(sesAcik ? "vol" : "mute"); $("#ses-txt").textContent = "Ses efektleri: " + (sesAcik ? "açık" : "kapalı"); }
+function sesAcKapat() { sesAcik = !sesAcik; guvenli("crm_ses", sesAcik); sesGuncelle(); ses("tik"); }
+
+function toast(tip, baslik, mesaj = "", sure = 4200) {
+  const el = document.createElement("div");
+  el.className = `toast ${tip}`;
+  const ikon = { ok: "check", err: "x", info: "zap", xp: "star", warn: "zap" }[tip] || "check";
+  el.innerHTML = `<div class="ti">${ic(ikon)}</div><div class="grow"><b>${esc(baslik)}</b>${mesaj ? `<p>${esc(mesaj)}</p>` : ""}</div><div class="bar" style="animation-duration:${sure}ms"></div>`;
+  $("#toasts").appendChild(el);
+  if (tip === "ok" || tip === "err" || tip === "xp") ses(tip);
+  const kapat = () => { el.classList.add("out"); setTimeout(() => el.remove(), 350); };
+  el.onclick = kapat; setTimeout(kapat, sure);
+}
+function konfeti(guc = 1) {
+  if (!window.confetti) return;
+  const renk = ["#C0A265", "#E7D09A", "#061337", "#16306B", "#ffffff"];
+  confetti({ particleCount: 70 * guc, spread: 75, startVelocity: 38, origin: { y: 0.7 }, colors: renk, scalar: 0.9 });
+  if (guc > 1) setTimeout(() => confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: 0.8 }, colors: renk }) || confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: 0.8 }, colors: renk }), 200);
+}
+async function onayla(baslik, metin, buton = "Evet", tehlike = false) {
+  if (window.Swal) {
+    const r = await Swal.fire({ title: baslik, text: metin, icon: tehlike ? "warning" : "question", showCancelButton: true, confirmButtonText: buton, cancelButtonText: "Vazgeç", confirmButtonColor: tehlike ? "#C0392B" : "#061337", cancelButtonColor: "#9AA1B2", reverseButtons: true, focusCancel: tehlike, customClass: { popup: "swal-crm" } });
+    return r.isConfirmed;
+  }
+  return confirm(`${baslik}\n${metin}`);
+}
+document.addEventListener("click", e => {  // buton dalga efekti
+  const b = e.target.closest(".btn"); if (!b) return;
+  const r = b.getBoundingClientRect(), s = document.createElement("span"), d = Math.max(r.width, r.height);
+  s.className = "rip"; s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+  b.appendChild(s); setTimeout(() => s.remove(), 600);
+});
+
+const UNVANLAR = ["Çaylak", "Danışman", "Uzman", "Usta", "Kıdemli Usta", "Portföy Ustası", "Efsane"];
+function xpBilgi(xp) { let lv = 1, gerek = 100, kalan = xp; while (kalan >= gerek) { kalan -= gerek; lv++; gerek = Math.round(gerek * 1.35); } return { lv, kalan, gerek }; }
+function xpCiz() { const b = xpBilgi(guvenli("crm_xp") || 0); $("#lvl-n").textContent = b.lv; $("#lvl-t").textContent = UNVANLAR[Math.min(b.lv - 1, UNVANLAR.length - 1)]; $("#lvl-bar").style.width = (100 * b.kalan / b.gerek) + "%"; $("#lvl-xp").textContent = `${b.kalan} / ${b.gerek} XP · Seviye ${b.lv}`; }
+function xpKazan(n, neden) {
+  const once = xpBilgi(guvenli("crm_xp") || 0).lv;
+  guvenli("crm_xp", (guvenli("crm_xp") || 0) + n); xpCiz();
+  const simdi = xpBilgi(guvenli("crm_xp")).lv;
+  setTimeout(() => toast("xp", `+${n} XP`, neden, 2600), 450);
+  if (simdi > once) setTimeout(() => { konfeti(2); ses("seviye"); toast("xp", `Seviye ${simdi}! 🎉`, `Yeni unvanın: ${UNVANLAR[Math.min(simdi - 1, UNVANLAR.length - 1)]}`, 5000); }, 900);
+}
+function sayiAnim(el, hedef) {
+  const s = performance.now(), sure = 700; hedef = Number(hedef) || 0;
+  const adim = t => { const p = Math.min(1, (t - s) / sure); el.textContent = Math.round(hedef * (1 - Math.pow(1 - p, 3))).toLocaleString("tr-TR"); if (p < 1) requestAnimationFrame(adim); };
+  requestAnimationFrame(adim);
+}
+
+/* ============================================================
+   YÖNLENDİRME
+   ============================================================ */
+const MENU = [["dashboard", "grid", "Ana Ekran"], ["musteriler", "users", "Müşteriler"], ["policeler", "file", "Poliçeler"], ["finansal", "chart", "Finansal Analiz"], ["pazarlama", "mega", "Pazarlama & Çapraz Satış"], ["dersler", "book", "Eğitim Merkezi"]];
+$("#nav").innerHTML = MENU.map(([v, i, t]) => `<button class="nav-btn" data-view="${v}">${ic(i)}<span>${t}</span></button>`).join("");
+$("#nav").addEventListener("click", e => { const b = e.target.closest("[data-view]"); if (b) location.hash = "#/" + b.dataset.view; });
+
+const YUKLEYICI = { dashboard: () => yukleDashboard(), musteriler: () => yukleMusteriler($("#musteri-ara").value, 1), policeler: () => yuklePoliceler(1), finansal: () => yukleFinansalHazirlik(), pazarlama: () => yuklePazarlama(), dersler: () => yukleDersler() };
+function goster(ad, yenile = true) {
+  if (!YUKLEYICI[ad]) ad = "dashboard";
+  MENU.forEach(([v]) => { $("#view-" + v).hidden = v !== ad; });
+  $$(".nav-btn").forEach(b => b.classList.toggle("on", b.dataset.view === ad));
+  if (yenile) YUKLEYICI[ad]();
+}
+function hashIsle() {
+  const [, rota, arg] = location.hash.split("/");
+  if (rota === "musteri" && arg) { if (!$(".nav-btn.on")) goster("dashboard"); kartAc(+arg); return; }
+  kartKapat(false); goster(rota || "dashboard");
+}
+window.addEventListener("hashchange", hashIsle);
+
+/* ============================================================
+   ANA EKRAN
+   ============================================================ */
+let buAyBitenlerCache = [];
+const seviyeSinif = s => s === "kirmizi" ? { w: "red", b: "bad" } : s === "sari" ? { w: "amber", b: "warn" } : { w: "", b: "" };
+function selamla() { const h = new Date().getHours(); return (h < 6 ? "İyi geceler" : h < 12 ? "Günaydın" : h < 18 ? "İyi günler" : "İyi akşamlar") + " 👋"; }
+
+function renderPoliceListesi(liste, id) {
+  const yeniler = guvenli("altun_yenilenen_policeler") || [];
+  const l = liste.filter(p => !yeniler.includes(p.id)).sort((a, b) => (a.kalan_gun ?? 999) - (b.kalan_gun ?? 999));
+  $("#" + id).innerHTML = !l.length ? `<div class="empty">Poliçe bulunmuyor. 🎯</div>` : l.map(p => {
+    const s = seviyeSinif(p.uyar_seviyesi), ad = tamAd(p) || "Bilinmeyen", wa = waLink(p.musteri_telefon, `Merhaba ${ad}, ${p.sigorta_turu} poliçenizin bitiş tarihi (${tarih(p.bitis_tarihi)}) yaklaşıyor. Yenileme için size yardımcı olabilir miyim?`);
+    return `<div class="item ${s.w}"><div class="grow"><b style="cursor:pointer" data-kart="${p.musteri_id}">${esc(ad)}</b><small>#${esc(p.police_no)} · ${esc(p.sigorta_sirketi)} · <b>${esc(p.sigorta_turu)}</b></small></div>
+      <span class="chip ${s.b}">${tarih(p.bitis_tarihi)}</span>${wa ? `<a class="icon-btn" href="${wa}" target="_blank" rel="noopener" title="WhatsApp">${ic("chat")}</a>` : ""}
+      <button class="btn btn-o btn-sm" data-yenilendi="${p.id}" data-ad="${esc(ad)}" data-no="${esc(p.police_no)}">${ic("check")}Yenilendi</button></div>`;
+  }).join("");
+}
+async function yukleDashboard() {
+  $("#karsilama").textContent = selamla();
+  const skel = `<div class="list">${'<div class="skel" style="height:54px"></div>'.repeat(3)}</div>`;
+  ["yaklasan-liste", "aylik-liste", "dogum-liste"].forEach(i => { $("#" + i).innerHTML = skel; });
+  try {
+    const [ozet, l7, lAy, dg] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=7"), api("/api/policeler/bu-ay"), api("/api/dogum-gunleri?gun=14")]);
+    buAyBitenlerCache = lAy;
+    $("#ozet-kartlar").innerHTML = [["Kayıtlı Müşteri", ozet.musteri_sayisi], ["Toplam Poliçe", ozet.police_sayisi], ["Aktif Poliçe", ozet.aktif_police], ["Yaklaşan (7 Gün)", ozet.yaklasan_7_gun]].map(([t, v]) => `<div class="card kpi"><small>${t}</small><b data-say="${v}">0</b></div>`).join("");
+    $$("[data-say]").forEach(el => sayiAnim(el, el.dataset.say));
+    renderPoliceListesi(l7, "yaklasan-liste"); renderPoliceListesi(lAy, "aylik-liste");
+    $("#dogum-liste").innerHTML = !dg.length ? `<div class="empty">Yakın zamanda doğum günü yok.</div>` : dg.map(d => {
+      const wa = waLink(d.telefon, `Merhaba ${d.ad_soyad}, doğum gününüzü kutlarız! Nice mutlu ve sağlıklı yıllar dileriz. 🎂 — Altun Kardeşler Sigorta`);
+      return `<div class="item ${d.kalan_gun === 0 ? "amber" : ""}"><div class="grow"><b style="cursor:pointer" data-kart="${d.id}">${esc(d.ad_soyad)}</b><small>${d.tarih} · ${d.yeni_yas}. yaş</small></div><span class="chip ${d.kalan_gun === 0 ? "gold" : ""}">${d.kalan_gun === 0 ? "🎂 Bugün!" : d.kalan_gun + " gün"}</span>${wa ? `<a class="icon-btn" href="${wa}" target="_blank" rel="noopener" title="Kutla">${ic("chat")}</a>` : ""}</div>`;
+    }).join("");
+  } catch (e) { toast("err", "Ana ekran yüklenemedi", e.message); }
+}
+async function policeYenilendi(id, ad, no) {
+  if (!await onayla("Poliçe yenilendi mi?", `${ad} · #${no}`, "Evet, yenilendi")) return;
+  const y = guvenli("altun_yenilenen_policeler") || []; if (!y.includes(id)) { y.push(id); guvenli("altun_yenilenen_policeler", y); }
+  toast("ok", "Harika iş!", `${ad} listeden kaldırıldı.`); konfeti(); xpKazan(8, "Yenileme takibi"); yukleDashboard();
+}
+
+/* ============================================================
+   MÜŞTERİ VE POLİÇE LİSTELERİ
+   ============================================================ */
+const perPage = 10;
+function sayfalama(id, d, fn) {
+  const el = $("#" + id); if (!d || !d.total) { el.innerHTML = ""; return; }
+  el.innerHTML = `<span>${d.total.toLocaleString("tr-TR")} kayıttan ${(d.page - 1) * d.limit + 1}–${Math.min(d.page * d.limit, d.total)}</span><span class="row"><button class="btn btn-o btn-sm" ${d.page <= 1 ? "disabled" : ""} data-sayfa="${d.page - 1}">‹ Önceki</button><b>${d.page} / ${d.pages}</b><button class="btn btn-o btn-sm" ${d.page >= d.pages ? "disabled" : ""} data-sayfa="${d.page + 1}">Sonraki ›</button></span>`;
+  el.onclick = e => { const b = e.target.closest("[data-sayfa]"); if (b) fn(+b.dataset.sayfa); };
+}
+const iskeleSatir = (n, c) => Array.from({ length: n }, () => `<tr>${`<td><div class="skel"></div></td>`.repeat(c)}</tr>`).join("");
+
+async function yukleMusteriler(q = "", page = 1) {
+  const tb = $("#musteri-tbody"); tb.innerHTML = iskeleSatir(6, 6);
+  try {
+    const d = await api(`/api/musteriler?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`);
+    if (!d.items.length) { tb.innerHTML = `<tr><td colspan="6" class="empty">Müşteri bulunamadı.</td></tr>`; sayfalama("musteri-pagination", null); return; }
+    let html = "", son = "";
+    d.items.forEach(m => {
+      const ad = tamAd(m), h = basHarf(ad);
+      if (h !== son && !q) { son = h; html += `<tr class="grp"><td colspan="6">${esc(h)}</td></tr>`; }
+      const dag = Object.entries(m.aktif_police_sayilari || {});
+      html += `<tr class="click" data-kart="${m.id}"><td><div class="row"><div class="avatar">${esc(h)}</div><b style="color:var(--navy)">${esc(ad)}</b></div></td><td>${esc(m.telefon || "—")}</td>
+        <td>${dag.length ? dag.map(([t, a]) => `<span class="chip" style="margin:0 4px 4px 0">${esc(t)} · ${a}</span>`).join("") : '<span class="faint">Aktif poliçe yok</span>'}</td>
+        <td class="muted nw">${esc(m.portfoy_sorumlusu || "—")}</td><td class="faint">${esc(m.tc_kimlik || "—")}</td><td class="right"><span class="chip gold">Kartı aç ›</span></td></tr>`;
+    });
+    tb.innerHTML = html; sayfalama("musteri-pagination", d, p => yukleMusteriler($("#musteri-ara").value, p));
+  } catch (e) { tb.innerHTML = `<tr><td colspan="6" class="empty">${esc(e.message)}</td></tr>`; }
+}
+$("#musteri-ara").addEventListener("input", debounce(e => yukleMusteriler(e.target.value, 1)));
+$("#police-ara").addEventListener("input", debounce(() => yuklePoliceler(1)));
+
+let aktifPoliceSekmesi = "aktif";
+function policeSekmeSec(s) { aktifPoliceSekmesi = s; $("#btn-sekme-aktif").classList.toggle("on", s === "aktif"); $("#btn-sekme-eski").classList.toggle("on", s === "eski"); yuklePoliceler(1); }
+function bitisChip(p) { if (p.durum === "iptal") return `<span class="chip">İPTAL</span>`; if (p.suresi_dolmus) return `<span class="chip warn">SÜRESİ DOLDU</span>`; return `<span class="chip ${p.kalan_gun <= 7 ? "bad" : p.kalan_gun <= 30 ? "warn" : "ok"}">${p.kalan_gun} gün kaldı</span>`; }
+async function yuklePoliceler(page = 1) {
+  const tb = $("#police-tbody"); tb.innerHTML = iskeleSatir(6, 7); const q = $("#police-ara").value;
+  try {
+    const d = await api(`/api/policeler?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`);
+    if (!d.items.length) { tb.innerHTML = `<tr><td colspan="7" class="empty">Poliçe bulunamadı.</td></tr>`; sayfalama("police-pagination", null); return; }
+    tb.innerHTML = d.items.map(p => `<tr><td><b style="color:var(--navy)">${esc(p.police_no)}</b>${p.pdf_dosya_adi ? ` <a class="icon-btn" style="display:inline-grid;width:26px;height:26px" href="/api/pdf/${encodeURIComponent(p.pdf_dosya_adi)}" target="_blank" title="PDF'i aç">${ic("file")}</a>` : ""}</td>
+      <td><a href="#/musteri/${p.musteri_id}" style="color:inherit;font-weight:600">${esc(tamAd(p) || "—")}</a></td><td>${esc(p.sigorta_sirketi || "")}<br><b>${esc(p.sigorta_turu)}</b></td>
+      <td>${tarih(p.bitis_tarihi)}</td><td>${bitisChip(p)}</td><td><b style="color:var(--gold-d)">${para(p.prim)}</b></td>
+      <td class="right"><button class="icon-btn" title="Poliçeyi sil" data-sil="${p.id}" data-no="${esc(p.police_no)}">${ic("trash")}</button></td></tr>`).join("");
+    sayfalama("police-pagination", d, yuklePoliceler);
+  } catch (e) { tb.innerHTML = `<tr><td colspan="7" class="empty">${esc(e.message)}</td></tr>`; }
+}
+async function policeSil(id, no) {
+  if (!await onayla("Poliçe silinsin mi?", `#${no} kalıcı olarak silinecek.`, "Evet, sil", true)) return;
+  try { await api(`/api/policeler/${id}`, { method: "DELETE" }); toast("ok", "Poliçe silindi", `#${no}`); yuklePoliceler(1); }
+  catch (e) { toast("err", "Silinemedi", e.message); }
+}
+async function sistemiTemizleVeBirlestir(btn) {
+  if (!await onayla("Sistem temizlensin mi?", "Aynı TCKN/VKN veya Ad-Soyad'a sahip müşteriler tek karta birleştirilir, mükerrer poliçeler silinir.", "Temizle", true)) return;
+  btn.disabled = true;
+  try { const r = await api("/api/sistemi-temizle", { method: "POST" }); toast("ok", "Temizlik tamamlandı", r.mesaj); konfeti(); xpKazan(20, "Veri temizliği"); yukleMusteriler($("#musteri-ara").value, 1); }
+  catch (e) { toast("err", "Temizlik başarısız", e.message); } finally { btn.disabled = false; }
+}
+
+/* ============================================================
+   MÜŞTERİ KARTI (Notion tarzı çekmece)
+   ============================================================ */
+let sabitler = { sirketler: [], branslar: [], danismanlar: [] };
+api("/api/sabitler").then(s => { sabitler = s; }).catch(() => {});
+const BRANS_KISA = { "Kasko Sigortası": "Kasko", "Trafik Sigortası": "Trafik", "Tamamlayıcı Sağlık Sigortası": "Sağlık (TSS)", "DASK": "DASK", "Konut ve Eşya Sigortaları": "Konut / Yangın", "Ferdi Kaza": "Ferdi Kaza", "İş Yeri": "İş Yeri", "Nakliyat": "Nakliyat", "Tarım": "Tarım", "Yat / Denizcilik": "Yat / Denizcilik", "Allrisk": "Allrisk", "Özel Paket / Destek": "Özel Paket" };
+const BRANS_IKON = { "Kasko Sigortası": "car", "Trafik Sigortası": "car", "Tamamlayıcı Sağlık Sigortası": "heart", "DASK": "home", "Konut ve Eşya Sigortaları": "home", "Ferdi Kaza": "shield", "İş Yeri": "build", "Nakliyat": "link", "Tarım": "star", "Yat / Denizcilik": "star", "Allrisk": "shield", "Özel Paket / Destek": "zap" };
+const KART_ALANLARI = [
+  { k: "telefon", et: "Telefon Numarası", i: "phone", tip: "tel", ph: "05XX XXX XX XX" },
+  { k: "adres", et: "Adresi", i: "home", ph: "Mahalle, ilçe, il" },
+  { k: "email", et: "Maili", i: "mail", tip: "email", ph: "ornek@mail.com" },
+  { k: "dogum_tarihi", et: "Doğum Tarihi", i: "calendar", tip: "date" },
+  { k: "tc_kimlik", et: "TC Kimlik No / VKN", i: "hash", ph: "11 haneli TCKN veya 10 haneli VKN" },
+  { k: "portfoy_sorumlusu", et: "Danışman", i: "user", tip: "select" },
+  { k: "meslek", et: "Mesleği", i: "brief", ph: "Örn: Öğrenci, Esnaf, Mühendis" },
+];
+const KART_EK_ALANLAR = [
+  { k: "medeni_durum", et: "Medeni Durum", i: "heart", tip: "select", sec: [["", "Belirtilmemiş"], ["Evli", "Evli"], ["Bekar", "Bekar"]] },
+  { k: "cocuk_sayisi", et: "Çocuk Sayısı", i: "users", tip: "number", ph: "0" },
+  { k: "cocuk_yaslari", et: "Çocuk Yaşları", i: "users", ph: "Örn: 3, 7, 12" },
+  { k: "yas", et: "Yaş", i: "clock", tip: "number", ph: "Doğum tarihinden otomatik hesaplanır" },
+  { k: "emekli_mi", et: "Emekli mi?", i: "shield", tip: "select", sec: [["", "Belirtilmemiş"], ["true", "Evet"], ["false", "Hayır"]] },
+  { k: "sahip_olunan_araclar", et: "Sahip Olunan Araçlar", i: "car", tip: "textarea", ph: "Plaka, marka, model — her satıra bir araç" },
+  { k: "sirket_sahipleri", et: "Şirket Sahipleri", i: "build", tip: "textarea", ph: "Şirket müşterisiyse ortaklar / yetkililer" },
+  { k: "ek_notlar", et: "Ek Notlar", i: "note", tip: "textarea", ph: "Görüşme notları, tercihler, hatırlatmalar…" },
+];
+let kart = { id: null, orijinal: {}, veri: null };
+
+function alanHtml(a, v) {
+  const deger = a.k === "emekli_mi" ? (v === true ? "true" : v === false ? "false" : "") : (v ?? "");
+  let girdi;
+  if (a.tip === "select") {
+    const sec = a.k === "portfoy_sorumlusu" ? sabitler.danismanlar.map(d => [d, d]) : a.sec;
+    girdi = `<select class="pv" data-f="${a.k}">${sec.map(([val, et]) => `<option value="${esc(val)}" ${String(deger) === String(val) ? "selected" : ""}>${esc(et)}</option>`).join("")}</select>`;
+  } else if (a.tip === "textarea") girdi = `<textarea class="pv" data-f="${a.k}" placeholder="${esc(a.ph || "")}" rows="2">${esc(deger)}</textarea>`;
+  else girdi = `<input class="pv" data-f="${a.k}" type="${a.tip || "text"}" value="${esc(deger)}" placeholder="${esc(a.ph || "")}" ${a.tip === "number" ? 'min="0"' : ""} autocomplete="off">`;
+  return `<div class="prop"><label>${ic(a.i)}${a.et}</label>${girdi}</div>`;
+}
+function kalanChip(g, b) { if (b == null) return ""; if (g < 0) return `<span class="chip">Süresi doldu</span>`; return `<span class="chip ${g <= 7 ? "bad" : g <= 30 ? "warn" : "ok"}">${g} gün</span>`; }
+
+function kartCiz(k) {
+  const yeni = !k.id, ad = yeni ? "" : tamAd(k);
+  const dolu = Object.entries(k.brans_ozeti || {}).filter(([, o]) => o.toplam_adet);
+  const bos = Object.entries(k.brans_ozeti || {}).filter(([, o]) => !o.toplam_adet).map(([b]) => b);
+  const wa = waLink(k.telefon);
+  $("#kart-govde").innerHTML = `
+    <div class="row between" style="align-items:flex-start"><div class="grow"><div class="k-icon">${esc(basHarf(ad || "Y"))}</div></div>
+      ${yeni ? "" : `<div class="row"><div class="ring" style="--p:${k.doluluk}" title="Kart doluluk oranı"><i>%${k.doluluk}</i></div>${wa ? `<a class="btn btn-o btn-sm" href="${wa}" target="_blank" rel="noopener">${ic("chat")}WhatsApp</a>` : ""}${k.telefon ? `<a class="btn btn-o btn-sm" href="tel:${esc(k.telefon)}">${ic("phone")}Ara</a>` : ""}</div>`}</div>
+    <input class="k-title" id="kart-ad" placeholder="Ad Soyad / Firma Unvanı" value="${esc(ad)}" autocomplete="off">
+    <div class="k-sub">${yeni ? '<span class="chip gold">Yeni müşteri kartı</span><span class="muted" style="font-size:12px">Aynı TCKN veya Ad-Soyad varsa mevcut kart güncellenir, mükerrer kayıt açılmaz.</span>' : `<span class="chip navy">${k.toplam_aktif} aktif poliçe</span><span class="chip">${k.toplam_police} toplam</span><span class="chip gold">${para(k.toplam_prim)} aktif prim</span>`}</div>
+    <div class="props">${KART_ALANLARI.map(a => alanHtml(a, k[a.k])).join("")}</div>
+    <div class="k-h">${ic("heart")}Aile &amp; Yaşam Profili<small>Çapraz satış önerilerini besler</small></div>
+    <div class="props">${KART_EK_ALANLAR.map(a => alanHtml(a, k[a.k])).join("")}</div>
+    ${yeni ? "" : `
+    <div class="k-h">${ic("file")}Poliçe Portföyü<small>${k.toplam_aktif} aktif · ${k.toplam_police} toplam</small></div>
+    ${dolu.length ? `<div class="pf head"><span>Branş</span><span>Adet</span><span>Bitiş Tarihi</span><span>Şirket</span></div>
+      ${dolu.map(([b, o]) => `<div class="pf ${o.aktif_adet ? "" : "zero"}"><span class="row">${ic(BRANS_IKON[b] || "file")}<b>${esc(BRANS_KISA[b] || b)}</b></span><span><span class="n">${o.aktif_adet}</span></span><span class="row">${tarih(o.bitis)} ${kalanChip(o.kalan_gun, o.bitis)}</span><span class="muted">${esc(o.sirket || "—")}</span></div>`).join("")}
+      <div class="pf total"><span>Toplam</span><span><span class="n">${k.toplam_aktif}</span></span><span></span><span></span></div>` : `<p class="muted" style="padding:8px 6px">Bu müşterinin henüz poliçesi yok.</p>`}
+    ${k.police_araclari.length ? `<div class="prop" style="margin-top:6px"><label>${ic("car")}Poliçedeki araçlar</label><div class="row wrap">${k.police_araclari.map(a => `<span class="chip">${esc(a)}</span>`).join("")}</div></div>` : ""}
+    <div class="k-h">${ic("zap")}Çapraz Satış Fırsatları<small>tıkla → poliçe formu açılır</small></div>
+    ${k.oneriler.length ? `<div class="opps">${k.oneriler.map(o => `<button class="opp" data-teklif="${esc(o.brans)}" title="${esc(o.nedenler.join(" · "))}">${ic("plus")}${esc(BRANS_KISA[o.brans] || o.brans)}<small>${esc(o.nedenler[0])}${o.nedenler.length > 1 ? " +" + (o.nedenler.length - 1) : ""}</small></button>`).join("")}</div>` : `<p class="muted" style="padding:6px">Şimdilik önerilecek yeni branş yok — portföy dolu görünüyor. 👏</p>`}
+    ${bos.length ? `<p class="faint" style="font-size:12px;margin-top:10px">Hiç poliçesi olmayan branşlar: ${bos.map(b => esc(BRANS_KISA[b] || b)).join(", ")}</p>` : ""}
+    <div class="k-h">${ic("file")}Poliçe Geçmişi</div>
+    ${k.policeler.length ? `<div style="overflow:auto"><table class="mini"><thead><tr><th>Poliçe No</th><th>Branş</th><th>Şirket</th><th>Bitiş</th><th>Durum</th><th>Prim</th></tr></thead><tbody>${k.policeler.slice(0, 15).map(p => `<tr><td><b>${esc(p.police_no)}</b>${p.pdf_dosya_adi ? ` <a href="/api/pdf/${encodeURIComponent(p.pdf_dosya_adi)}" target="_blank" title="PDF">${ic("file")}</a>` : ""}</td><td>${esc(BRANS_KISA[p.sigorta_turu] || p.sigorta_turu)}</td><td>${esc(p.sigorta_sirketi || "")}</td><td>${tarih(p.bitis_tarihi)}</td><td>${bitisChip(p)}</td><td>${para(p.prim)}</td></tr>`).join("")}</tbody></table></div>${k.policeler.length > 15 ? `<p class="faint" style="font-size:12px;margin-top:6px">+${k.policeler.length - 15} poliçe daha…</p>` : ""}` : `<p class="muted" style="padding:6px">Poliçe kaydı yok.</p>`}
+    <div class="row" style="margin-top:18px"><button class="btn btn-g" data-teklif="">${ic("plus")}Bu müşteriye poliçe ekle</button></div>`}
+    <div class="savebar" id="kart-savebar"><span class="muted" id="kart-degisiklik">Kaydedilmemiş değişiklikler var</span><span class="row"><button class="btn btn-o" onclick="kartKapat()">Vazgeç</button><button class="btn btn-p" id="kart-kaydet-btn" onclick="kartKaydet()">${ic("check")}Kaydet <kbd style="background:rgba(255,255,255,.15);color:#fff;border:0">Ctrl S</kbd></button></span></div>`;
+  kart.orijinal = kartDegerleri();
+  if (yeni) { $("#kart-savebar").classList.add("show"); $("#kart-degisiklik").textContent = "Yeni müşteri oluşturulacak"; setTimeout(() => $("#kart-ad").focus(), 300); }
+  yasKilidi();
+}
+function kartDegerleri() {
+  const v = { ad_soyad: $("#kart-ad")?.value.trim() || "" };
+  $$("#kart-govde [data-f]").forEach(el => { v[el.dataset.f] = el.value; });
+  return v;
+}
+function yasKilidi() { const y = $('#kart-govde [data-f="yas"]'), d = $('#kart-govde [data-f="dogum_tarihi"]'); if (y && d) { y.readOnly = !!d.value; y.title = d.value ? "Doğum tarihinden otomatik hesaplanır" : ""; } }
+function kartDegisti() {
+  const su = kartDegerleri(); let n = 0;
+  $$("#kart-govde [data-f]").forEach(el => { const d = su[el.dataset.f] !== (kart.orijinal[el.dataset.f] ?? ""); el.classList.toggle("dirty", d); n += d; });
+  const adDegisti = su.ad_soyad !== kart.orijinal.ad_soyad; $("#kart-ad").style.color = adDegisti ? "var(--gold-d)" : ""; n += adDegisti;
+  $("#kart-savebar").classList.toggle("show", n > 0 || !kart.id);
+  if (kart.id) $("#kart-degisiklik").textContent = `${n} alan değişti — kaydedilmedi`;
+}
+function katmanAc(html, sinif) { const w = document.createElement("div"); w.className = sinif; w.innerHTML = html; $("#katman").appendChild(w); return w; }
+
+async function kartAc(id) {
+  if (kart.id === id && $(".drawer-wrap")) return;
+  kartKapat(false); kart.id = id;
+  const w = katmanAc(`<div class="drawer"><div class="drawer-top"><span class="chip gold">${ic("user")}Müşteri Kartı</span><button class="icon-btn" onclick="kartKapat()" title="Kapat (Esc)">${ic("x")}</button></div><div class="drawer-body" id="kart-govde"><div class="skel" style="height:64px;width:64px;border-radius:18px"></div><div class="skel" style="height:44px;margin:16px 0"></div>${'<div class="skel" style="height:34px;margin:10px 0"></div>'.repeat(7)}</div></div>`, "drawer-wrap");
+  w.onclick = e => { if (e.target === w) kartKapat(); };
+  try { const k = await api(`/api/musteriler/${id}`); if (kart.id !== id) return; kart.veri = k; kartCiz(k); wireKart(); }
+  catch (e) { toast("err", "Kart açılamadı", e.message); kartKapat(); }
+}
+function kartYeni() {
+  kartKapat(false); kart.id = null;
+  katmanAc(`<div class="drawer"><div class="drawer-top"><span class="chip gold">${ic("plus")}Yeni Müşteri</span><button class="icon-btn" onclick="kartKapat()">${ic("x")}</button></div><div class="drawer-body" id="kart-govde"></div></div>`, "drawer-wrap").onclick = function (e) { if (e.target === this) kartKapat(); };
+  kartCiz({ portfoy_sorumlusu: sabitler.danismanlar[0] }); wireKart();
+}
+function wireKart() { const g = $("#kart-govde"); g.addEventListener("input", kartDegisti); g.addEventListener("change", () => { yasKilidi(); kartDegisti(); }); }
+async function kartKapat(hashTemizle = true) {
+  const w = $(".drawer-wrap"); if (!w) { kart.id = null; return; }
+  const kirli = $("#kart-savebar")?.classList.contains("show") && kart.id;
+  if (kirli && hashTemizle && !await onayla("Değişiklikler kaydedilmedi", "Kartı kapatırsan girdiğin bilgiler kaybolur.", "Yine de kapat", true)) return;
+  w.remove(); kart.id = null;
+  if (hashTemizle && location.hash.startsWith("#/musteri/")) history.replaceState(null, "", "#/" + (MENU.find(([v]) => !$("#view-" + v).hidden)?.[0] || "musteriler"));
+}
+async function kartKaydet() {
+  const btn = $("#kart-kaydet-btn"), su = kartDegerleri(), yeni = !kart.id;
+  if (!su.ad_soyad) { const a = $("#kart-ad"); a.classList.add("err"); a.focus(); ses("err"); setTimeout(() => a.classList.remove("err"), 400); return toast("err", "Ad Soyad zorunlu", "Müşteri kartının bir adı olmalı."); }
+  const parts = su.ad_soyad.split(/\s+/), soyad = parts.length > 1 ? parts.pop() : "", ad = parts.join(" ");
+  const govde = yeni ? { ad, soyad } : {};
+  if (!yeni && su.ad_soyad !== kart.orijinal.ad_soyad) Object.assign(govde, { ad, soyad });
+  $$("#kart-govde [data-f]").forEach(el => { const k = el.dataset.f; if ((yeni && su[k] !== "") || (!yeni && su[k] !== (kart.orijinal[k] ?? ""))) govde[k] = su[k]; });
+  btn.disabled = true;
+  try {
+    const m = yeni ? await api("/api/musteriler", { method: "POST", body: JSON.stringify(govde) }) : await api(`/api/musteriler/${kart.id}`, { method: "PUT", body: JSON.stringify(govde) });
+    if (yeni && m.yeni === false) toast("info", "Mevcut müşteri güncellendi", "Aynı TCKN/Ad-Soyad zaten kayıtlıydı; mükerrer kart açılmadı.", 5500);
+    else toast("ok", yeni ? "Müşteri oluşturuldu" : "Kart güncellendi", tamAd(m));
+    konfeti(); xpKazan(yeni ? 10 : 5, yeni ? "Yeni müşteri" : "Kart güncellendi");
+    const id = m.id; kart.id = null; $(".drawer-wrap")?.remove(); await kartAc(id);
+    if (!$("#view-musteriler").hidden) yukleMusteriler($("#musteri-ara").value, 1);
+  } catch (e) { toast("err", "Kaydedilemedi", e.message); btn.disabled = false; }
+}
+
+/* ============================================================
+   POLİÇE FORMU + PDF OKUMA
+   ============================================================ */
+let seciliMusteriId = null, musteriSekmesi = "mevcut", sonYuklenenDosyaAdi = null;
+const bugunIso = () => new Date().toISOString().slice(0, 10);
+
+function policeFormunuAc(aiData = null, on = null) {
+  $("#ai-modal")?.remove();
+  const opt = l => l.map(x => `<option value="${esc(x)}">`).join("");
+  const w = katmanAc(`<div class="modal" id="ai-modal-kutu">
+    <div class="modal-h"><div class="row"><div class="avatar" style="background:rgba(192,162,101,.2);color:var(--gold-l)">${ic("zap")}</div><div><h3>Poliçe Kayıt Merkezi</h3><p id="ai-modal-subtitle">${aiData ? esc(aiData.mesaj || "Yapay zeka bilgileri doldurdu. Lütfen kontrol edin.") : "Yeni işlem. Lütfen bilgileri kontrol edip kaydedin."}</p></div></div><button class="icon-btn" style="color:#fff" onclick="aiModalKapat()">${ic("x")}</button></div>
+    <div class="modal-b">
+      <div class="sec"><span class="tag">1 · MÜŞTERİ</span>
+        <div class="seg" style="margin-bottom:16px"><button id="btn-tab-mevcut" onclick="musteriTabGecis('mevcut')">Mevcut Müşteri Seç</button><button id="btn-tab-yeni" onclick="musteriTabGecis('yeni')">Yeni Müşteri Oluştur</button></div>
+        <div id="tab-mevcut"><div style="position:relative" id="ai-ara-kutu"><label class="lbl">Müşteri ara (ad, soyad, TCKN)</label><input class="input" id="ai-musteri-ara" placeholder="Yazarak arayın…" autocomplete="off"><div class="res" id="ai-musteri-sonuclar" hidden></div></div>
+          <div id="secili-musteri-kutu" class="row between" hidden style="background:var(--ok-bg);border:1px solid #BFE3CE;border-radius:12px;padding:12px 16px"><div class="row"><div class="avatar" style="background:var(--ok)">✓</div><div><b style="color:var(--ok)" id="secili-musteri-ad"></b><br><small style="color:var(--ok)">Sistemde mevcut</small></div></div><button class="btn btn-o btn-sm" onclick="musteriSecimiIptal()">Değiştir</button></div></div>
+        <div id="tab-yeni" class="fgrid" hidden>
+          <div class="s2"><label class="lbl">Ad Soyad *</label><input class="input" id="yeni-adsoyad" placeholder="Örn: MEHMET EMİR YILDIRIM" style="text-transform:uppercase"></div>
+          <div class="s2"><label class="lbl">TCKN / VKN</label><input class="input" id="yeni-tckn"></div>
+          <div class="s2"><label class="lbl">Telefon</label><input class="input" id="yeni-telefon" placeholder="05XX XXX XX XX"></div>
+          <div class="s2"><label class="lbl">Portföy Sorumlusu</label><select class="select" id="yeni-sorumlu">${sabitler.danismanlar.map(d => `<option>${esc(d)}</option>`).join("")}</select></div>
+          <p class="s4 chip warn" style="border-radius:10px;padding:8px 12px;white-space:normal">Aynı TCKN veya Ad-Soyad zaten kayıtlıysa yeni kart açılmaz; mevcut müşteri kullanılır.</p></div></div>
+      <div class="sec"><span class="tag g">2 · POLİÇE</span><div class="fgrid">
+        <div class="s2"><label class="lbl">İşlem Tipi *</label><select class="select" id="form-islem-tipi"><option value="Yeni">Yeni Poliçe (İlk Tanzim)</option><option value="Yenileme">Yenileme (Tecdit)</option><option value="Primli Zeyil">Primli Zeyil (Ek Prim)</option><option value="İadeli Zeyil">İadeli Zeyil (İade Prim)</option><option value="İptal">İptal (Fesih)</option></select></div>
+        <div class="s2"><label class="lbl">Üretim Kaynağı *</label><select class="select" id="form-uretim-kaynagi"><option value="Kendi">Kendi Şirketimiz (Tam Komisyon)</option><option value="Dışarıdan">Dışarıdan Üretim (Yarım Komisyon)</option></select></div>
+        <div class="s2"><label class="lbl">Sigorta Şirketi *</label><input class="input" id="form-sirket" list="dl-sirket" placeholder="Türkiye Sigorta…"><datalist id="dl-sirket">${opt(sabitler.sirketler)}</datalist></div>
+        <div class="s2"><label class="lbl">Branş *</label><input class="input" id="form-brans" list="dl-brans" placeholder="Trafik Sigortası…"><datalist id="dl-brans">${opt(sabitler.branslar)}</datalist></div>
+        <div class="s2"><label class="lbl">Poliçe Numarası</label><input class="input" id="form-police-no" placeholder="Boş bırakılırsa otomatik üretilir"></div>
+        <div><label class="lbl">Başlangıç</label><input class="input" type="date" id="form-baslangic"></div><div><label class="lbl">Bitiş</label><input class="input" type="date" id="form-bitis"></div>
+        <div class="s2"><label class="lbl">Brüt Prim / İade Prim (TL)</label><input class="input right" id="form-prim" placeholder="0,00" style="font-weight:700;color:var(--ok)"></div>
+        <div class="s2"><label class="lbl">Araç / Ek Bilgi</label><input class="input" id="form-arac" placeholder="Plaka, marka, adres…"></div></div></div></div>
+    <div class="modal-f"><p id="ai-modal-hata" class="grow" style="color:var(--bad);font-weight:600" hidden></p><span class="row" style="margin-left:auto"><button class="btn btn-o" onclick="aiModalKapat()">Vazgeç</button><button class="btn btn-p" id="ai-kaydet" onclick="policeyiKaydet()">${ic("check")}Sisteme Kaydet</button></span></div></div>`, "overlay");
+  w.id = "ai-modal"; w.onclick = e => { if (e.target === w) aiModalKapat(); };
+  $("#ai-musteri-ara").addEventListener("input", debounce(e => musteriAramaTetikle(e.target.value), 300));
+  sonYuklenenDosyaAdi = null; seciliMusteriId = null; musteriTabGecis("mevcut");
+  if (aiData) {
+    sonYuklenenDosyaAdi = aiData.pdf_dosya_adi || null;
+    Object.entries({ "form-sirket": aiData.sigorta_sirketi, "form-brans": aiData.sigorta_turu, "form-police-no": aiData.police_no, "form-baslangic": aiData.baslangic_tarihi, "form-bitis": aiData.bitis_tarihi, "form-prim": aiData.prim, "form-arac": aiData.arac_bilgisi || aiData.varlik_bilgisi, "form-islem-tipi": aiData.islem_tipi }).forEach(([id, v]) => { if (v != null && v !== "") $("#" + id).value = v; });
+    if (aiData.musteri_eslesti && aiData.musteri) musteriSec(aiData.musteri.id, tamAd(aiData.musteri));
+    else { musteriTabGecis("yeni"); $("#yeni-adsoyad").value = `${aiData.ad || ""} ${aiData.soyad || ""}`.trim(); $("#yeni-tckn").value = aiData.tckn && !String(aiData.tckn).includes("*") ? aiData.tckn : ""; $("#yeni-telefon").value = aiData.telefon || ""; $("#yeni-sorumlu").value = aiData.portfoy_sorumlusu || sabitler.danismanlar[0]; }
+    if (aiData.police_mevcut) toast("warn", "Bu poliçe zaten kayıtlı", "Aynı numaralı ikinci poliçe açılamaz; işlem tipini kontrol edin.", 6000);
+  }
+  if (on) { if (on.musteriId) musteriSec(on.musteriId, on.adSoyad); if (on.brans) { $("#form-brans").value = on.brans; $("#ai-modal-subtitle").textContent = `Çapraz satış teklifi · ${on.brans}`; } $("#form-baslangic").value = bugunIso(); }
+}
+function aiModalKapat() { $("#ai-modal")?.remove(); }
+function musteriTabGecis(tab) {
+  musteriSekmesi = tab;
+  $("#btn-tab-mevcut").classList.toggle("on", tab === "mevcut"); $("#btn-tab-yeni").classList.toggle("on", tab === "yeni");
+  $("#tab-mevcut").hidden = tab !== "mevcut"; $("#tab-yeni").hidden = tab !== "yeni";
+}
+async function musteriAramaTetikle(val) {
+  const drop = $("#ai-musteri-sonuclar"); if (val.trim().length < 2) { drop.hidden = true; return; }
+  try {
+    const d = await api(`/api/musteriler?q=${encodeURIComponent(val)}&limit=6`);
+    drop.innerHTML = d.items.length ? d.items.map(m => `<div data-sec="${m.id}" data-ad="${esc(tamAd(m))}"><b style="color:var(--navy)">${esc(tamAd(m))}</b><br><small class="muted">TC: ${esc(m.tc_kimlik || "-")} · Tel: ${esc(m.telefon || "-")}</small></div>`).join("") : `<div class="muted center" style="cursor:default">Bulunamadı.</div>`;
+    drop.hidden = false;
+    drop.onclick = e => { const x = e.target.closest("[data-sec]"); if (x) musteriSec(+x.dataset.sec, x.dataset.ad); };
+  } catch (e) {}
+}
+function musteriSec(id, ad) { seciliMusteriId = id; musteriTabGecis("mevcut"); $("#ai-musteri-sonuclar").hidden = true; $("#ai-ara-kutu").hidden = true; $("#secili-musteri-ad").textContent = ad; $("#secili-musteri-kutu").hidden = false; ses("tik"); }
+function musteriSecimiIptal() { seciliMusteriId = null; $("#secili-musteri-kutu").hidden = true; $("#ai-ara-kutu").hidden = false; $("#ai-musteri-ara").value = ""; }
+
+async function policeyiKaydet() {
+  const hata = $("#ai-modal-hata"), btn = $("#ai-kaydet"); hata.hidden = true;
+  const dur = (id, m) => { const el = $("#" + id); el.classList.add("err"); el.focus(); setTimeout(() => el.classList.remove("err"), 400); throw new Error(m); };
+  try {
+    let musteriId = seciliMusteriId;
+    if (musteriSekmesi === "yeni") {
+      const tam = $("#yeni-adsoyad").value.trim(); if (!tam) dur("yeni-adsoyad", "Yeni müşteri için Ad Soyad zorunludur.");
+      const p = tam.split(/\s+/), soyad = p.length > 1 ? p.pop() : "";
+      const m = await api("/api/musteriler", { method: "POST", body: JSON.stringify({ ad: p.join(" "), soyad, tc_kimlik: $("#yeni-tckn").value.trim(), telefon: $("#yeni-telefon").value.trim(), portfoy_sorumlusu: $("#yeni-sorumlu").value }) });
+      musteriId = m.id; if (m.yeni === false) toast("info", "Mevcut müşteri kullanıldı", `${tamAd(m)} zaten kayıtlı.`);
+    } else if (!musteriId) throw new Error("Lütfen listeden bir müşteri seçin.");
+    if (!$("#form-sirket").value.trim()) dur("form-sirket", "Sigorta şirketi zorunludur.");
+    if (!$("#form-brans").value.trim()) dur("form-brans", "Branş zorunludur.");
+    btn.disabled = true;
+    const r = await api("/api/policeler", { method: "POST", body: JSON.stringify({
+      musteri_id: musteriId, police_no: $("#form-police-no").value.trim(), islem_tipi: $("#form-islem-tipi").value, uretim_kaynagi: $("#form-uretim-kaynagi").value,
+      sigorta_sirketi: $("#form-sirket").value, sigorta_turu: $("#form-brans").value,
+      baslangic_tarihi: $("#form-baslangic").value || bugunIso(), bitis_tarihi: $("#form-bitis").value || bugunIso(),
+      prim: $("#form-prim").value, arac_bilgisi: $("#form-arac").value, pdf_dosya_adi: sonYuklenenDosyaAdi }) });
+    aiModalKapat(); toast("ok", "Poliçe kaydedildi", `#${r.police_no} · ${r.sigorta_sirketi} · ${r.sigorta_turu}`); konfeti(1.4); xpKazan(10, "Yeni poliçe");
+    if (!$("#view-policeler").hidden) yuklePoliceler(1); if (!$("#view-dashboard").hidden) yukleDashboard();
+    if (kart.id === musteriId) { const id = kart.id; kart.id = null; $(".drawer-wrap")?.remove(); kartAc(id); }
+  } catch (e) { hata.textContent = e.message; hata.hidden = false; ses("err"); btn.disabled = false; }
+}
+
+async function pdfYukle(file) {
+  if (!file) return;
+  const durum = $("#pdf-durum"), txt = $("#pdf-durum-text"); durum.hidden = false; txt.textContent = "Yükleniyor ve yapay zeka okuyor…";
+  const fd = new FormData(); fd.append("file", file);
+  try {
+    const res = await fetch(API + "/api/upload-parse", { method: "POST", body: fd });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(j.detail || `Sunucu hatası (${res.status})`);
+    txt.textContent = "Başarılı! Form açılıyor…"; toast("ok", "Poliçe okundu", "Bilgileri kontrol edip kaydedin."); xpKazan(15, "PDF ile poliçe okuma");
+    setTimeout(() => { durum.hidden = true; policeFormunuAc(j); }, 700);
+  } catch (e) { txt.textContent = "Hata: " + e.message; toast("err", "PDF okunamadı", e.message, 6000); setTimeout(() => { durum.hidden = true; }, 2600); }
+}
+$("#pdf-input").addEventListener("change", e => { pdfYukle(e.target.files[0]); e.target.value = ""; });
+const drop = $("#pdf-drop");
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => pdfYukle(e.dataTransfer.files[0]));
+
+/* ============================================================
+   PAZARLAMA
+   ============================================================ */
+let pazarlamaDataCache = [];
+async function yuklePazarlama() {
+  const tb = $("#pazarlama-tbody"); tb.innerHTML = iskeleSatir(5, 5); $("#pazarlama-empty").hidden = true;
+  try {
+    const liste = pazarlamaDataCache = await api("/api/pazarlama");
+    if (!liste.length) { tb.innerHTML = ""; $("#pazarlama-empty").hidden = false; return; }
+    tb.innerHTML = liste.map(i => { const wa = waLink(i.telefon, `Merhaba ${i.ad_soyad}, ${i.tetikleyici_police} poliçenizin bitiş tarihi yaklaşıyor. Ayrıca size özel ${i.firsatlar} tekliflerimiz var, konuşalım mı?`);
+      return `<tr class="click" data-kart="${i.musteri_id}"><td><b style="color:var(--navy)">${esc(i.ad_soyad)}</b></td><td>${esc(i.telefon)} ${wa ? `<a class="icon-btn" style="display:inline-grid" href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp">${ic("chat")}</a>` : ""}</td><td class="muted">${esc(i.tetikleyici_police)}</td>
+        <td>${(i.firsatlar || "").split("+").map(f => `<span class="chip navy" style="margin:0 4px 4px 0">${esc(f.trim())}</span>`).join("")}</td><td class="center"><span class="chip warn">${esc(i.bitis)}</span></td></tr>
+        <tr><td colspan="5" style="background:var(--gold-bg);padding:9px 16px"><span class="row" style="align-items:flex-start"><span class="chip gold" style="flex:none">${ic("zap")}AI SATIŞ NOTU</span><i style="font-size:12.5px;color:#4b4630">${esc(i.taktik)}</i></span></td></tr>`; }).join("");
+  } catch (e) { tb.innerHTML = `<tr><td colspan="5" class="empty">${esc(e.message)}</td></tr>`; }
+}
+function yazdirPenceresi(html) { const w = window.open("", "_blank"); if (!w) return toast("warn", "Açılır pencere engellendi", "Tarayıcının açılır pencere iznini verin."); w.document.write(html); w.document.close(); }
+function pazarlamaListeyiYazdir() {
+  if (!pazarlamaDataCache.length) return toast("warn", "Yazdırılacak veri yok");
+  yazdirPenceresi(`<html><head><title>Satış Planı</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#333}h2{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;color:#061337}table{width:100%;border-collapse:collapse;margin-bottom:30px}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background:#061337;color:#fff}.ai{background:#fefce8;font-style:italic;color:#854d0e}@media print{button{display:none}}</style></head><body><h2>Yapay Zeka Destekli Çapraz Satış Planı</h2><table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe</th><th>Fırsatlar</th><th>Bitiş</th></tr></thead><tbody>${pazarlamaDataCache.map(i => `<tr><td><b>${esc(i.ad_soyad)}</b></td><td>${esc(i.telefon)}</td><td>${esc(i.tetikleyici_police)}</td><td><b>${esc(i.firsatlar)}</b></td><td><b>${esc(i.bitis)}</b></td></tr><tr class="ai"><td colspan="5"><b>Satış Taktiği:</b> ${esc(i.taktik)}</td></tr>`).join("")}</tbody></table><div style="text-align:center"><button onclick="window.print()" style="padding:12px 24px;background:#061337;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer">Çıktı Al / PDF Kaydet</button></div></body></html>`);
+}
+function aylikListeyiYazdir() {
+  if (!buAyBitenlerCache.length) return toast("warn", "Yazdırılacak poliçe yok");
+  const g = {}; buAyBitenlerCache.forEach(p => (g[p.sigorta_turu || "Diğer"] ||= []).push(p));
+  yazdirPenceresi(`<html><head><title>Yenileme Listesi</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px}h2{text-align:center;border-bottom:2px solid #000;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th,td{border:1px solid #000;padding:8px;text-align:left}th{background:#f0f0f0}.bx{width:20px;height:20px;border:1.5px solid #000}@media print{button{display:none}}</style></head><body>${Object.entries(g).map(([b, pl]) => `<h2>BRANŞ: ${esc(b.toUpperCase())}</h2><table><thead><tr><th>Bitiş</th><th>Müşteri</th><th>Şirket</th><th>Poliçe No</th><th>Durum</th></tr></thead><tbody>${pl.sort((x, y) => new Date(x.bitis_tarihi) - new Date(y.bitis_tarihi)).map(p => `<tr><td>${tarih(p.bitis_tarihi)}</td><td><b>${esc(tamAd(p).toUpperCase())}</b></td><td>${esc(p.sigorta_sirketi || "-")}</td><td>${esc(p.police_no || "-")}</td><td style="text-align:center"><div class="bx"></div></td></tr>`).join("")}</tbody></table>`).join("")}<div style="text-align:center"><button onclick="window.print()" style="padding:10px 20px;background:#061337;color:#fff;border:0">Yazdır</button></div></body></html>`);
+}
+
+/* ============================================================
+   FİNANSAL ANALİZ
+   ============================================================ */
+function ddAc(id) { $$(".dd-m").forEach(m => { if (m.id !== id) m.hidden = true; }); const m = $("#" + id); m.hidden = !m.hidden; }
+document.addEventListener("click", e => { if (!e.target.closest(".dd")) $$(".dd-m").forEach(m => { m.hidden = true; }); });
+function cbGrup(items, cls, etiketId) {
+  return `<label><input type="checkbox" checked data-tumu="${cls}"> <b>Tümü</b></label>` + items.map(x => `<label><input type="checkbox" checked value="${esc(x)}" class="${cls}"> ${esc(x)}</label>`).join("");
+}
+function cbBagla(container, cls, etiketId) {
+  const guncelle = () => { const t = $$("." + cls), s = t.filter(c => c.checked).length; $("#" + etiketId).textContent = s === t.length ? "Tümü" : s === 0 ? "Seçim yok" : `${s} seçili`; $("[data-tumu='" + cls + "']").checked = s === t.length; };
+  container.addEventListener("change", e => { if (e.target.dataset.tumu) $$("." + cls).forEach(c => { c.checked = e.target.checked; }); guncelle(); });
+}
+let finHazir = false;
+async function yukleFinansalHazirlik() {
+  if (finHazir) return;
+  try {
+    const r = await api("/api/finansal/filtreler");
+    [["sirket", r.sirketler], ["sorumlu", r.danismanlar], ["brans", r.branslar]].forEach(([n, l]) => { const c = $(`#fin-${n}-container`); c.innerHTML = cbGrup(l, `fin-${n}-cb`); cbBagla(c, `fin-${n}-cb`, `fin-${n}-etiket`); });
+    finHazir = true;
+  } catch (e) { toast("err", "Filtreler yüklenemedi", e.message); }
+}
+async function calistirFinansalRapor(btn) {
+  const params = (s, e) => ({ baslangic: $("#" + s).value || null, bitis: $("#" + e).value || null, sirket: $$(".fin-sirket-cb:checked").map(c => c.value), danisman: $$(".fin-sorumlu-cb:checked").map(c => c.value), branslar: $$(".fin-brans-cb:checked").map(c => c.value) });
+  const post = p => api("/api/finansal/rapor", { method: "POST", body: JSON.stringify(p) });
+  const eski = btn.innerHTML; btn.disabled = true; btn.textContent = "Hesaplanıyor…";
+  try {
+    const r1 = await post(params("fin-start", "fin-end")), kiyas = $("#fin-kiyas-aktif").checked;
+    $("#fin-metrics").hidden = false; $("#fin-details").hidden = false;
+    const tek = (v, f, renk) => `<b style="color:${renk}">${f(v)}</b>`;
+    if (!kiyas) { $("#fin-ciro").innerHTML = tek(r1.ciro, para, "var(--gold-l)"); $("#fin-kar").innerHTML = tek(r1.kar, para, "var(--navy)"); $("#fin-adet").innerHTML = tek(r1.adet, v => v + " Adet", "var(--navy)"); }
+    else {
+      const r2 = await post(params("fin-start-2", "fin-end-2"));
+      const fark = (v1, v2, f, koyu) => { const d = v1 - v2, ok = d > 0 ? "▲" : d < 0 ? "▼" : "≈", renk = d > 0 ? "#4ADE80" : d < 0 ? "#F87171" : "#9AA1B2"; return `<b style="color:${koyu ? "var(--gold-l)" : "var(--navy)"}">${f(v1)}</b><span style="display:block;font-size:12px;font-weight:700;color:${renk};position:relative">${ok} ${f(Math.abs(d))} <span style="opacity:.7;font-weight:500">· Dönem 2: ${f(v2)}</span></span>`; };
+      $("#fin-ciro").innerHTML = fark(r1.ciro, r2.ciro, para, true); $("#fin-kar").innerHTML = fark(r1.kar, r2.kar, para); $("#fin-adet").innerHTML = fark(r1.adet, r2.adet, v => v + " Adet");
+    }
+    const liste = d => { const en = Math.max(1, ...Object.values(d)); return Object.entries(d).map(([k, v]) => `<div class="bar-row"><span class="grow">${esc(k)}</span><i style="width:${Math.max(6, 90 * v / en)}px"></i><b style="min-width:64px;text-align:right">${v} Adet</b></div>`).join("") || '<span class="faint">Veri yok.</span>'; };
+    $("#fin-brans-liste").innerHTML = liste(r1.brans_dagilimi); $("#fin-sirket-liste").innerHTML = liste(r1.sirket_dagilimi);
+    toast("ok", "Rapor hazır", `${r1.adet} poliçe analiz edildi.`); xpKazan(5, "Finansal analiz");
+  } catch (e) { toast("err", "Rapor oluşturulamadı", e.message); } finally { btn.innerHTML = eski; btn.disabled = false; }
+}
+
+/* ============================================================
+   EĞİTİM MERKEZİ
+   ============================================================ */
+window.dersDataCache = {};
     const SATIS_ARGUMANLARI = {
         "Kasko Sigortası": {
             "Aksigorta": [
@@ -868,650 +1138,81 @@
             ]
         }
     };
-    
-    // TAB YÖNETİMİ
-    document.querySelectorAll(".nav-btn").forEach((btn) => btn.addEventListener("click", () => goster(btn.dataset.view)));
+async function yukleDersler() {
+  try {
+    const data = window.dersDataCache = await api("/api/dersler/liste"), kl = Object.keys(data);
+    $("#ders-kategoriler").innerHTML = kl.length ? kl.map(k => `<button class="katbtn" data-kat="${esc(k)}">${esc(k)}<span class="chip">${data[k].length}</span></button>`).join("") : '<span class="faint">Sunum bulunamadı.</span>';
+    if (kl.length) dersKategoriGoster(kl[0]);
+  } catch (e) { toast("err", "Dersler yüklenemedi", e.message); }
+}
+function dersKategoriGoster(k) {
+  $("#secilen-kategori-baslik").textContent = `${k} Sunumları`;
+  $$(".katbtn").forEach(b => b.classList.toggle("on", b.dataset.kat === k));
+  const d = window.dersDataCache[k] || [];
+  $("#ders-icerik").innerHTML = d.length ? d.map(f => `<div class="ders" data-ders="${esc(f)}" data-kat="${esc(k)}"><div class="pdf">${ic("file")}</div><h4>${esc(f.replace(/\.pdf$/i, "").replace(/_/g, " "))}</h4><span class="chip gold">Satış ipuçları ›</span></div>`).join("") : '<div class="empty" style="grid-column:1/-1">Bu kategoriye henüz sunum eklenmemiş.</div>';
+}
+function acDersDetay(kategori, dosya) {
+  const temiz = dosya.replace(/\.pdf$/i, "").replace(/_/g, " "), c = temiz.toUpperCase();
+  const sirket = c.includes("AXA") ? "Axa" : c.includes("NEOVA") ? "Neova" : /QU[İI]CK/.test(c) ? "Quick" : /HEP[İI]Y[İI]/.test(c) ? "Hepiyi" : /T[ÜU]RK[İI]YE/.test(c) ? "Türkiye" : (/\bAK\b/.test(c) || /AKS[İI]GORTA|AKKASKO/.test(c)) ? "Aksigorta" : null;
+  const arg = sirket && SATIS_ARGUMANLARI[kategori]?.[sirket];
+  const w = katmanAc(`<div class="modal" style="max-width:920px"><div class="modal-h" style="padding:26px 30px"><div><span class="chip gold" style="text-transform:uppercase;letter-spacing:.06em">${esc(kategori)}</span><h3 class="serif" style="font-size:28px;margin-top:10px;color:#fff">${esc(temiz)}</h3><p>Müşteriye sunulacak temel avantajlar ve satış argümanları</p></div><button class="icon-btn" style="color:#fff" onclick="this.closest('.overlay').remove()">${ic("x")}</button></div>
+    <div class="modal-b" style="flex-direction:row;flex-wrap:wrap;align-items:flex-start"><div class="card" style="width:230px;padding:20px;text-align:center;flex:none"><div class="pdf" style="width:64px;height:64px;border-radius:20px;background:var(--bad-bg);color:var(--bad);display:grid;place-items:center;margin:0 auto 12px">${ic("file")}</div><b style="color:var(--navy)">Orijinal Doküman</b><p class="muted" style="font-size:12px;margin:6px 0 14px">Limitler ve özel koşullar için PDF'i inceleyin.</p><a class="btn btn-g" style="width:100%" href="/dersler/${encodeURIComponent(dosya)}" target="_blank">PDF'İ GÖRÜNTÜLE</a></div>
+    <div class="grow" style="min-width:280px"><h4 style="color:var(--navy);font-size:17px;margin-bottom:12px">Müşteri Neden Bu Şirketi Seçmeli?</h4>${arg ? `<div style="display:flex;flex-direction:column;gap:10px">${arg.map(x => `<div class="arg"><div class="ck">${ic("check")}</div><p>${x}</p></div>`).join("")}</div>` : `<div class="empty">Bu sunuma ait özel satış argümanı bulunmuyor.<br>PDF'i görüntüleyebilirsiniz.</div>`}</div></div></div>`, "overlay");
+  w.onclick = e => { if (e.target === w) w.remove(); }; ses("tik");
+}
 
-    function goster(ad) {
-      ["dashboard", "musteriler", "policeler", "finansal", "dersler", "pazarlama"].forEach((v) => document.getElementById("view-" + v).classList.toggle("hidden", v !== ad));
-      document.querySelectorAll(".nav-btn").forEach((b) => {
-        if(b.dataset.view === ad) {
-          b.classList.add("bg-brand-navy/5", "text-brand-navy"); b.classList.remove("text-slate-400");
-        } else {
-          b.classList.remove("bg-brand-navy/5", "text-brand-navy"); b.classList.add("text-slate-400");
-        }
-      });
-      
-      if (ad === "dashboard") yukleDashboard();
-      if (ad === "musteriler") yukleMusteriler(document.getElementById("musteri-ara").value, 1);
-      if (ad === "policeler") yuklePoliceler(1);
-      if (ad === "finansal") yukleFinansalHazirlik();
-      if (ad === "pazarlama") yuklePazarlama();
-      if (ad === "dersler") yukleDersler();
-    }
+/* ============================================================
+   KOMUT PALETİ (Ctrl+K)
+   ============================================================ */
+let palSonuc = [], palIdx = 0;
+function palAc() {
+  if ($("#pal")) return;
+  const w = katmanAc(`<div class="pal"><input id="pal-in" placeholder="Müşteri, poliçe veya komut ara…" autocomplete="off"><div class="pal-l" id="pal-list"></div></div>`, "overlay"); w.id = "pal"; w.onclick = e => { if (e.target === w) palKapat(); };
+  $("#pal-in").addEventListener("input", debounce(e => palAra(e.target.value), 220));
+  $("#pal-in").addEventListener("keydown", e => { if (e.key === "ArrowDown") palGit(1); else if (e.key === "ArrowUp") palGit(-1); else if (e.key === "Enter") { palSonuc[palIdx]?.git(); } });
+  palAra(""); $("#pal-in").focus();
+}
+function palKapat() { $("#pal")?.remove(); }
+function palGit(d) { palIdx = (palIdx + d + palSonuc.length) % palSonuc.length; palCiz(); }
+function palCiz() {
+  let son = "";
+  $("#pal-list").innerHTML = palSonuc.map((s, i) => { const b = s.grup !== son ? `<div class="pal-h">${esc(s.grup)}</div>` : ""; son = s.grup; return `${b}<div class="pal-i ${i === palIdx ? "on" : ""}" data-i="${i}">${ic(s.i)}<span>${esc(s.t)}</span><small>${esc(s.k || "")}</small></div>`; }).join("") || '<div class="empty">Sonuç yok.</div>';
+  $("#pal-list").onclick = e => { const x = e.target.closest("[data-i]"); if (x) palSonuc[+x.dataset.i].git(); };
+}
+async function palAra(q) {
+  const kapatGit = f => () => { palKapat(); f(); };
+  const komutlar = [["Yeni poliçe ekle", "plus", () => policeFormunuAc()], ["Yeni müşteri kartı", "user", kartYeni], ...MENU.map(([v, i, t]) => [t + " sayfasına git", i, () => { location.hash = "#/" + v; }])].filter(([t]) => t.toLowerCase().includes(q.toLowerCase()) || !q);
+  palSonuc = komutlar.slice(0, q ? 3 : 8).map(([t, i, f]) => ({ grup: "KOMUTLAR", t, i, git: kapatGit(f) })); palIdx = 0; palCiz();
+  if (q.trim().length < 2) return;
+  try {
+    const [m, p] = await Promise.all([api(`/api/musteriler?q=${encodeURIComponent(q)}&limit=6`), api(`/api/policeler?q=${encodeURIComponent(q)}&limit=4`)]);
+    const musteriler = m.items.map(x => ({ grup: "MÜŞTERİLER", t: tamAd(x), k: x.telefon || x.tc_kimlik || "", i: "user", git: kapatGit(() => { location.hash = "#/musteri/" + x.id; }) }));
+    const policeler = p.items.map(x => ({ grup: "POLİÇELER", t: `#${x.police_no} · ${tamAd(x)}`, k: x.sigorta_turu, i: "file", git: kapatGit(() => { location.hash = "#/musteri/" + x.musteri_id; }) }));
+    palSonuc = [...musteriler, ...policeler, ...palSonuc]; palIdx = 0; palCiz();
+  } catch (e) {}
+}
 
-    // ====== AI VE MODAL ENTEGRASYONLARI ======
-    
-    let seciliMusteriId = null;
-    let aktifMusteriSekmesi = 'mevcut';
-    let sonYuklenenDosyaAdi = null;
-
-    async function pdfSecildiV2(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const durum = document.getElementById("pdf-durum");
-        const durumText = document.getElementById("pdf-durum-text");
-        durum.classList.remove("hidden");
-        durumText.textContent = "Yükleniyor ve Yapay Zeka Okuyor...";
-        
-        const formData = new FormData(); formData.append("file", file);
-        try {
-            const res = await fetch(API + "/api/upload-parse", { method: "POST", body: formData });
-            if (!res.ok) throw new Error(await res.json().detail || "Hata");
-            const data = await res.json();
-            
-            durumText.textContent = "Başarılı! Form açılıyor...";
-            setTimeout(() => { durum.classList.add("hidden"); policeFormunuAc(data); }, 1000);
-        } catch (e) {
-            durumText.textContent = `Hata: ${e.message}`;
-            setTimeout(() => durum.classList.add("hidden"), 3000);
-        }
-        event.target.value = "";
-    }
-
-    function policeFormunuAc(aiData = null) {
-        document.getElementById("form-islem-tipi").value = "Yeni";
-        document.getElementById("form-uretim-kaynagi").value = "Kendi";
-        document.getElementById("form-sirket").value = "";
-        document.getElementById("form-brans").value = "";
-        document.getElementById("form-police-no").value = "";
-        document.getElementById("form-baslangic").value = "";
-        document.getElementById("form-bitis").value = "";
-        document.getElementById("form-prim").value = "";
-        document.getElementById("form-arac").value = "";
-        document.getElementById("ai-musteri-ara").value = "";
-        document.getElementById("yeni-telefon").value = "";
-        document.getElementById("yeni-sorumlu").value = "";
-        musteriSecimiIptal();
-        document.getElementById("ai-modal-hata").classList.add("hidden");
-        sonYuklenenDosyaAdi = null;
-
-        if (aiData) {
-            if(aiData.pdf_dosya_adi) sonYuklenenDosyaAdi = aiData.pdf_dosya_adi;
-            if(aiData.sigorta_sirketi) document.getElementById("form-sirket").value = aiData.sigorta_sirketi;
-            if(aiData.sigorta_turu) document.getElementById("form-brans").value = aiData.sigorta_turu;
-            document.getElementById("form-police-no").value = aiData.police_no || "";
-            document.getElementById("form-baslangic").value = aiData.baslangic_tarihi || "";
-            document.getElementById("form-bitis").value = aiData.bitis_tarihi || "";
-            document.getElementById("form-prim").value = aiData.prim || "";
-            document.getElementById("form-arac").value = aiData.arac_bilgisi || aiData.varlik_bilgisi || "";
-
-            if (aiData.musteri_eslesti && aiData.musteri) {
-                musteriTabGecis('mevcut');
-                musteriSec(aiData.musteri.id, `${aiData.musteri.ad} ${aiData.musteri.soyad}`);
-            } else {
-                musteriTabGecis('yeni');
-                const tamAd = `${aiData.ad || ''} ${aiData.soyad || ''}`.trim();
-                document.getElementById("yeni-adsoyad").value = tamAd;
-                document.getElementById("yeni-tckn").value = aiData.tckn || "";
-                document.getElementById("yeni-telefon").value = aiData.telefon || "";
-                document.getElementById("yeni-sorumlu").value = aiData.portfoy_sorumlusu || "";
-            }
-        } else {
-            musteriTabGecis('mevcut');
-        }
-
-        document.getElementById("ai-police-modal").classList.remove("hidden");
-    }
-
-    function aiModalKapat() { document.getElementById("ai-police-modal").classList.add("hidden"); }
-
-    function musteriTabGecis(tab) {
-        aktifMusteriSekmesi = tab;
-        const bMevcut = document.getElementById("btn-tab-mevcut");
-        const bYeni = document.getElementById("btn-tab-yeni");
-        const divMevcut = document.getElementById("tab-mevcut");
-        const divYeni = document.getElementById("tab-yeni");
-
-        if (tab === 'mevcut') {
-            bMevcut.className = "px-4 py-2 font-bold text-sm rounded-lg transition-all bg-brand-navy text-white shadow-md";
-            bYeni.className = "px-4 py-2 font-bold text-sm rounded-lg transition-all text-slate-500 hover:bg-slate-100";
-            divMevcut.classList.remove("hidden");
-            divYeni.classList.add("hidden");
-        } else {
-            bYeni.className = "px-4 py-2 font-bold text-sm rounded-lg transition-all bg-brand-navy text-white shadow-md";
-            bMevcut.className = "px-4 py-2 font-bold text-sm rounded-lg transition-all text-slate-500 hover:bg-slate-100";
-            divYeni.classList.remove("hidden");
-            divMevcut.classList.add("hidden");
-        }
-    }
-
-    let aramaTimeout = null;
-    async function musteriAramaTetikle(val) {
-        clearTimeout(aramaTimeout);
-        const drop = document.getElementById("ai-musteri-sonuclar");
-        if(val.length < 2) { drop.classList.add("hidden"); return; }
-        
-        aramaTimeout = setTimeout(async () => {
-            try {
-                const data = await api(`/api/musteriler?q=${encodeURIComponent(val)}&limit=5`);
-                if(data.items && data.items.length > 0) {
-                    drop.innerHTML = data.items.map(m => `
-                        <div onclick="musteriSec(${m.id}, '${m.ad} ${m.soyad}')" class="p-3 hover:bg-slate-50 cursor-pointer transition-colors flex justify-between items-center group">
-                            <div>
-                                <p class="font-bold text-sm text-brand-navy">${m.ad} ${m.soyad}</p>
-                                <p class="text-[10px] text-slate-500">TC: ${m.tc_kimlik||'-'} | Tel: ${m.telefon||'-'}</p>
-                            </div>
-                            <span class="text-xs font-bold text-brand-gold opacity-0 group-hover:opacity-100">Seç</span>
-                        </div>
-                    `).join("");
-                    drop.classList.remove("hidden");
-                } else {
-                    drop.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 italic">Bulunamadı.</div>`;
-                    drop.classList.remove("hidden");
-                }
-            } catch(e) {}
-        }, 300);
-    }
-
-    function musteriSec(id, adSoyad) {
-        seciliMusteriId = id;
-        document.getElementById("ai-musteri-sonuclar").classList.add("hidden");
-        document.getElementById("ai-musteri-ara").parentElement.classList.add("hidden"); 
-        document.getElementById("secili-musteri-ad").textContent = adSoyad;
-        document.getElementById("secili-musteri-kutu").classList.remove("hidden");
-    }
-
-    function musteriSecimiIptal() {
-        seciliMusteriId = null;
-        document.getElementById("secili-musteri-kutu").classList.add("hidden");
-        document.getElementById("ai-musteri-ara").parentElement.classList.remove("hidden");
-        document.getElementById("ai-musteri-ara").value = "";
-    }
-
-    // YENİ GÜNCELLENEN KAYIT FONKSİYONU
-    async function policeyiKaydetV2() {
-        const hataP = document.getElementById("ai-modal-hata");
-        hataP.classList.add("hidden");
-        let kullanilacakMusteriId = seciliMusteriId;
-
-        try {
-            if (aktifMusteriSekmesi === 'yeni') {
-                const tamAd = document.getElementById("yeni-adsoyad").value.trim();
-                const tckn = document.getElementById("yeni-tckn").value.trim();
-                const telefon = document.getElementById("yeni-telefon").value.trim();
-                const portfoy_sorumlusu = document.getElementById("yeni-sorumlu").value.trim();
-                
-                if(!tamAd) throw new Error("Yeni müşteri eklemek için Ad Soyad zorunludur.");
-                
-                const parts = tamAd.split(" ");
-                const soyad = parts.length > 1 ? parts.pop() : "";
-                const ad = parts.join(" ");
-
-                const mRes = await api("/api/musteriler", { 
-                    method: "POST", 
-                    body: JSON.stringify({ 
-                        ad, 
-                        soyad, 
-                        tc_kimlik: tckn,
-                        telefon,
-                        portfoy_sorumlusu
-                    }) 
-                });
-                kullanilacakMusteriId = mRes.id;
-            } else {
-                if (!kullanilacakMusteriId) throw new Error("Lütfen listeden müşteri seçin.");
-            }
-
-            // DÜZELTME: Virgülü noktaya çevirip hata fırlatmasını engelliyoruz
-            let primDegeri = document.getElementById("form-prim").value;
-            if(primDegeri) primDegeri = primDegeri.replace(',', '.');
-
-            // DÜZELTME: Veritabanında (app.py) henüz bulunmayan islem_tipi ve uretim_kaynagi 
-            // json payload içerisinden çıkarıldı. Çökmeyi engelleyecektir.
-            const policePayload = {
-                musteri_id: kullanilacakMusteriId,
-                police_no: document.getElementById("form-police-no").value || "-",
-                sigorta_sirketi: document.getElementById("form-sirket").value,
-                sigorta_turu: document.getElementById("form-brans").value,
-                baslangic_tarihi: document.getElementById("form-baslangic").value || new Date().toISOString().split('T')[0],
-                bitis_tarihi: document.getElementById("form-bitis").value || new Date().toISOString().split('T')[0],
-                prim: parseFloat(primDegeri) || 0,
-                arac_bilgisi: document.getElementById("form-arac").value,
-                pdf_dosya_adi: sonYuklenenDosyaAdi
-            };
-
-            await api("/api/policeler", { method: "POST", body: JSON.stringify(policePayload) });
-            aiModalKapat();
-            yukleDashboard();
-            yuklePoliceler(1);
-            alert("Poliçe başarıyla kaydedildi.");
-
-        } catch(e) {
-            hataP.textContent = "Hata: " + e.message;
-            hataP.classList.remove("hidden");
-        }
-    }
-
-    async function yukleDersler() {
-        try {
-            const data = await api("/api/dersler/liste");
-            const katDiv = document.getElementById("ders-kategoriler");
-            if(Object.keys(data).length === 0) { katDiv.innerHTML = '<span class="text-xs italic text-slate-400">Sunum bulunamadı.</span>'; return; }
-
-            katDiv.innerHTML = Object.keys(data).map(k =>
-                `<button data-kat="${k}" onclick="dersKategoriGoster('${k}')" class="kategori-btn text-left w-full px-5 py-3.5 rounded-2xl font-bold transition-all flex justify-between items-center mb-2 hover:bg-slate-50 text-slate-500">
-                    ${k} <span class="badge px-2.5 py-1 rounded-lg text-xs font-black shadow-sm transition-colors bg-slate-200 text-slate-600">${data[k].length}</span>
-                </button>`
-            ).join("");
-            
-            window.dersDataCache = data;
-            dersKategoriGoster(Object.keys(data)[0]);
-        } catch(e) { console.error("Dersler yüklenemedi.", e); }
-    }
-
-    window.dersKategoriGoster = function(kategori) {
-        document.getElementById("secilen-kategori-baslik").innerHTML = `${kategori} Sunumları`;
-        const dosyalar = window.dersDataCache[kategori] || [];
-        const icerik = document.getElementById("ders-icerik");
-        
-        document.querySelectorAll('.kategori-btn').forEach(btn => {
-            if(btn.dataset.kat === kategori) {
-                btn.classList.add('bg-brand-navy', 'text-brand-gold', 'shadow-md');
-                btn.classList.remove('text-slate-500', 'hover:bg-slate-50');
-                btn.querySelector('.badge').classList.add('bg-brand-gold', 'text-brand-navy');
-                btn.querySelector('.badge').classList.remove('bg-slate-200', 'text-slate-600');
-            } else {
-                btn.classList.remove('bg-brand-navy', 'text-brand-gold', 'shadow-md');
-                btn.classList.add('text-slate-500', 'hover:bg-slate-50');
-                btn.querySelector('.badge').classList.remove('bg-brand-gold', 'text-brand-navy');
-                btn.querySelector('.badge').classList.add('bg-slate-200', 'text-slate-600');
-            }
-        });
-
-        if (dosyalar.length === 0) {
-            icerik.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 px-4 bg-white border-2 border-dashed border-slate-300 rounded-3xl h-full"><p class='text-slate-500 font-bold'>Bu kategoriye henüz sunum eklenmemiş.</p></div>`;
-            return;
-        }
-        
-        icerik.innerHTML = dosyalar.map(f => {
-            let temizAd = f.replace('.pdf','').replace('.PDF','').replace(/_/g, ' ');
-            return `
-            <div onclick="acDersDetay('${kategori}', '${encodeURIComponent(f)}', '${temizAd.replace(/'/g, "\\'")}')" class="relative group bg-white border-2 border-transparent rounded-[24px] p-6 hover:border-brand-gold/30 hover:shadow-[0_20px_40px_rgba(10,25,47,0.06)] hover:-translate-y-2 transition-all duration-300 flex flex-col h-56 overflow-hidden cursor-pointer">
-                
-                <div class="absolute top-0 right-0 w-32 h-32 bg-brand-navy/5 rounded-bl-[100px] -z-10 group-hover:scale-[1.5] group-hover:bg-brand-gold/10 transition-transform duration-500"></div>
-                
-                <div class="flex-1 flex flex-col items-center justify-center text-center">
-                    <div class="w-14 h-14 bg-red-50 text-red-500 rounded-[20px] flex items-center justify-center mb-4 group-hover:-translate-y-2 group-hover:shadow-md transition-all duration-300">
-                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
-                    </div>
-                    <h4 class="font-black text-brand-navy text-[15px] leading-tight break-words uppercase px-2">${temizAd}</h4>
-                </div>
-                
-                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span class="text-[10px] font-black tracking-widest text-slate-400 group-hover:text-brand-gold transition-colors">SATIŞ İPUÇLARI</span>
-                    <span class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-navy group-hover:text-brand-gold transition-colors shadow-sm">
-                        <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
-                    </span>
-                </div>
-            </div>
-            `;
-        }).join("");
-    }
-
-    window.acDersDetay = function(kategori, dosyaAdiEncode, temizAd) {
-        document.getElementById("detay-baslik").textContent = temizAd;
-        document.getElementById("detay-kategori-badge").textContent = kategori;
-        document.getElementById("detay-pdf-btn").href = `/dersler/${dosyaAdiEncode}`;
-        
-        const cAd = temizAd.toUpperCase();
-        let sirket = null;
-        if (cAd.includes("AXA")) sirket = "Axa";
-        else if (cAd.includes("NEOVA")) sirket = "Neova";
-        else if (cAd.includes("QUICK") || cAd.includes("QUİCK")) sirket = "Quick";
-        else if (cAd.includes("HEPİYİ") || cAd.includes("HEPIYI")) sirket = "Hepiyi";
-        else if (cAd.includes("TÜRKİYE") || cAd.includes("TURKIYE")) sirket = "Türkiye";
-        else if (cAd.match(/\bAK\b/) || cAd.includes("AKKASKO") || cAd.includes("AKSİGORTA") || cAd.includes("AKSIGORTA")) sirket = "Aksigorta";
-
-        const argumanAlani = document.getElementById("detay-argumanlar");
-        
-        if (sirket && SATIS_ARGUMANLARI[kategori] && SATIS_ARGUMANLARI[kategori][sirket]) {
-            const listItems = SATIS_ARGUMANLARI[kategori][sirket].map(item => `
-                <div class="flex items-start gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-brand-gold/40 transition-colors">
-                    <div class="w-6 h-6 shrink-0 rounded-full bg-brand-gold/20 flex items-center justify-center mt-0.5">
-                        <svg class="w-3.5 h-3.5 text-brand-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <p class="text-[13px] text-slate-600 leading-relaxed">${item}</p>
-                </div>
-            `).join("");
-            argumanAlani.innerHTML = `<div class="flex flex-col gap-3">${listItems}</div>`;
-        } else {
-            argumanAlani.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-10 bg-white rounded-3xl border border-slate-100">
-                    <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <p class="text-sm font-medium text-slate-400 px-8 text-center">Bu sunuma ait özel satış argümanı bulunmamaktadır.<br>Sağ menüden PDF'i görüntüleyebilirsiniz.</p>
-                </div>
-            `;
-        }
-        
-        document.getElementById("ders-detay-modal").classList.remove("hidden");
-    };
-
-    window.kapatDersDetay = function() {
-        document.getElementById("ders-detay-modal").classList.add("hidden");
-    };
-
-    // DÜZELTME: API Hatası geldiğinde ekranda "Hata: Hata" yerine 
-    // gerçek sorunu okuyabilmek için try-catch mekanizması güçlendirildi
-    async function api(path, opts) {
-      const res = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...opts });
-      if (!res.ok) {
-          let msg = "Sunucu Hatası (" + res.status + ")";
-          try {
-              const text = await res.text();
-              try { msg = JSON.parse(text).detail || msg; }
-              catch(e) { msg = text.length < 100 ? text : msg; }
-          } catch(_) {}
-          throw new Error(msg);
-      }
-      return res.status === 204 ? null : res.json();
-    }
-    
-    // === YENİ YAPAY ZEKA ÇAPRAZ SATIŞ MODÜLÜ FONKSİYONLARI ===
-    
-    async function yuklePazarlama() {
-        const tbody = document.getElementById("pazarlama-tbody");
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-400 italic font-medium">Yapay zeka analiz ediyor, lütfen bekleyin...</td></tr>';
-
-        try {
-            const liste = await api("/api/pazarlama"); 
-            pazarlamaDataCache = liste;
-
-            if (!liste || liste.length === 0) {
-                tbody.innerHTML = "";
-                document.getElementById("pazarlama-empty").classList.remove("hidden");
-                return;
-            }
-
-            document.getElementById("pazarlama-empty").classList.add("hidden");
-
-            tbody.innerHTML = liste.map(item => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-5 py-4 font-bold text-brand-navy text-[13px]">${item.ad_soyad}</td>
-                    <td class="px-5 py-4 text-slate-600 font-bold">${item.telefon}</td>
-                    <td class="px-5 py-4 text-slate-500 text-xs font-medium">${item.tetikleyici_police}</td>
-                    <td class="px-5 py-4">
-                        <div class="flex flex-wrap gap-1">
-                            ${(item.firsatlar || '').split('+').map(f => `<span class="bg-brand-navy text-brand-gold font-bold text-[9px] uppercase px-1.5 py-0.5 rounded shadow-sm">${f.trim()}</span>`).join('')}
-                        </div>
-                    </td>
-                    <td class="px-5 py-4 text-center"><span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1.5 rounded-lg">${item.bitis}</span></td>
-                </tr>
-                <tr class="bg-brand-gold/5 border-b-2 border-slate-100">
-                    <td colspan="5" class="px-5 py-3">
-                        <div class="flex gap-3 items-start">
-                            <span class="bg-brand-gold text-brand-navy text-[9px] font-black uppercase px-2 py-1 rounded shrink-0 flex items-center gap-1 shadow-sm">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                AI SATIŞ NOTU
-                            </span>
-                            <p class="text-xs text-slate-700 font-medium italic mt-0.5">${item.taktik}</p>
-                        </div>
-                    </td>
-                </tr>
-            `).join("");
-        } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-red-500 italic font-medium">Veri yüklenemedi. app.py tarafının yapay zeka analizini doğru döndüğünden emin olun.</td></tr>`;
-        }
-    }
-
-    window.pazarlamaListeyiYazdir = function() {
-        const liste = pazarlamaDataCache || [];
-        if(!liste.length) { alert("Yazdırılacak veri bulunamadı."); return; }
-
-        let h = `<html><head><title>Yapay Zeka Destekli Satış Planı</title>
-        <style>
-            body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#333;}
-            h2{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;color:#0A192F;}
-            table{width:100%;border-collapse:collapse;margin-bottom:30px;}
-            th,td{border:1px solid #ddd;padding:10px;text-align:left;}
-            th{background-color:#0A192F;color:white;}
-            .ai-note{background-color:#fefce8; font-style: italic; color: #854d0e;}
-            @media print{button{display:none;}}
-        </style></head><body>`;
-        
-        h += `<h2>Yapay Zeka Destekli Çapraz Satış Planı</h2>
-              <table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe (Tetikleyici)</th><th>Çapraz Satış Fırsatları</th><th>Bitiş Tarihi</th></tr></thead><tbody>`;
-
-        liste.forEach(item => {
-            h += `<tr>
-                <td><strong>${item.ad_soyad}</strong></td>
-                <td>${item.telefon}</td>
-                <td>${item.tetikleyici_police}</td>
-                <td><strong>${item.firsatlar}</strong></td>
-                <td><strong>${item.bitis}</strong></td>
-            </tr>
-            <tr class="ai-note">
-                <td colspan="5"><strong>📞 Çalışan Satış Taktiği:</strong> ${item.taktik}</td>
-            </tr>`;
-        });
-
-        h += `</tbody></table><div style="text-align:center;"><button onclick="window.print()" style="padding:12px 24px;background:#0A192F;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">Çıktı Al / PDF Kaydet</button></div></body></html>`;
-        const w = window.open('','_blank'); w.document.write(h); w.document.close();
-    }
-
-
-    function renderPagination(c, data, fName) {
-      if (!document.getElementById(c)) return;
-      if (!data || data.total === 0) { document.getElementById(c).innerHTML = ""; return; }
-      let b1 = `<button onclick="window.${fName}(${data.page - 1})" ${data.page===1?'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs"':'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg text-xs"'}>Önceki</button>`;
-      let b2 = `<button onclick="window.${fName}(${data.page + 1})" ${data.page>=data.pages?'disabled class="px-4 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs"':'class="px-4 py-1.5 bg-brand-navy text-brand-gold rounded-lg text-xs"'}>Sonraki</button>`;
-      document.getElementById(c).innerHTML = `<div class="text-[11px] text-slate-500 font-semibold">${data.total} kayıttan ${(data.page-1)*data.limit + 1}-${Math.min(data.page*data.limit, data.total)}</div><div class="flex gap-2">${b1}${b2}</div>`;
-    }
-    
-    window.musteriSayfaDegistir = function(page) { yukleMusteriler(document.getElementById("musteri-ara").value, page); };
-    window.policeSayfaDegistir = function(page) { yuklePoliceler(page); };
-
-    function para(n) { return (n==null || n==="") ? "—" : Number(n).toLocaleString("tr-TR", { style:"currency", currency:"TRY" }); }
-    function tarih(d) { return !d ? "—" : new Date(d + "T00:00:00").toLocaleDateString("tr-TR"); }
-    function seviyeSinif(s) { return s==="kirmizi" ? { w:"border-l-4 border-l-red-500", b:"bg-red-50 text-red-600" } : s==="sari" ? { w:"border-l-4 border-l-amber-400", b:"bg-amber-50 text-amber-600" } : { w:"border-l-4 border-l-slate-200", b:"bg-slate-100 text-slate-500" }; }
-
-    document.getElementById("musteri-ara").addEventListener("input", (e) => { clearTimeout(window.s1); window.s1 = setTimeout(() => yukleMusteriler(e.target.value, 1), 500); });
-    document.getElementById("police-ara").addEventListener("input", (e) => { clearTimeout(window.s2); window.s2 = setTimeout(() => yuklePoliceler(1), 500); });
-
-    async function yukleMusteriler(q = "", page = 1) {
-      const qs = `?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`;
-      const data = await api("/api/musteriler" + qs);
-      if (!data.items || data.items.length === 0) { document.getElementById("musteri-tbody").innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400 text-xs italic">Bulunamadı.</td></tr>`; renderPagination("musteri-pagination", null, "musteriSayfaDegistir"); return; }
-      let html = ''; let sonHarf = '';
-      data.items.forEach(m => {
-        const ad = `${m.ad||''} ${m.soyad||''}`.trim(); const ilk = ad.charAt(0).toLocaleUpperCase('tr-TR');
-        if (ilk !== sonHarf && !q) { sonHarf = ilk; html += `<tr class="bg-brand-navy/5 font-bold text-brand-navy text-xs"><td colspan="6" class="px-5 py-2">${sonHarf}</td></tr>`; }
-        let d = '<span class="text-slate-400 italic text-xs">Yok</span>';
-        if (m.aktif_police_sayilari && Object.keys(m.aktif_police_sayilari).length > 0) d = Object.entries(m.aktif_police_sayilari).map(([t, a]) => `<span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1 rounded border mr-1 mb-1 inline-block">${t}: ${a}</span>`).join("");
-        html += `<tr class="hover:bg-slate-50 cursor-pointer group"><td class="px-5 py-3 font-semibold text-brand-navy flex items-center gap-2"><div class="w-6 h-6 rounded bg-brand-navy/5 flex items-center justify-center text-[10px]">${ilk}</div>${ad}</td><td class="px-5 py-3 text-slate-600 text-xs">${m.telefon||"—"}</td><td class="px-5 py-3">${d}</td><td class="px-5 py-3 text-xs text-slate-500">${m.portfoy_sorumlusu||"—"}</td><td class="px-5 py-3 text-xs text-slate-400">${m.tc_kimlik||"—"}</td><td class="px-5 py-3 text-right opacity-0 group-hover:opacity-100"><button class="text-slate-500 hover:text-brand-navy text-xs font-bold mr-2">Düzenle</button></td></tr>`;
-      });
-      document.getElementById("musteri-tbody").innerHTML = html; renderPagination("musteri-pagination", data, "musteriSayfaDegistir");
-    }
-
-    window.policeSekmeSec = function(s) { aktifPoliceSekmesi = s; document.getElementById('btn-sekme-aktif').className = s==='aktif' ? "pb-2 border-b-2 border-brand-navy text-brand-navy font-bold" : "pb-2 border-b-2 border-transparent text-slate-400"; document.getElementById('btn-sekme-eski').className = s==='eski' ? "pb-2 border-b-2 border-brand-navy text-brand-navy font-bold" : "pb-2 border-b-2 border-transparent text-slate-400"; yuklePoliceler(1); };
-
-    async function yuklePoliceler(page = 1) {
-        const q = document.getElementById("police-ara").value;
-        const data = await api(`/api/policeler?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`);
-        if (!data || !data.items || data.items.length === 0) { document.getElementById("police-tbody").innerHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-400 text-xs italic">Bulunamadı.</td></tr>`; renderPagination("police-pagination", null, "policeSayfaDegistir"); return; }
-        document.getElementById("police-tbody").innerHTML = data.items.map(p => {
-            let dur = p.durum.toUpperCase(); let bg = p.durum==='aktif'?'text-green-600 bg-green-50':'text-red-600 bg-red-50';
-            if (aktifPoliceSekmesi==='eski') { if(p.durum==='iptal'){ dur="İPTAL"; bg="text-slate-600 bg-slate-200"; } else if(p.suresi_dolmus){ dur="SÜRESİ DOLDU"; bg="text-amber-600 bg-amber-50"; } }
-            return `<tr class="hover:bg-slate-50 border-b border-slate-100 group"><td class="px-5 py-3 font-bold text-brand-navy text-xs">${p.police_no}</td><td class="px-5 py-3 text-xs font-medium">${p.musteri_ad} ${p.musteri_soyad}</td><td class="px-5 py-3 text-xs text-slate-500">${p.sigorta_sirketi} <br> <span class="font-bold text-slate-700">${p.sigorta_turu}</span></td><td class="px-5 py-3 text-xs">${tarih(p.bitis_tarihi)}</td><td class="px-5 py-3 text-xs"><span class="${bg} px-2 py-1 rounded font-bold">${dur}</span></td><td class="px-5 py-3 text-xs font-bold text-brand-gold">${para(p.prim)}</td><td class="px-5 py-3 text-right text-xs opacity-0 group-hover:opacity-100"><button class="text-red-400 hover:text-red-600 font-bold">Sil</button></td></tr>`;
-        }).join("");
-        renderPagination("police-pagination", data, "policeSayfaDegistir");
-    }
-
-    function renderPoliceListesi(liste, cId) {
-      const el = document.getElementById(cId);
-      let yeniler = []; try { yeniler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e){}
-      const flt = liste.filter(p => !yeniler.includes(p.id));
-      if (!flt.length) { el.innerHTML = `<p class="text-sm text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200 text-center">Poliçe bulunmuyor.</p>`; return; }
-      flt.sort((a,b)=>(a.kalan_gun??999)-(b.kalan_gun??999));
-      el.innerHTML = flt.map(p => {
-        const s = seviyeSinif(p.uyar_seviyesi); const ad = [p.musteri_ad, p.musteri_soyad].filter(Boolean).join(" ");
-        return `<div class="bg-white border rounded-xl p-3 shadow-sm flex items-center justify-between ${s.w} group"><div class="flex items-center gap-3"><div><p class="font-bold text-brand-navy text-[13px] leading-none mb-1">${ad||"Bilinmeyen"} <span class="text-[9px] font-normal text-slate-400">#${p.police_no}</span></p><p class="text-[10px] font-medium text-slate-500">${p.sigorta_sirketi} · <strong class="text-brand-navy">${p.sigorta_turu}</strong></p></div></div><div class="flex items-center gap-2"><span class="text-[10px] font-bold px-2 py-1 rounded ${s.b}">${tarih(p.bitis_tarihi)}</span><button onclick="policeYenilendiSoru(${p.id}, '${ad.replace(/'/g, "\\'")}', '${p.police_no}')" class="bg-slate-100 text-slate-400 hover:bg-brand-navy hover:text-brand-gold text-[10px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all">✓ Yenilendi</button></div></div>`;
-      }).join("");
-    }
-
-    async function yukleDashboard() {
-      const [ozet, l7, lAy] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=7"), api("/api/policeler/bu-ay")]);
-      buAyBitenlerCache = lAy;
-      document.getElementById("ozet-kartlar").innerHTML = [ {t:"Kayıtlı Müşteri", v:ozet.musteri_sayisi}, {t:"Toplam Poliçe", v:ozet.police_sayisi}, {t:"Aktif Poliçe", v:ozet.aktif_police}, {t:"Yaklaşan (7G)", v:ozet.yaklasan_7_gun}].map(d => `<div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-400 uppercase">${d.t}</p><p class="text-2xl font-sans font-black tracking-tight text-brand-navy mt-2">${d.v}</p></div>`).join("");
-      renderPoliceListesi(l7, "yaklasan-liste"); renderPoliceListesi(lAy, "aylik-liste");
-    }
-
-    function policeYenilendiSoru(id, musteriAd, policeNo) {
-      if (confirm(`"${musteriAd}" müşterisinin #${policeNo} poliçesi yenilendi mi?`)) {
-        let yeniler = []; try { yeniler = JSON.parse(localStorage.getItem("altun_yenilenen_policeler") || "[]"); } catch(e){}
-        if (!yeniler.includes(id)) { yeniler.push(id); localStorage.setItem("altun_yenilenen_policeler", JSON.stringify(yeniler)); }
-        yukleDashboard();
-      }
-    }
-
-    // FİNANSAL ANALİZ - "TÜMÜ" CHECKBOX FONKSİYONLARI VE HTML YARATIMI
-    window.toggleTumu = function(tumuCb, targetClass) {
-        const cbs = document.querySelectorAll('.' + targetClass);
-        cbs.forEach(cb => cb.checked = tumuCb.checked);
-    };
-
-    window.checkTumuState = function(targetClass) {
-        const cbs = document.querySelectorAll('.' + targetClass);
-        const parentContainer = cbs[0].closest('.dropdown-content');
-        if(!parentContainer) return;
-        const tumuCb = parentContainer.querySelector('.tumu-kontrol');
-        const allChecked = Array.from(cbs).every(cb => cb.checked);
-        if(tumuCb) tumuCb.checked = allChecked;
-    };
-
-    function createCheckboxGroupHTML(items, className) {
-        let html = `
-        <label class="flex items-center gap-2 p-2 hover:bg-slate-50 cursor-pointer text-sm text-brand-navy font-bold border-b border-slate-100 mb-1">
-            <input type="checkbox" checked onchange="toggleTumu(this, '${className}')" class="tumu-kontrol rounded text-brand-navy w-4 h-4 focus:ring-brand-navy"> Tümü
-        </label>`;
-        
-        html += items.map(item => `
-        <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-600 font-medium">
-            <input type="checkbox" value="${item}" checked onchange="checkTumuState('${className}')" class="${className} rounded text-brand-navy w-3.5 h-3.5 focus:ring-brand-navy"> ${item}
-        </label>`).join('');
-        
-        return html;
-    }
-
-    window.yukleFinansalHazirlik = async function() {
-        try {
-            const res = await api("/api/finansal/filtreler");
-            
-            document.getElementById("fin-sirket-container").innerHTML = createCheckboxGroupHTML(res.sirketler, 'fin-sirket-cb');
-            document.getElementById("fin-sorumlu-container").innerHTML = createCheckboxGroupHTML(res.danismanlar, 'fin-sorumlu-cb');
-            document.getElementById("fin-brans-container").innerHTML = createCheckboxGroupHTML(res.branslar, 'fin-brans-cb');
-        } catch (e) { console.error("Filtreler yüklenemedi", e); }
-    };
-
-    window.calistirFinansalRapor = async function() {
-        // Parametre Toplama Fonksiyonu
-        const getParams = (startId, endId) => ({
-            baslangic: document.getElementById(startId).value || null,
-            bitis: document.getElementById(endId).value || null,
-            sirket: Array.from(document.querySelectorAll('.fin-sirket-cb:checked')).map(cb=>cb.value),
-            danisman: Array.from(document.querySelectorAll('.fin-sorumlu-cb:checked')).map(cb=>cb.value),
-            branslar: Array.from(document.querySelectorAll('.fin-brans-cb:checked')).map(cb=>cb.value)
-        });
-
-        const kiyasAktif = document.getElementById('fin-kiyas-aktif').checked;
-        const p1 = getParams("fin-start", "fin-end");
-        
-        try {
-            const btn = event.currentTarget; 
-            const oldText = btn.innerHTML; 
-            btn.innerHTML = "Hesaplanıyor..."; 
-            btn.disabled = true;
-            
-            // Asıl Dönem İsteği
-            const res1 = await fetch(API + "/api/finansal/rapor", { 
-                method: "POST", 
-                headers: { "Content-Type": "application/json" }, 
-                body: JSON.stringify(p1) 
-            }).then(r=>r.json());
-            
-            document.getElementById("fin-metrics").classList.remove("hidden"); 
-            document.getElementById("fin-details").classList.remove("hidden");
-            
-            if(!kiyasAktif) {
-                // Sadece Tek Dönem
-                document.getElementById("fin-ciro").innerHTML = `<span class="text-3xl font-black text-brand-gold">${para(res1.ciro)}</span>`; 
-                document.getElementById("fin-kar").innerHTML = `<span class="text-3xl font-black text-brand-navy">${para(res1.kar)}</span>`; 
-                document.getElementById("fin-adet").innerHTML = `<span class="text-3xl font-black text-brand-navy">${res1.adet} Adet</span>`;
-            } else {
-                // 2. Dönem İsteği ve Kıyaslama Mantığı
-                const p2 = getParams("fin-start-2", "fin-end-2");
-                const res2 = await fetch(API + "/api/finansal/rapor", { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(p2) 
-                }).then(r=>r.json());
-                
-                const getFarkHtml = (v1, v2, formatFn) => {
-                    const fark = v1 - v2;
-                    const ok = fark > 0 ? '▲' : (fark < 0 ? '▼' : '≈');
-                    const color = fark > 0 ? 'text-green-500' : (fark < 0 ? 'text-red-500' : 'text-slate-400');
-                    return `<span class="block text-3xl font-black text-brand-navy mb-1">${formatFn(v1)}</span>
-                            <span class="text-xs font-bold ${color} flex items-center gap-1">
-                               ${ok} Fark: ${formatFn(Math.abs(fark))} 
-                               <span class="text-[10px] text-slate-400 font-medium ml-1 bg-slate-50 px-1 py-0.5 rounded border border-slate-200">
-                                  Kıyas (Dönem 2): ${formatFn(v2)}
-                               </span>
-                            </span>`;
-                };
-
-                document.getElementById("fin-ciro").innerHTML = getFarkHtml(res1.ciro, res2.ciro, para);
-                document.getElementById("fin-kar").innerHTML = getFarkHtml(res1.kar, res2.kar, para);
-                document.getElementById("fin-adet").innerHTML = getFarkHtml(res1.adet, res2.adet, val => val + " Adet");
-            }
-            
-            const fmt = (dict) => Object.entries(dict).map(([k,v]) => `<div class="flex justify-between py-2 border-b border-slate-50 last:border-0"><span class="text-sm font-semibold text-slate-600">${k}</span><span class="text-sm font-bold text-brand-navy">${v} Adet</span></div>`).join('') || '<span class="text-slate-400 italic text-sm">Veri yok.</span>';
-            document.getElementById("fin-brans-liste").innerHTML = fmt(res1.brans_dagilimi); 
-            document.getElementById("fin-sirket-liste").innerHTML = fmt(res1.sirket_dagilimi);
-            
-            btn.innerHTML = oldText; btn.disabled = false;
-        } catch (e) { alert("Rapor oluşturulurken hata meydana geldi."); console.error(e); }
-    };
-
-    function aylikListeyiYazdir() {
-        if (!buAyBitenlerCache || !buAyBitenlerCache.length) { alert("Poliçe bulunamadı!"); return; }
-        const g = {}; buAyBitenlerCache.forEach(p => { const b = p.sigorta_turu||"Diğer"; if(!g[b]) g[b]=[]; g[b].push(p); });
-        let h = `<html><head><title>Yenileme Listesi</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}h2{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}table{width:100%;border-collapse:collapse;margin-bottom:30px;}th,td{border:1px solid #000;padding:8px;text-align:left;}th{background-color:#f0f0f0;}.bx{width:20px;height:20px;border:1.5px solid #000;}@media print{button{display:none;}}</style></head><body>`;
-        for (const [b, pl] of Object.entries(g)) {
-            pl.sort((x,y) => new Date(x.bitis_tarihi)-new Date(y.bitis_tarihi));
-            h += `<h2>BRANŞ: ${b.toUpperCase()}</h2><table><thead><tr><th>Bitiş</th><th>Müşteri</th><th>Şirket</th><th>Poliçe No</th><th>Durum</th></tr></thead><tbody>`;
-            pl.forEach(p => { h += `<tr><td>${new Date(p.bitis_tarihi+"T00:00:00").toLocaleDateString("tr-TR")}</td><td><strong>${[p.musteri_ad,p.musteri_soyad].filter(Boolean).join(" ").toUpperCase()}</strong></td><td>${p.sigorta_sirketi||"-"}</td><td>${p.police_no||"-"}</td><td style="text-align:center;"><div class="bx"></div></td></tr>`; });
-            h += `</tbody></table>`;
-        }
-        h += `<div style="text-align:center;"><button onclick="window.print()" style="padding:10px 20px;background:#0A192F;color:white;">Yazdır</button></div></body></html>`;
-        const w = window.open('','_blank'); w.document.write(h); w.document.close();
-    }
-
-    async function sistemiTemizleVeBirlestir() {
-        if(confirm("Tüm müşteriler düzenlenip birleştirilecek. Devam edilsin mi?")) {
-            try { const b = event.currentTarget; const old = b.innerHTML; b.innerHTML = "İşleniyor..."; b.disabled = true; const res = await api("/api/sistemi-temizle"); alert(res.mesaj); yukleMusteriler(document.getElementById("musteri-ara").value, 1); b.innerHTML = old; b.disabled = false; } catch(e) { alert("Hata: " + e.message); }
-        }
-    }
-
-    const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]; document.getElementById("ay-ismi").textContent = aylar[new Date().getMonth()];
-    
-    // Menüleri dışarı tıklayınca kapatma
-    document.addEventListener('click', function(e) { 
-        if (!document.getElementById('fin-brans-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-brans-menu"]')) document.getElementById('fin-brans-menu')?.classList.add('hidden'); 
-        if (!document.getElementById('fin-sirket-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-sirket-menu"]')) document.getElementById('fin-sirket-menu')?.classList.add('hidden'); 
-        if (!document.getElementById('fin-sorumlu-menu')?.contains(e.target) && !e.target.closest('button[onclick*="fin-sorumlu-menu"]')) document.getElementById('fin-sorumlu-menu')?.classList.add('hidden'); 
-    });
-
-    yukleDashboard(); 
-  </script>
+/* ============================================================
+   GLOBAL OLAYLAR
+   ============================================================ */
+document.addEventListener("click", e => {
+  const t = e.target;
+  let x;
+  if ((x = t.closest("[data-yenilendi]"))) { e.stopPropagation(); policeYenilendi(+x.dataset.yenilendi, x.dataset.ad, x.dataset.no); }
+  else if ((x = t.closest("[data-sil]"))) policeSil(+x.dataset.sil, x.dataset.no);
+  else if ((x = t.closest("[data-teklif]"))) { const k = kart.veri; policeFormunuAc(null, { musteriId: kart.id, adSoyad: k ? tamAd(k) : "", brans: x.dataset.teklif }); }
+  else if ((x = t.closest("[data-kat]")) && x.classList.contains("katbtn")) dersKategoriGoster(x.dataset.kat);
+  else if ((x = t.closest("[data-ders]"))) acDersDetay(x.dataset.kat, x.dataset.ders);
+  else if ((x = t.closest("[data-kart]")) && !t.closest("a")) location.hash = "#/musteri/" + x.dataset.kart;
+});
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#pal") ? palKapat() : palAc(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && $("#kart-savebar")?.classList.contains("show")) { e.preventDefault(); kartKaydet(); }
+  else if (e.key === "Escape") { if ($("#pal")) palKapat(); else if ($("#ai-modal")) aiModalKapat(); else if ($(".overlay")) $(".overlay").remove(); else if ($(".drawer-wrap")) kartKapat(); }
+});
+window.addEventListener("error", e => console.error("UI hatası:", e.message));
+$("#ay-ismi").textContent = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"][new Date().getMonth()];
+sesGuncelle(); xpCiz(); hashIsle();
+</script>
 </body>
 </html>

@@ -4,3 +4,6 @@ __pycache__/
 *.db
 .Python
 .env
+
+*.db.yedek-*
+import_atlanan_satirlar.csv

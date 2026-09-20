@@ -7,3 +7,6 @@ python-multipart>=0.0.9
 google-genai>=1.0.0
 psycopg2-binary
 google-generativeai
+# bot.py (Excel içe aktarımı)
+pandas>=2.0
+openpyxl>=3.1
