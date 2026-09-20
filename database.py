@@ -311,7 +311,7 @@ def musteri_kaydet(db, veri: dict, uzerine_yaz: bool = False, varsayilan_danisma
         if not yeni and k in ("ad", "soyad"):
             continue  # eşleşen kartın adı başka bir girdiyle yeniden adlandırılmaz (düzeltme kart üzerinden yapılır)
         if yeni or uzerine_yaz or _bos(getattr(m, k)):
-            setattr(m, k, v)
+            setattr(m, k, _sigdir(Musteri, k, v))
     if m.dogum_tarihi and "yas" not in veri:
         m.yas = yas_hesapla(m.dogum_tarihi)
     db.flush()
@@ -327,23 +327,36 @@ def police_bul(db, police_no) -> Optional[Police]:
 # Şema geçişi + mükerrer temizliği + UNIQUE kısıtları
 # --------------------------------------------------------------------------
 def _eksik_kolonlari_ekle() -> list:
+    """Eksik kolonları ekler; PostgreSQL'de eski şemadan kalan dar VARCHAR kolonları genişletir (idempotent)."""
     eklenen = []
     insp = inspect(engine)
     for tablo in Base.metadata.sorted_tables:
         if not insp.has_table(tablo.name):
             continue
-        mevcut = {c["name"] for c in insp.get_columns(tablo.name)}
+        mevcut = {c["name"]: c for c in insp.get_columns(tablo.name)}
         for kolon in tablo.columns:
-            if kolon.name in mevcut:
-                continue
             tip = kolon.type.compile(dialect=engine.dialect)
-            with engine.begin() as conn:
-                conn.execute(text(f"ALTER TABLE {tablo.name} ADD COLUMN {kolon.name} {tip}"))
-            eklenen.append(f"{tablo.name}.{kolon.name}")
+            if kolon.name not in mevcut:
+                with engine.begin() as conn:
+                    conn.execute(text(f'ALTER TABLE {tablo.name} ADD COLUMN {"IF NOT EXISTS " if not SQLITE else ""}{kolon.name} {tip}'))
+                eklenen.append(f"{tablo.name}.{kolon.name}")
+                continue
+            hedef = getattr(kolon.type, "length", None)
+            eski = getattr(mevcut[kolon.name]["type"], "length", None)
+            if not SQLITE and isinstance(kolon.type, String) and hedef and eski and eski < hedef:
+                with engine.begin() as conn:  # örn. eski şemada telefon VARCHAR(20)
+                    conn.execute(text(f"ALTER TABLE {tablo.name} ALTER COLUMN {kolon.name} TYPE {tip}"))
+                eklenen.append(f"{tablo.name}.{kolon.name} genişletildi {eski}→{hedef}")
     if "musteriler.ek_notlar" in eklenen:
         with engine.begin() as conn:  # eski 'notlar' içeriği yeni kartta görünsün
             conn.execute(text("UPDATE musteriler SET ek_notlar = notlar WHERE notlar IS NOT NULL AND notlar <> ''"))
     return eklenen
+
+
+def _sigdir(tablo, alan, deger):
+    """Değeri kolon uzunluğuna kırpar (PostgreSQL uzun değeri reddeder, SQLite sessizce kabul eder)."""
+    uzunluk = getattr(tablo.__table__.c[alan].type, "length", None)
+    return deger[:uzunluk] if uzunluk and isinstance(deger, str) and len(deger) > uzunluk else deger
 
 
 def _dolu_mu(v) -> bool:
@@ -354,7 +367,7 @@ def _musterileri_birlestir(db, rapor: dict):
     musteriler = db.query(Musteri).order_by(Musteri.id).all()
     police_sayilari = dict(db.query(Police.musteri_id, func.count(Police.id)).group_by(Police.musteri_id).all())
 
-    for m in musteriler:  # normalizasyon
+    for m in musteriler:  # normalizasyon (kayıt bazlı savepoint: tek bozuk satır tüm açılışı çökertmesin)
         yeni = {
             "ad": tr_buyuk(m.ad), "soyad": tr_buyuk(m.soyad), "tc_kimlik": kimlik_temizle(m.tc_kimlik),
             "telefon": telefon_temizle(m.telefon),
@@ -362,11 +375,22 @@ def _musterileri_birlestir(db, rapor: dict):
         }
         if not _dolu_mu(m.portfoy_sorumlusu):
             yeni["portfoy_sorumlusu"] = VARSAYILAN_DANISMAN
-        for k, v in yeni.items():
-            if getattr(m, k) != v:
-                setattr(m, k, v)
-                rapor["duzeltilen_alan"] += 1
-        m.ad_soyad_anahtar = ad_anahtari(m.ad, m.soyad)
+        yeni = {k: _sigdir(Musteri, k, v) for k, v in yeni.items()}
+        degisen = {k: v for k, v in yeni.items() if getattr(m, k) != v}
+        anahtar = _sigdir(Musteri, "ad_soyad_anahtar", ad_anahtari(yeni["ad"], yeni["soyad"]))
+        if not degisen and m.ad_soyad_anahtar == anahtar:
+            continue
+        try:
+            with db.begin_nested():
+                for k, v in degisen.items():
+                    setattr(m, k, v)
+                m.ad_soyad_anahtar = anahtar
+                db.flush()
+            rapor["duzeltilen_alan"] += len(degisen)
+        except Exception as e:
+            log.error("Müşteri #%s normalize edilemedi, atlandı: %s", m.id, str(e).splitlines()[0][:200])
+            db.expire(m)
+            rapor["atlanan_kayit"] += 1
 
     ebeveyn = {m.id: m.id for m in musteriler}
 
@@ -469,7 +493,7 @@ def _policeleri_tekillestir(db, rapor: dict):
 def veritabanini_temizle(db) -> dict:
     """Mükerrer müşteri ve poliçeleri birleştirir/temizler. Idempotenttir; commit çağırana aittir."""
     rapor = {"birlesen_musteri_grubu": 0, "silinen_kopya_musteri": 0, "silinen_kopya_police": 0,
-             "duzeltilen_alan": 0, "ayni_isim_farkli_tckn": []}
+             "duzeltilen_alan": 0, "atlanan_kayit": 0, "ayni_isim_farkli_tckn": []}
     _musterileri_birlestir(db, rapor)
     _policeleri_tekillestir(db, rapor)
     return rapor
@@ -505,26 +529,41 @@ def sqlite_yedekle() -> Optional[Path]:
     return hedef
 
 
-def init_db() -> dict:
-    """Şemayı kurar/günceller, mükerrerleri temizler, en son UNIQUE kısıtlarını ekler."""
-    Base.metadata.create_all(bind=engine)
-    eklenen = _eksik_kolonlari_ekle()
+def _temizligi_calistir() -> dict:
+    """Temizliği tek transaction'da çalıştırır. PostgreSQL'de eşzamanlı worker'ları advisory lock ile sıraya koyar."""
     db = SessionLocal()
     try:
+        if not SQLITE:
+            db.execute(text("SELECT pg_advisory_xact_lock(76543210)"))
         rapor = veritabanini_temizle(db)
         if degisiklik_var_mi(rapor):
             if SQLITE:
-                yedek = sqlite_yedekle()
-                log.warning("Temizlik öncesi yedek alındı: %s", yedek)
+                log.warning("Temizlik öncesi yedek alındı: %s", sqlite_yedekle())
             db.commit()
             log.warning("Veri temizliği uygulandı: %s", {k: v for k, v in rapor.items() if k != "ayni_isim_farkli_tckn"})
         else:
             db.rollback()
+        return rapor
     except Exception:
         db.rollback()
         raise
     finally:
         db.close()
+
+
+def init_db() -> dict:
+    """Şemayı kurar/günceller, mükerrerleri temizler, en son UNIQUE kısıtlarını ekler.
+
+    Şema adımları başarısız olursa hata verir (uygulama bozuk şemayla çalışmasın); mükerrer temizliği ise
+    başarısız olursa loglanıp atlanır, böylece geçici bir veri sorunu uygulamanın açılmasını engellemez.
+    """
+    Base.metadata.create_all(bind=engine)
+    eklenen = _eksik_kolonlari_ekle()
+    try:
+        rapor = _temizligi_calistir()
+    except Exception:
+        log.exception("Veri temizliği başarısız oldu; uygulama temizlik yapılmadan başlatılıyor")
+        rapor = {"hata": True, "ayni_isim_farkli_tckn": []}
     unique_kisitlari_ekle()
     rapor["eklenen_kolonlar"] = eklenen
     return rapor

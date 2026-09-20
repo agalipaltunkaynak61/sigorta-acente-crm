@@ -478,7 +478,12 @@ def main(argv=None):
         print("Aktarılacak Excel dosyası yok.")
         return 1
 
-    init_db()
+    print(f"Veritabanı: {'SQLite (yerel)' if SQLITE else 'PostgreSQL'}")
+    rapor = init_db()
+    if rapor.get("hata"):
+        print("! Şema/temizlik adımında uyarı var (ayrıntı log'da); aktarım yine de devam ediyor.")
+    if not SQLITE and not args.dry_run:
+        print("Not: PostgreSQL için otomatik yedek alınmaz; Supabase panelinden yedeğinizi alın.")
     if SQLITE and not args.dry_run and not args.yedeksiz:
         print(f"Yedek alındı: {sqlite_yedekle()}")
 
