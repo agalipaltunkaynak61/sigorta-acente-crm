@@ -71,16 +71,18 @@ def bir_yil_sonra(d: date) -> date:
         return d.replace(year=d.year + 1, day=28)
 
 
-def baslikli_oku(yol, anahtar, sayfa=0) -> pd.DataFrame:
-    """Başlık satırı ilk 15 satır içinde 'anahtar' sütununu içeren sayfayı okur (sütun adlarındaki boşluk/satır sonu temizlenir)."""
+def baslikli_oku(yol, anahtar, sayfa=0, varsayilan_satir=None) -> pd.DataFrame:
+    """Başlık satırını (ilk 15 satırda 'anahtar' sütununu içeren satır) kendisi bulur; bulamazsa
+    `varsayilan_satir` (0 tabanlı) kullanılır. Sütun adlarındaki boşluk/satır sonu temizlenir."""
     ham = pd.read_excel(yol, sheet_name=sayfa, header=None, dtype=object)
-    for i in range(min(len(ham), 15)):
-        basliklar = [" ".join(str(c).split()) for c in ham.iloc[i]]
-        if anahtar in basliklar:
-            df = ham.iloc[i + 1:].copy()
-            df.columns = basliklar
-            return df.reset_index(drop=True)
-    raise ValueError(f"'{anahtar}' başlığı bulunamadı: {yol}")
+    satir_no = next((i for i in range(min(len(ham), 15)) if anahtar in [" ".join(str(c).split()) for c in ham.iloc[i]]), varsayilan_satir)
+    if satir_no is None:
+        raise ValueError(f"'{anahtar}' başlığı bulunamadı: {yol}")
+    df = ham.iloc[satir_no + 1:].copy()
+    df.columns = [" ".join(str(c).split()) for c in ham.iloc[satir_no]]
+    if anahtar not in df.columns:
+        raise ValueError(f"{yol}: {satir_no + 1}. satırda '{anahtar}' sütunu yok")
+    return df.reset_index(drop=True)
 
 
 # --------------------------------------------------------------------------
@@ -171,7 +173,7 @@ def satir(police_no, sirket, brans, **ek) -> dict:
 # Excel okuyucuları
 # --------------------------------------------------------------------------
 def oku_axa(yol):
-    df = baslikli_oku(yol, "POLİÇE NO")
+    df = baslikli_oku(yol, "POLİÇE NO", varsayilan_satir=4)  # AXA: ilk 4 satır rapor başlığı, sütun adları 5. satırda (header=4)
     for r in df.to_dict("records"):
         if bos_mu(r.get("POLİÇE NO")) or bos_mu(r.get("SIGORTALI ADI")):
             continue
@@ -494,6 +496,13 @@ def main(argv=None):
             print(f"--> {yol.name} işleniyor...")
             sonuclar[anahtar] = dosyayi_aktar(db, anahtar, yol, lambda: MaskeEslestirici(db))
             print("    " + sonuclar[anahtar].ozet())
+            if sonuclar[anahtar].police == 0:
+                print(f"    ! UYARI: {yol.name} dosyasından hiç poliçe okunamadı — sütun adlarını kontrol edin.")
+            nedenler = {}
+            for _no, _ad, neden in sonuclar[anahtar].atlanan:
+                nedenler[neden[:110]] = nedenler.get(neden[:110], 0) + 1
+            for neden, adet in sorted(nedenler.items(), key=lambda kv: -kv[1])[:3]:
+                print(f"      atlanan · {neden}: {adet}")
             for neden, adet in sorted(sonuclar[anahtar].eslesme.items()):
                 print(f"      maske eşleşmesi · {neden}: {adet}")
             if not args.dry_run:
