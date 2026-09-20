@@ -327,7 +327,7 @@ def police_bul(db, police_no) -> Optional[Police]:
 # Şema geçişi + mükerrer temizliği + UNIQUE kısıtları
 # --------------------------------------------------------------------------
 def _eksik_kolonlari_ekle() -> list:
-    """Eksik kolonları ekler; PostgreSQL'de eski şemadan kalan dar VARCHAR kolonları genişletir (idempotent)."""
+    """Eksik kolonları ekler; PostgreSQL'de eski şemadan kalan dar VARCHAR ve gereksiz NOT NULL kısıtlarını düzeltir (idempotent)."""
     eklenen = []
     insp = inspect(engine)
     for tablo in Base.metadata.sorted_tables:
@@ -341,6 +341,13 @@ def _eksik_kolonlari_ekle() -> list:
                     conn.execute(text(f'ALTER TABLE {tablo.name} ADD COLUMN {"IF NOT EXISTS " if not SQLITE else ""}{kolon.name} {tip}'))
                 eklenen.append(f"{tablo.name}.{kolon.name}")
                 continue
+            if not SQLITE and kolon.nullable and not kolon.primary_key and mevcut[kolon.name].get("nullable") is False:
+                try:  # eski şemadan kalan NOT NULL (örn. musteriler.telefon) → boş bırakılabilir yap
+                    with engine.begin() as conn:
+                        conn.execute(text(f"ALTER TABLE {tablo.name} ALTER COLUMN {kolon.name} DROP NOT NULL"))
+                    eklenen.append(f"{tablo.name}.{kolon.name} NOT NULL kaldırıldı")
+                except Exception as e:
+                    log.error("%s.%s NOT NULL kaldırılamadı: %s", tablo.name, kolon.name, str(e).splitlines()[0][:200])
             hedef = getattr(kolon.type, "length", None)
             eski = getattr(mevcut[kolon.name]["type"], "length", None)
             if not SQLITE and isinstance(kolon.type, String) and hedef and eski and eski < hedef:
