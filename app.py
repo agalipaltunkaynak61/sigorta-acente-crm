@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -275,7 +275,7 @@ def musteri_to_dict(m: Musteri) -> dict:
         "dogum_tarihi": m.dogum_tarihi, "meslek": m.meslek, "sirket_sahipleri": m.sirket_sahipleri,
         "medeni_durum": m.medeni_durum, "cocuk_sayisi": m.cocuk_sayisi, "cocuk_yaslari": m.cocuk_yaslari,
         "yas": yas_hesapla(m.dogum_tarihi) if m.dogum_tarihi else m.yas, "emekli_mi": m.emekli_mi,
-        "sahip_olunan_araclar": m.sahip_olunan_araclar, "ek_notlar": m.ek_notlar,
+        "sahip_olunan_araclar": m.sahip_olunan_araclar, "ek_notlar": m.ek_notlar, "musteri_tipi": m.musteri_tipi,
     }
 
 
@@ -461,9 +461,11 @@ def api_dogum_gunleri(gun: int = Query(14, ge=1, le=90), db: Session = Depends(g
 # Müşteriler
 # =========================================================================
 @app.get("/api/musteriler")
-def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100000),
-                        db: Session = Depends(get_db)):
+def api_musteri_listele(q: Optional[str] = None, tip: Optional[str] = None, page: int = Query(1, ge=1),
+                        limit: int = Query(10, ge=1, le=100000), db: Session = Depends(get_db)):
     query = db.query(Musteri)
+    if tip in ("Bireysel", "Kurumsal"):
+        query = query.filter(Musteri.musteri_tipi == tip)
     if q and q.strip():
         like = f"%{q.strip()}%"
         kosullar = [Musteri.ad.ilike(like), Musteri.soyad.ilike(like), Musteri.telefon.ilike(like), Musteri.tc_kimlik.ilike(like)]
@@ -483,9 +485,11 @@ def api_musteri_listele(q: Optional[str] = None, page: int = Query(1, ge=1), lim
             dagilim[p.musteri_id][t] = dagilim[p.musteri_id].get(t, 0) + 1
 
     items = [{"id": m.id, "ad": m.ad, "soyad": m.soyad, "telefon": m.telefon, "tc_kimlik": m.tc_kimlik,
-              "adres": m.adres, "portfoy_sorumlusu": m.portfoy_sorumlusu, "aktif_police_sayilari": dagilim[m.id]}
+              "adres": m.adres, "portfoy_sorumlusu": m.portfoy_sorumlusu, "musteri_tipi": m.musteri_tipi,
+              "aktif_police_sayilari": dagilim[m.id]}
              for m in musteriler]
-    return {"items": items, "total": total, "page": page, "limit": limit, "pages": pages}
+    tip_sayilari = dict(db.query(Musteri.musteri_tipi, func.count(Musteri.id)).group_by(Musteri.musteri_tipi).all())
+    return {"items": items, "total": total, "page": page, "limit": limit, "pages": pages, "tip_sayilari": tip_sayilari}
 
 
 PROFIL_ALANLARI = ("telefon", "email", "adres", "tc_kimlik", "dogum_tarihi", "meslek", "medeni_durum", "emekli_mi",

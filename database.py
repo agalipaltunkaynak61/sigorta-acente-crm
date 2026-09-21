@@ -2,6 +2,7 @@
 
 Tüm modüller (app.py, bot.py, yardımcı scriptler) veritabanına yalnızca buradan erişir.
 """
+import difflib
 import logging
 import os
 import re
@@ -76,30 +77,65 @@ def ad_anahtari(ad, soyad="") -> str:
     return gelismis_firma_temizle(f"{ad or ''} {soyad or ''}")
 
 
-_FIRMA_KELIMELERI = {
-    "LTD", "LIMITED", "ANONIM", "SIRKETI", "STI", "SANAYI", "TICARET", "TIC", "SAN", "AS", "INSAAT", "OTOMOTIV",
-    "MIMARLIK", "MUHENDISLIK", "YONETIMI", "SITE", "DERNEGI", "VAKFI", "KOOPERATIFI", "HOLDING", "GIDA", "TEKSTIL",
-    "TURIZM", "NAKLIYAT", "ORGANIZASYON", "TAAHHUT", "ECZANESI", "PAZARLAMA", "ILETISIM", "ELEKTRIK", "MAKINA",
+_FIRMA_GUCLU = {  # tek başına firma göstergesi
+    "LTD", "LIMITED", "ANONIM", "SIRKETI", "STI", "SANAYI", "TICARET", "INSAAT", "OTOMOTIV", "MIMARLIK", "MUHENDISLIK",
+    "YONETIMI", "DERNEGI", "VAKFI", "KOOPERATIFI", "HOLDING", "GIDA", "TEKSTIL", "TURIZM", "NAKLIYAT", "ORGANIZASYON",
+    "TAAHHUT", "ECZANESI", "PAZARLAMA", "ILETISIM", "ELEKTRIK", "MAKINA", "SITE", "LTI", "AS",
 }
-# Firma adının sonundaki "yasal/genel" ekler; bunlar atılınca kalan kısım firmanın ayırt edici çekirdeğidir.
-_FIRMA_GENEL_EK = re.compile(r"(?:SANAYI|SAN|TICARET|TIC|VE|LIMITED|LTD|STI|SIRKETI|ANONIM|AS|DIS|INSAAT|TAAHHUT|PAZARLAMA)*")
+_FIRMA_IZLERI = (  # boşluksuz adın içinde geçmesi yeterli olan (uzun, kişi adında rastlanmayan) kelimeler
+    "LIMITED", "ANONIM", "SIRKET", "SANAYI", "TICARET", "INSAAT", "MIMARLIK", "MUHENDISLIK", "OTOMOTIV", "TEKSTIL",
+    "HOLDING", "ORGANIZASYON", "TAAHHUT", "PAZARLAMA", "ISLETME", "BELEDIYE", "BAKANLIG", "HIZMETLERI", "AMBALAJ",
+    "SISTEM", "MAKINA", "ELEKTRIK", "YONETIM", "DERNEG", "VAKFI", "KOOPERATIF", "TURIZM", "NAKLIYAT", "ECZANE",
+    "ILETISIM", "IDARESI", "BASKANLIGI", "LTDSTI", "LTISTI", "TAAH", "LPG",
+)
+_GENEL_KELIMELER = ("SANAYI", "SAN", "TICARET", "TIC", "VE", "LIMITED", "LTD", "STI", "SIRKETI", "ANONIM", "AS", "DIS",
+                    "INSAAT", "TAAHHUT", "PAZARLAMA")
+# Kesik yazılmış son ek ("...LIMITED SIR", "...LIMITED S") da genel ek sayılır.
+_KIRPIK = sorted({w[:k] for w in _GENEL_KELIMELER for k in range(1, len(w))}, key=len, reverse=True)
+_FIRMA_GENEL_EK = re.compile(r"(?:%s)*(?:%s)?" % ("|".join(_GENEL_KELIMELER), "|".join(_KIRPIK)))
+
+
+def firma_gibi_mi(ad, soyad="", tckn=None) -> bool:
+    """Ad firma/kurum gibi mi? (LTD, A.Ş., Sanayi, İnşaat… ya da 10 haneli VKN)"""
+    tc = kimlik_temizle(tckn)
+    if tc and len(tc) == 10:
+        return True
+    ascii_ad = ascii_buyuk(f"{ad or ''} {soyad or ''}")
+    if _FIRMA_GUCLU & set(re.findall(r"[A-Z0-9]+", ascii_ad)):
+        return True
+    sikistirilmis = re.sub(r"[^A-Z0-9]", "", ascii_ad)
+    return any(iz in sikistirilmis for iz in _FIRMA_IZLERI) or bool(re.search(r"A\s?\.\s?S", ascii_ad))
+
+
+def musteri_tipi_belirle(ad, soyad="", tckn=None) -> str:
+    return "Kurumsal" if firma_gibi_mi(ad, soyad, tckn) else "Bireysel"
 
 
 def firma_cekirdegi(ad, soyad="", tckn=None) -> Optional[str]:
-    """Firma adının çekirdeği: boşluk/noktalama/harf hataları ve yasal ekler (Ltd. Şti., Sanayi ve Ticaret…) atılmış hâli.
+    """Firma adının çekirdeği: boşluk/noktalama/harf hataları, kesik ve yasal ekler (Ltd. Şti., Sanayi ve Ticaret…) atılmış hâli.
 
     'ACRY TEKSTİL İNŞAAT SANAYİ VE TİCARET LİMİTED ŞİRKETİ', '…SANAYİ VETİCARET…' ve 'ACRY TEKSTİL İNŞAATSAN. VE TİC .LTD.ŞTİ.'
     üçü de 'ACRYTEKSTIL' verir. Firma gibi görünmeyen adlar ve 8 karakterden kısa çekirdekler için None.
     """
-    tam = f"{ad or ''} {soyad or ''}"
-    tc = kimlik_temizle(tckn)
-    if not (_FIRMA_KELIMELERI & set(re.findall(r"[A-Z0-9]+", ascii_buyuk(tam))) or (tc and len(tc) == 10)):
+    if not firma_gibi_mi(ad, soyad, tckn):
         return None
-    c = re.sub(r"[^A-Z0-9]", "", ascii_buyuk(tam))
+    c = re.sub(r"[^A-Z0-9]", "", ascii_buyuk(f"{ad or ''} {soyad or ''}"))
     for i in range(8, len(c) + 1):
         if _FIRMA_GENEL_EK.fullmatch(c, i):
             return c[:i]
     return None
+
+
+def firma_ayni_mi(a: str, b: str) -> bool:
+    """İki firma çekirdeği aynı firmaya mı ait? Birebir aynı ya da ilk 10 harfi aynı ve %88+ benzer (kısaltma/kesik yazım)."""
+    if a == b:
+        return True
+    if min(len(a), len(b)) < 14 or a[:10] != b[:10]:
+        return False
+    kisa, uzun = sorted((a, b), key=len)
+    if len(kisa) >= 16 and uzun.startswith(kisa):   # AXA gibi kaynaklarda kesilmiş uzun ad
+        return True
+    return difflib.SequenceMatcher(None, a, b).ratio() >= 0.88
 
 
 def kimlik_temizle(deger) -> Optional[str]:
@@ -219,6 +255,7 @@ class Musteri(Base):
     emekli_mi = Column(Boolean)
     sahip_olunan_araclar = Column(Text)
     ek_notlar = Column(Text)
+    musteri_tipi = Column(String(20), index=True)  # 'Bireysel' | 'Kurumsal'
 
     policeler = relationship("Police", back_populates="musteri")
 
@@ -263,7 +300,7 @@ UNIQUE_INDEXLER = (
 MUSTERI_ALANLARI = (
     "ad", "soyad", "telefon", "email", "tc_kimlik", "adres", "notlar", "portfoy_sorumlusu",
     "dogum_tarihi", "meslek", "sirket_sahipleri", "medeni_durum", "cocuk_sayisi",
-    "cocuk_yaslari", "yas", "emekli_mi", "sahip_olunan_araclar", "ek_notlar",
+    "cocuk_yaslari", "yas", "emekli_mi", "sahip_olunan_araclar", "ek_notlar", "musteri_tipi",
 )
 _METIN_ALANLARI = ("telefon", "email", "adres", "notlar", "meslek", "sirket_sahipleri",
                    "cocuk_yaslari", "sahip_olunan_araclar", "ek_notlar")
@@ -273,6 +310,8 @@ _METIN_ALANLARI = ("telefon", "email", "adres", "notlar", "meslek", "sirket_sahi
 @event.listens_for(Musteri, "before_update")
 def _anahtar_guncelle(_mapper, _conn, m):
     m.ad_soyad_anahtar = ad_anahtari(m.ad, m.soyad)
+    if not m.musteri_tipi:
+        m.musteri_tipi = musteri_tipi_belirle(m.ad, m.soyad, m.tc_kimlik)
 
 
 # --------------------------------------------------------------------------
@@ -297,6 +336,8 @@ def musteri_verisi_temizle(veri: dict) -> dict:
             v = _tam_sayi(v)
         elif k == "emekli_mi":
             v = _mantiksal(v)
+        elif k == "musteri_tipi":
+            v = None if _bos(v) else ("Kurumsal" if ascii_buyuk(v).startswith("K") else "Bireysel")
         elif k == "medeni_durum":
             v = None if _bos(v) else str(v).strip().capitalize()
         elif k in _METIN_ALANLARI:
@@ -324,7 +365,8 @@ def musteri_bul(db, ad="", soyad="", tckn=None) -> Optional[Musteri]:
     cekirdek = firma_cekirdegi(ad, soyad, tc)   # aynı firmanın farklı yazımları (Ltd. Şti. / Limited Şirketi, yazım hataları)
     if cekirdek:
         for m in db.query(Musteri).filter(Musteri.ad_soyad_anahtar.like(cekirdek[:8] + "%")).order_by(Musteri.id):
-            if firma_cekirdegi(m.ad, m.soyad, m.tc_kimlik) == cekirdek and not (tc and m.tc_kimlik and m.tc_kimlik != tc):
+            diger = firma_cekirdegi(m.ad, m.soyad, m.tc_kimlik)
+            if diger and firma_ayni_mi(cekirdek, diger) and not (tc and m.tc_kimlik and m.tc_kimlik != tc):
                 return m
     return None
 
@@ -419,6 +461,8 @@ def _musterileri_birlestir(db, rapor: dict):
         }
         if not _dolu_mu(m.portfoy_sorumlusu):
             yeni["portfoy_sorumlusu"] = VARSAYILAN_DANISMAN
+        if not _dolu_mu(m.musteri_tipi):
+            yeni["musteri_tipi"] = musteri_tipi_belirle(yeni["ad"], yeni["soyad"], yeni["tc_kimlik"])
         yeni = {k: _sigdir(Musteri, k, v) for k, v in yeni.items()}
         degisen = {k: v for k, v in yeni.items() if getattr(m, k) != v}
         anahtar = _sigdir(Musteri, "ad_soyad_anahtar", ad_anahtari(yeni["ad"], yeni["soyad"]))
@@ -457,13 +501,32 @@ def _musterileri_birlestir(db, rapor: dict):
             isim_gruplari.setdefault(m.ad_soyad_anahtar, []).append(m)
     for grup in tc_gruplari.values():
         birlestir([m.id for m in grup])
-    firma_gruplari = {}
+    kovalar = {}   # ilk 10 harf → [(çekirdek, müşteri)]; benzer firmalar aynı kovada karşılaştırılır
     for m in musteriler:
         cekirdek = firma_cekirdegi(m.ad, m.soyad, m.tc_kimlik)
         if cekirdek:
-            firma_gruplari.setdefault(cekirdek, []).append(m)
-    for gruplar in (isim_gruplari, firma_gruplari):
-        for grup in gruplar.values():
+            kovalar.setdefault(cekirdek[:10], []).append((cekirdek, m))
+    firma_gruplari = []
+    for kova in kovalar.values():
+        if len(kova) < 2:
+            continue
+        atama = list(range(len(kova)))
+
+        def kok(x):
+            while atama[x] != x:
+                atama[x] = atama[atama[x]]
+                x = atama[x]
+            return x
+        for a in range(len(kova)):
+            for b in range(a + 1, len(kova)):
+                if firma_ayni_mi(kova[a][0], kova[b][0]):
+                    atama[kok(b)] = kok(a)
+        kumeler_k = {}
+        for idx, (_c, m) in enumerate(kova):
+            kumeler_k.setdefault(kok(idx), []).append(m)
+        firma_gruplari.extend(kumeler_k.values())
+    for gruplar in (isim_gruplari.values(), firma_gruplari):
+        for grup in gruplar:
             if len(grup) < 2:
                 continue
             tcler = {m.tc_kimlik for m in grup if m.tc_kimlik}
@@ -510,6 +573,7 @@ def _musterileri_birlestir(db, rapor: dict):
         db.flush()
         for alan, v in alan_degerleri.items():
             setattr(ana, alan, v)
+        rapor["birlesenler"].append(f"{ana.ad} {ana.soyad}".strip() + "  ←  " + " | ".join(f"{k.ad} {k.soyad}".strip() for k in kopyalar))
         rapor["birlesen_musteri_grubu"] += 1
         rapor["silinen_kopya_musteri"] += len(kopyalar)
 
@@ -545,7 +609,7 @@ def _policeleri_tekillestir(db, rapor: dict):
 def veritabanini_temizle(db) -> dict:
     """Mükerrer müşteri ve poliçeleri birleştirir/temizler. Idempotenttir; commit çağırana aittir."""
     rapor = {"birlesen_musteri_grubu": 0, "silinen_kopya_musteri": 0, "silinen_kopya_police": 0,
-             "duzeltilen_alan": 0, "atlanan_kayit": 0, "ayni_isim_farkli_tckn": []}
+             "duzeltilen_alan": 0, "atlanan_kayit": 0, "ayni_isim_farkli_tckn": [], "birlesenler": []}
     _musterileri_birlestir(db, rapor)
     _policeleri_tekillestir(db, rapor)
     return rapor
@@ -592,7 +656,9 @@ def _temizligi_calistir() -> dict:
             if SQLITE:
                 log.warning("Temizlik öncesi yedek alındı: %s", sqlite_yedekle())
             db.commit()
-            log.warning("Veri temizliği uygulandı: %s", {k: v for k, v in rapor.items() if k != "ayni_isim_farkli_tckn"})
+            for satir in rapor["birlesenler"][:300]:
+                log.warning("BİRLEŞTİ: %s", satir)
+            log.warning("Veri temizliği uygulandı: %s", {k: v for k, v in rapor.items() if k not in ("ayni_isim_farkli_tckn", "birlesenler")})
         else:
             db.rollback()
         return rapor

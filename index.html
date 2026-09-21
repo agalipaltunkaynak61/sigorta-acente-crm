@@ -320,7 +320,7 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
         <button class="btn btn-o" onclick="sistemiTemizleVeBirlestir(this)" title="Mükerrer müşteri/poliçeleri birleştirir, şirket ve branş adlarını standartlaştırır"><svg class="i"><use href="#i-broom"/></svg>Temizle &amp; Birleştir</button>
         <button class="btn btn-p" onclick="kartYeni()"><svg class="i"><use href="#i-plus"/></svg>Yeni Müşteri</button>
       </div></div>
-    <div class="card"><div class="card-b row"><div class="search"><svg class="i"><use href="#i-search"/></svg><input id="musteri-ara" class="input" type="search" placeholder="Ad, telefon veya TCKN ara…" autocomplete="off"></div></div>
+    <div class="card"><div class="card-b row wrap"><div class="seg" id="tip-sekmeleri"><button class="on" data-tip="">Tümü</button><button data-tip="Bireysel">Bireysel</button><button data-tip="Kurumsal">Kurumsal</button></div><div class="search"><svg class="i"><use href="#i-search"/></svg><input id="musteri-ara" class="input" type="search" placeholder="Ad, telefon veya TCKN ara…" autocomplete="off"></div></div>
       <div class="table-wrap"><table><thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Aktif Branşlar</th><th>Danışman</th><th>TCKN / VKN</th><th></th></tr></thead><tbody id="musteri-tbody"></tbody></table></div><div class="pager" id="musteri-pagination"></div></div>
   </section>
 
@@ -582,17 +582,21 @@ function sayfalama(id, d, fn) {
 }
 const iskeleSatir = (n, c) => Array.from({ length: n }, () => `<tr>${`<td><div class="skel"></div></td>`.repeat(c)}</tr>`).join("");
 
+let musteriTipi = "";
+$("#tip-sekmeleri").addEventListener("click", e => { const b = e.target.closest("[data-tip]"); if (!b) return; musteriTipi = b.dataset.tip; yukleMusteriler($("#musteri-ara").value, 1); });
 async function yukleMusteriler(q = "", page = 1) {
   const tb = $("#musteri-tbody"); tb.innerHTML = iskeleSatir(6, 6);
   try {
-    const d = await api(`/api/musteriler?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}`);
+    const d = await api(`/api/musteriler?page=${page}&limit=${perPage}${q ? "&q=" + encodeURIComponent(q) : ""}${musteriTipi ? "&tip=" + musteriTipi : ""}`);
+    const ts = d.tip_sayilari || {}, top = (ts.Bireysel || 0) + (ts.Kurumsal || 0);
+    $$("#tip-sekmeleri button").forEach(b => { b.classList.toggle("on", b.dataset.tip === musteriTipi); b.textContent = { "": `Tümü (${top})`, Bireysel: `Bireysel (${ts.Bireysel || 0})`, Kurumsal: `Kurumsal (${ts.Kurumsal || 0})` }[b.dataset.tip]; });
     if (!d.items.length) { tb.innerHTML = `<tr><td colspan="6" class="empty">Müşteri bulunamadı.</td></tr>`; sayfalama("musteri-pagination", null); return; }
     let html = "", son = "";
     d.items.forEach(m => {
       const ad = tamAd(m), h = basHarf(ad);
       if (h !== son && !q) { son = h; html += `<tr class="grp"><td colspan="6">${esc(h)}</td></tr>`; }
       const dag = Object.entries(m.aktif_police_sayilari || {});
-      html += `<tr class="click" data-kart="${m.id}"><td><div class="row"><div class="avatar">${esc(h)}</div><b style="color:var(--navy)">${esc(ad)}</b></div></td><td>${esc(m.telefon || "—")}</td>
+      html += `<tr class="click" data-kart="${m.id}"><td><div class="row"><div class="avatar" ${m.musteri_tipi === "Kurumsal" ? 'style="border-radius:9px" title="Kurumsal"' : ""}>${m.musteri_tipi === "Kurumsal" ? ic("build") : esc(h)}</div><b style="color:var(--navy)">${esc(ad)}</b></div></td><td>${esc(m.telefon || "—")}</td>
         <td>${dag.length ? dag.map(([t, a]) => `<span class="chip" style="margin:0 4px 4px 0">${esc(t)} · ${a}</span>`).join("") : '<span class="faint">Aktif poliçe yok</span>'}</td>
         <td class="muted nw">${esc(m.portfoy_sorumlusu || "—")}</td><td class="faint">${esc(m.tc_kimlik || "—")}</td><td class="right"><span class="chip gold">Kartı aç ›</span></td></tr>`;
     });
@@ -637,6 +641,7 @@ api("/api/sabitler").then(s => { sabitler = s; }).catch(() => {});
 const BRANS_KISA = { "Kasko Sigortası": "Kasko", "Trafik Sigortası": "Trafik", "Tamamlayıcı Sağlık Sigortası": "Sağlık (TSS)", "DASK": "DASK", "Konut ve Eşya Sigortaları": "Konut / Yangın", "Ferdi Kaza": "Ferdi Kaza", "İş Yeri": "İş Yeri", "Nakliyat": "Nakliyat", "Tarım": "Tarım", "Yat / Denizcilik": "Yat / Denizcilik", "Allrisk": "Allrisk", "Özel Paket / Destek": "Özel Paket" };
 const BRANS_IKON = { "Kasko Sigortası": "car", "Trafik Sigortası": "car", "Tamamlayıcı Sağlık Sigortası": "heart", "DASK": "home", "Konut ve Eşya Sigortaları": "home", "Ferdi Kaza": "shield", "İş Yeri": "build", "Nakliyat": "link", "Tarım": "star", "Yat / Denizcilik": "star", "Allrisk": "shield", "Özel Paket / Destek": "zap" };
 const KART_ALANLARI = [
+  { k: "musteri_tipi", et: "Müşteri Tipi", i: "build", tip: "select", sec: [["", "Otomatik (ada göre)"], ["Bireysel", "Bireysel"], ["Kurumsal", "Kurumsal"]] },
   { k: "telefon", et: "Telefon Numarası", i: "phone", tip: "tel", ph: "05XX XXX XX XX" },
   { k: "adres", et: "Adresi", i: "home", ph: "Mahalle, ilçe, il" },
   { k: "email", et: "Maili", i: "mail", tip: "email", ph: "ornek@mail.com" },
@@ -678,7 +683,7 @@ function kartCiz(k) {
     <div class="row between" style="align-items:flex-start"><div class="grow"><div class="k-icon">${esc(basHarf(ad || "Y"))}</div></div>
       ${yeni ? "" : `<div class="row"><div class="ring" style="--p:${k.doluluk}" title="Kart doluluk oranı"><i>%${k.doluluk}</i></div>${wa ? `<a class="btn btn-o btn-sm" href="${wa}" target="_blank" rel="noopener">${ic("chat")}WhatsApp</a>` : ""}${k.telefon ? `<a class="btn btn-o btn-sm" href="tel:${esc(k.telefon)}">${ic("phone")}Ara</a>` : ""}</div>`}</div>
     <input class="k-title" id="kart-ad" placeholder="Ad Soyad / Firma Unvanı" value="${esc(ad)}" autocomplete="off">
-    <div class="k-sub">${yeni ? '<span class="chip gold">Yeni müşteri kartı</span><span class="muted" style="font-size:12px">Aynı TCKN veya Ad-Soyad varsa mevcut kart güncellenir, mükerrer kayıt açılmaz.</span>' : `<span class="chip navy">${k.toplam_aktif} aktif poliçe</span><span class="chip">${k.toplam_police} toplam</span><span class="chip gold">${para(k.toplam_prim)} aktif prim</span>`}</div>
+    <div class="k-sub">${yeni ? '<span class="chip gold">Yeni müşteri kartı</span><span class="muted" style="font-size:12px">Aynı TCKN veya Ad-Soyad varsa mevcut kart güncellenir, mükerrer kayıt açılmaz.</span>' : `<span class="chip ${k.musteri_tipi === "Kurumsal" ? "navy" : ""}">${esc(k.musteri_tipi || "Bireysel")}</span><span class="chip navy">${k.toplam_aktif} aktif poliçe</span><span class="chip">${k.toplam_police} toplam</span><span class="chip gold">${para(k.toplam_prim)} aktif prim</span>`}</div>
     <div class="props">${KART_ALANLARI.map(a => alanHtml(a, k[a.k])).join("")}</div>
     <div class="k-h">${ic("heart")}Aile &amp; Yaşam Profili<small>Çapraz satış önerilerini besler</small></div>
     <div class="props">${KART_EK_ALANLAR.map(a => alanHtml(a, k[a.k])).join("")}</div>
