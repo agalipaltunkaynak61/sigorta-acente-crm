@@ -76,6 +76,32 @@ def ad_anahtari(ad, soyad="") -> str:
     return gelismis_firma_temizle(f"{ad or ''} {soyad or ''}")
 
 
+_FIRMA_KELIMELERI = {
+    "LTD", "LIMITED", "ANONIM", "SIRKETI", "STI", "SANAYI", "TICARET", "TIC", "SAN", "AS", "INSAAT", "OTOMOTIV",
+    "MIMARLIK", "MUHENDISLIK", "YONETIMI", "SITE", "DERNEGI", "VAKFI", "KOOPERATIFI", "HOLDING", "GIDA", "TEKSTIL",
+    "TURIZM", "NAKLIYAT", "ORGANIZASYON", "TAAHHUT", "ECZANESI", "PAZARLAMA", "ILETISIM", "ELEKTRIK", "MAKINA",
+}
+# Firma adının sonundaki "yasal/genel" ekler; bunlar atılınca kalan kısım firmanın ayırt edici çekirdeğidir.
+_FIRMA_GENEL_EK = re.compile(r"(?:SANAYI|SAN|TICARET|TIC|VE|LIMITED|LTD|STI|SIRKETI|ANONIM|AS|DIS|INSAAT|TAAHHUT|PAZARLAMA)*")
+
+
+def firma_cekirdegi(ad, soyad="", tckn=None) -> Optional[str]:
+    """Firma adının çekirdeği: boşluk/noktalama/harf hataları ve yasal ekler (Ltd. Şti., Sanayi ve Ticaret…) atılmış hâli.
+
+    'ACRY TEKSTİL İNŞAAT SANAYİ VE TİCARET LİMİTED ŞİRKETİ', '…SANAYİ VETİCARET…' ve 'ACRY TEKSTİL İNŞAATSAN. VE TİC .LTD.ŞTİ.'
+    üçü de 'ACRYTEKSTIL' verir. Firma gibi görünmeyen adlar ve 8 karakterden kısa çekirdekler için None.
+    """
+    tam = f"{ad or ''} {soyad or ''}"
+    tc = kimlik_temizle(tckn)
+    if not (_FIRMA_KELIMELERI & set(re.findall(r"[A-Z0-9]+", ascii_buyuk(tam))) or (tc and len(tc) == 10)):
+        return None
+    c = re.sub(r"[^A-Z0-9]", "", ascii_buyuk(tam))
+    for i in range(8, len(c) + 1):
+        if _FIRMA_GENEL_EK.fullmatch(c, i):
+            return c[:i]
+    return None
+
+
 def kimlik_temizle(deger) -> Optional[str]:
     """TCKN/VKN'yi rakamlara indirger. Boş, yıldızlı (maskeli) veya geçersiz uzunluk → None."""
     if deger is None:
@@ -295,6 +321,11 @@ def musteri_bul(db, ad="", soyad="", tckn=None) -> Optional[Musteri]:
     for m in db.query(Musteri).filter(Musteri.ad_soyad_anahtar == anahtar).order_by(Musteri.id):
         if not (tc and m.tc_kimlik and m.tc_kimlik != tc):
             return m
+    cekirdek = firma_cekirdegi(ad, soyad, tc)   # aynı firmanın farklı yazımları (Ltd. Şti. / Limited Şirketi, yazım hataları)
+    if cekirdek:
+        for m in db.query(Musteri).filter(Musteri.ad_soyad_anahtar.like(cekirdek[:8] + "%")).order_by(Musteri.id):
+            if firma_cekirdegi(m.ad, m.soyad, m.tc_kimlik) == cekirdek and not (tc and m.tc_kimlik and m.tc_kimlik != tc):
+                return m
     return None
 
 
@@ -426,15 +457,23 @@ def _musterileri_birlestir(db, rapor: dict):
             isim_gruplari.setdefault(m.ad_soyad_anahtar, []).append(m)
     for grup in tc_gruplari.values():
         birlestir([m.id for m in grup])
-    for anahtar, grup in isim_gruplari.items():
-        tcler = {m.tc_kimlik for m in grup if m.tc_kimlik}
-        if len(tcler) <= 1:
-            birlestir([m.id for m in grup])
-        else:  # aynı isim, farklı TCKN: farklı kişiler → yalnızca TCKN'siz kayıtlar kendi aralarında birleşir
-            tcsiz = [m.id for m in grup if not m.tc_kimlik]
-            if len(tcsiz) > 1:
-                birlestir(tcsiz)
-            rapor["ayni_isim_farkli_tckn"].append({"ad_soyad": f"{grup[0].ad} {grup[0].soyad}".strip(), "tckn": sorted(tcler)})
+    firma_gruplari = {}
+    for m in musteriler:
+        cekirdek = firma_cekirdegi(m.ad, m.soyad, m.tc_kimlik)
+        if cekirdek:
+            firma_gruplari.setdefault(cekirdek, []).append(m)
+    for gruplar in (isim_gruplari, firma_gruplari):
+        for grup in gruplar.values():
+            if len(grup) < 2:
+                continue
+            tcler = {m.tc_kimlik for m in grup if m.tc_kimlik}
+            if len(tcler) <= 1:
+                birlestir([m.id for m in grup])
+            else:  # aynı isim/firma, farklı TCKN/VKN: farklı kişiler → yalnızca kimliksiz kayıtlar kendi aralarında birleşir
+                tcsiz = [m.id for m in grup if not m.tc_kimlik]
+                if len(tcsiz) > 1:
+                    birlestir(tcsiz)
+                rapor["ayni_isim_farkli_tckn"].append({"ad_soyad": f"{grup[0].ad} {grup[0].soyad}".strip(), "tckn": sorted(tcler)})
 
     kumeler = {}
     for m in musteriler:
