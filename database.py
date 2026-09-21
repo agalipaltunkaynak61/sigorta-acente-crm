@@ -93,7 +93,11 @@ def kimlik_temizle(deger) -> Optional[str]:
 
 
 def telefon_temizle(deger) -> Optional[str]:
-    """05XXXXXXXXX biçimine getirir; tanınmayan biçimleri olduğu gibi bırakır."""
+    """Telefonu 05XXXXXXXXX (11 hane) biçimine getirir.
+
+    10 haneli ve 5 ile başlıyorsa (cep) ya da 2/3/4 ile başlıyorsa (sabit hat) başına 0 eklenir; +90/90 ön eki atılır;
+    bundan kısa ya da tanınmayan biçimler None (boş) döner. 11 haneden uzun (yurtdışı vb.) numaralar olduğu gibi bırakılır.
+    """
     if deger is None:
         return None
     s = str(deger).strip()
@@ -104,9 +108,11 @@ def telefon_temizle(deger) -> Optional[str]:
     d = re.sub(r"\D", "", s)
     if len(d) == 12 and d.startswith("90"):
         d = d[2:]
-    if len(d) == 10 and d.startswith("5"):
-        d = "0" + d
-    return d if len(d) == 11 and d.startswith("05") else s
+    if len(d) == 11 and d.startswith("0"):
+        return d
+    if len(d) == 10 and d[0] in "2345":
+        return "0" + d
+    return s if len(d) > 11 else None
 
 
 def police_no_temizle(deger) -> str:

@@ -7,3 +7,4 @@ __pycache__/
 
 *.db.yedek-*
 import_atlanan_satirlar.csv
+rehber_rapor.csv
