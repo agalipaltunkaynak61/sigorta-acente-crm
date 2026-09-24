@@ -2,7 +2,8 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#061337" />
 <title>Altun Kardeşler Sigorta CRM</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23061337'/%3E%3Cpath d='M14 46 32 14l18 32h-9l-9-17-9 17z' fill='%23C0A265'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -202,6 +203,129 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
 .bar-row i{display:block;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold-l));flex:none}
 @media (max-width:900px){main{padding:18px 14px 60px}.fgrid{grid-template-columns:1fr 1fr}.fgrid .s2,.fgrid .s4{grid-column:span 2}.prop{grid-template-columns:1fr}.drawer-body{padding:20px 18px 110px}.savebar{margin:0 -18px -110px;padding:12px 18px}.pf{grid-template-columns:1fr 1fr}.k-title{font-size:28px}}
 @media print{.sidebar,.btn,#toasts{display:none!important}main{margin:0}}
+
+/* ===== MOBİL (yalnızca ≤768px; masaüstü görünümü etkilenmez) ===== */
+.m-top{display:none} .nav-btn em{display:none}
+@media (hover:none){.btn:hover,.kpi:hover,.item:hover,.ders:hover,.arg:hover,.opp:hover,.drop:hover,.icon-btn:hover{transform:none}}
+@media (max-height:560px){.table-wrap{max-height:none!important}}
+@media (max-width:768px){
+  html{overflow-x:clip}
+  body{font-size:14.5px}
+  /* Üst çubuk */
+  .m-top{display:flex;position:sticky;top:0;z-index:90;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));background:linear-gradient(120deg,var(--navy),var(--navy-2));color:#fff;box-shadow:0 4px 18px rgba(6,19,55,.22)}
+  .m-logo{width:46px;height:32px;background:#f6f6f5;border-radius:9px;padding:2px 4px;flex:none}
+  .m-logo svg{width:100%;height:100%;display:block}
+  .m-brand b{display:block;font-family:'Playfair Display',serif;font-size:16px;color:var(--gold-l);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-brand small{font-size:10.5px;color:rgba(255,255,255,.6)}
+  .m-top .icon-btn{width:40px;height:40px;color:rgba(255,255,255,.82)} .m-top .icon-btn:hover,.m-top .icon-btn:active{background:rgba(255,255,255,.1);color:#fff}
+  .m-top .lvl-badge{width:34px;height:34px;font-size:13px;cursor:pointer}
+  /* Alt sekme menüsü */
+  .sidebar,.sidebar:hover{inset:auto 0 0 0;width:auto;height:auto;flex-direction:row;background:var(--navy);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -6px 24px rgba(6,19,55,.22);overflow:visible}
+  .sidebar .logo-tile,.side-foot{display:none}
+  .nav{flex-direction:row;padding:6px 4px;gap:2px;overflow:visible}
+  .nav-btn{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;height:54px;padding:4px 2px;gap:3px;border-radius:10px}
+  .nav-btn span{display:none}
+  .nav-btn em{display:block;font-style:normal;font-size:10px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .nav-btn svg.i{width:21px;height:21px}
+  .nav-btn.on::before{left:28%;right:28%;top:-6px;bottom:auto;width:auto;height:3px;border-radius:0 0 4px 4px}
+  main{margin-left:0;padding:16px 12px calc(92px + env(safe-area-inset-bottom));min-height:auto}
+  /* Sayfa başlıkları ve butonlar */
+  .page-head{flex-direction:column;align-items:stretch;gap:12px;margin-bottom:16px}
+  .page-head h2{font-size:24px}
+  .page-head p{font-size:13px}
+  .page-head>.row,.page-head>.btn{width:100%}
+  .page-head>.row .btn{flex:1 1 0}
+  .page-head .search{min-width:100%!important}
+  kbd{display:none}
+  .btn{height:44px} .btn-sm{height:36px}
+  .icon-btn{width:40px;height:40px}
+  .input,.select,.textarea,.pv,.pal input{font-size:16px}
+  .input,.select{height:44px}
+  .search{min-width:0}.search svg{top:13px}
+  .seg{display:flex;width:100%}.seg button{flex:1 1 0;padding:8px 6px;font-size:12.5px}
+  .card-h{flex-wrap:wrap;padding:12px 14px}
+  .card-b{padding:14px}
+  /* Özet kartları ve listeler */
+  .kpis{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .kpi{padding:14px}.kpi b{font-size:26px}.kpi small{font-size:10px}
+  #fin-metrics{grid-template-columns:1fr}
+  #fin-metrics b{font-size:24px;word-break:break-word}
+  .grid2{grid-template-columns:1fr;gap:14px}
+  .list{padding:10px;max-height:62vh}
+  .item{flex-wrap:wrap;gap:8px 10px;padding:11px 12px}
+  .item>.grow{flex:1 1 100%}
+  .item>.btn{margin-left:auto}
+  /* Tablolar → kart listesi */
+  .table-wrap{max-height:none!important;overflow:visible}
+  table.tbl-cards,table.tbl-cards tbody{display:block}
+  table.tbl-cards thead{display:none}
+  table.tbl-cards tr{display:block;position:relative;padding:10px 14px;border-bottom:1px solid var(--line)}
+  table.tbl-cards tbody tr:hover{box-shadow:none;background:transparent}
+  table.tbl-cards tbody tr.click:active{background:#FCFAF4}
+  table.tbl-cards td{display:block;padding:4px 0;border:0;text-align:right;overflow:hidden;white-space:normal}
+  table.tbl-cards td[data-l]::before{content:attr(data-l);float:left;margin-right:12px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);line-height:22px}
+  table.tbl-cards td.t-main{text-align:left;font-size:15px;padding:2px 44px 6px 0}
+  table.tbl-cards td.t-act{position:absolute;top:8px;right:10px;padding:0}
+  table.tbl-cards td[colspan]{text-align:center}
+  table.tbl-cards tr.grp{padding:0;border:0}
+  table.tbl-cards tr.grp td{text-align:left;padding:6px 14px}
+  table.tbl-cards tr.t-top{border-bottom:0;padding-bottom:6px}
+  table.tbl-cards tr.t-note{padding:0 14px 12px}
+  table.tbl-cards tr.t-note td{border-radius:10px;padding:9px 12px!important;text-align:left}
+  table.tbl-cards tr.t-note .row{flex-wrap:wrap;gap:6px}
+  table.mini.tbl-cards tr{padding:8px 4px}
+  table.mini.tbl-cards td{font-size:13px}
+  .pager{flex-wrap:wrap;justify-content:center;gap:10px;text-align:center}
+  /* PDF alanı / sekmeler */
+  .drop{padding:18px 14px}
+  .tabs{gap:18px;overflow-x:auto}
+  /* Finansal */
+  #fin-kiyas-container p{grid-column:1/-1!important}
+  #fin-run{width:100%}
+  .bar-row{font-size:13px}
+  /* Eğitim */
+  #view-dersler>.card{padding:20px 18px!important}
+  #view-dersler>.card h2{font-size:22px!important}
+  #view-dersler>.row{gap:12px!important}
+  #view-dersler>.row>.card{width:100%!important;min-width:0!important;flex:1 1 100%!important}
+  #ders-kategoriler{flex-direction:row!important;overflow-x:auto;gap:6px!important;padding-bottom:4px;scrollbar-width:none}
+  #ders-kategoriler::-webkit-scrollbar{display:none}
+  .katbtn{width:auto;flex:none;gap:8px;white-space:nowrap;padding:9px 12px}
+  .ders-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .ders{padding:16px 10px 12px;gap:10px}
+  /* Modallar tam ekran */
+  .overlay{padding:0;align-items:stretch}
+  .modal{max-width:none!important;max-height:none;height:100%;height:100dvh;border-radius:0;animation:sheet .4s var(--ease)}
+  @keyframes sheet{from{opacity:0;transform:translateY(40px)}}
+  .modal-h{padding:14px 16px!important;padding-top:calc(14px + env(safe-area-inset-top))!important}
+  .modal-h h3{font-size:18px!important}
+  .modal-b{padding:18px 12px;gap:20px}
+  .modal-b .grow{min-width:0!important}
+  .modal-b>.card{width:100%!important}
+  .modal-f{flex-wrap:wrap;padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+  .modal-f>.row{width:100%}.modal-f>.row .btn{flex:1 1 0}
+  .sec{padding:20px 14px 14px}
+  .seg button{white-space:normal;line-height:1.25}
+  .pal{width:calc(100% - 20px);margin:calc(10px + env(safe-area-inset-top)) auto 0}
+  .pal-l{max-height:65vh}
+  /* Müşteri kartı çekmecesi */
+  .drawer{width:100%}
+  .drawer-top{padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top))}
+  .drawer-body{padding:18px 14px 110px}
+  #kart-govde>.row.between{flex-wrap:wrap;gap:10px}
+  .k-icon{width:52px;height:52px;font-size:20px;border-radius:15px}
+  .k-title{font-size:22px;text-overflow:ellipsis}
+  .prop{gap:4px;padding:6px 2px}
+  .pv{background:#F7F6F2;min-height:42px}
+  .pf.head{display:none}
+  .pf{gap:6px 10px;padding:10px 4px;border-bottom:1px solid var(--line-2)}
+  .k-h{flex-wrap:wrap}.k-h small{margin-left:0;flex-basis:100%}
+  .savebar{margin:0 -14px -110px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));flex-wrap:wrap}
+  .savebar>.row{width:100%}.savebar>.row .btn{flex:1 1 0}
+  /* Bildirimler */
+  #toasts{top:calc(10px + env(safe-area-inset-top));left:10px;right:10px}
+  .toast{min-width:0;max-width:none}
+}
 </style>
 </head>
 <body>
@@ -298,6 +422,15 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
   </div>
 </aside>
 
+<!-- Mobil üst çubuk (yalnızca telefonda görünür) -->
+<header class="m-top">
+  <div class="m-logo"><svg viewBox="272 240 486 314"><use href="#logo-art"/></svg></div>
+  <div class="m-brand grow"><b>Altun Kardeşler</b><small>Sigorta CRM</small></div>
+  <button class="icon-btn" onclick="palAc()" aria-label="Ara"><svg class="i"><use href="#i-search"/></svg></button>
+  <button class="icon-btn" onclick="sesAcKapat()" aria-label="Ses efektleri" id="m-ses-ic"></button>
+  <div class="lvl-badge" id="m-lvl-n" onclick="xpGoster()" title="Seviye">1</div>
+</header>
+
 <main>
   <!-- ANA EKRAN -->
   <section class="view" id="view-dashboard">
@@ -321,7 +454,7 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
         <button class="btn btn-p" onclick="kartYeni()"><svg class="i"><use href="#i-plus"/></svg>Yeni Müşteri</button>
       </div></div>
     <div class="card"><div class="card-b row wrap"><div class="seg" id="tip-sekmeleri"><button class="on" data-tip="">Tümü</button><button data-tip="Bireysel">Bireysel</button><button data-tip="Kurumsal">Kurumsal</button></div><div class="search"><svg class="i"><use href="#i-search"/></svg><input id="musteri-ara" class="input" type="search" placeholder="Ad, telefon veya TCKN ara…" autocomplete="off"></div></div>
-      <div class="table-wrap"><table><thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Aktif Branşlar</th><th>Danışman</th><th>TCKN / VKN</th><th></th></tr></thead><tbody id="musteri-tbody"></tbody></table></div><div class="pager" id="musteri-pagination"></div></div>
+      <div class="table-wrap"><table class="tbl-cards"><thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Aktif Branşlar</th><th>Danışman</th><th>TCKN / VKN</th><th></th></tr></thead><tbody id="musteri-tbody"></tbody></table></div><div class="pager" id="musteri-pagination"></div></div>
   </section>
 
   <!-- POLİÇELER -->
@@ -335,7 +468,7 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
       <div class="drop-busy" id="pdf-durum" hidden><div class="spin"></div><span id="pdf-durum-text">Yükleniyor ve yapay zeka okuyor…</span></div>
     </label>
     <div class="tabs"><button class="tab on" id="btn-sekme-aktif" onclick="policeSekmeSec('aktif')">Aktif Poliçeler</button><button class="tab" id="btn-sekme-eski" onclick="policeSekmeSec('eski')">Eski / İptal</button></div>
-    <div class="card"><div class="table-wrap" style="max-height:calc(100vh - 430px)"><table><thead><tr><th>Poliçe No</th><th>Müşteri</th><th>Şirket / Branş</th><th>Bitiş</th><th>Durum</th><th>Prim</th><th></th></tr></thead><tbody id="police-tbody"></tbody></table></div><div class="pager" id="police-pagination"></div></div>
+    <div class="card"><div class="table-wrap" style="max-height:calc(100vh - 430px)"><table class="tbl-cards"><thead><tr><th>Poliçe No</th><th>Müşteri</th><th>Şirket / Branş</th><th>Bitiş</th><th>Durum</th><th>Prim</th><th></th></tr></thead><tbody id="police-tbody"></tbody></table></div><div class="pager" id="police-pagination"></div></div>
   </section>
 
   <!-- FİNANSAL -->
@@ -367,7 +500,7 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
   <section class="view" id="view-pazarlama" hidden>
     <div class="page-head"><div><h2>Akıllı Satış ve Pazarlama Asistanı</h2><p>Bitişi 30 gün içinde olan poliçelerin sahiplerine önerilen çapraz satış fırsatları ve iletişim taktikleri.</p></div>
       <button class="btn btn-p" onclick="pazarlamaListeyiYazdir()"><svg class="i"><use href="#i-printer"/></svg>Tüm Planı İndir (PDF)</button></div>
-    <div class="card"><div class="table-wrap"><table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe</th><th>Çapraz Satış Fırsatları</th><th class="center">Bitiş</th></tr></thead><tbody id="pazarlama-tbody"></tbody></table><div id="pazarlama-empty" class="empty" hidden>Uygun müşteri bulunamadı. Harika!</div></div></div>
+    <div class="card"><div class="table-wrap"><table class="tbl-cards"><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe</th><th>Çapraz Satış Fırsatları</th><th class="center">Bitiş</th></tr></thead><tbody id="pazarlama-tbody"></tbody></table><div id="pazarlama-empty" class="empty" hidden>Uygun müşteri bulunamadı. Harika!</div></div></div>
   </section>
 
   <!-- EĞİTİM -->
@@ -462,7 +595,7 @@ function ses(tip) {
     notlar.forEach((f, i) => { const o = sesCtx.createOscillator(), g = sesCtx.createGain(), t = n + i * 0.09; o.type = tip === "err" ? "triangle" : "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); o.connect(g).connect(sesCtx.destination); o.start(t); o.stop(t + 0.22); });
   } catch (e) {}
 }
-function sesGuncelle() { $("#ses-ic").innerHTML = ic(sesAcik ? "vol" : "mute"); $("#ses-txt").textContent = "Ses efektleri: " + (sesAcik ? "açık" : "kapalı"); }
+function sesGuncelle() { $("#ses-ic").innerHTML = $("#m-ses-ic").innerHTML = ic(sesAcik ? "vol" : "mute"); $("#ses-txt").textContent = "Ses efektleri: " + (sesAcik ? "açık" : "kapalı"); }
 function sesAcKapat() { sesAcik = !sesAcik; guvenli("crm_ses", sesAcik); sesGuncelle(); ses("tik"); }
 
 function toast(tip, baslik, mesaj = "", sure = 4200) {
@@ -497,7 +630,8 @@ document.addEventListener("click", e => {  // buton dalga efekti
 
 const UNVANLAR = ["Çaylak", "Danışman", "Uzman", "Usta", "Kıdemli Usta", "Portföy Ustası", "Efsane"];
 function xpBilgi(xp) { let lv = 1, gerek = 100, kalan = xp; while (kalan >= gerek) { kalan -= gerek; lv++; gerek = Math.round(gerek * 1.35); } return { lv, kalan, gerek }; }
-function xpCiz() { const b = xpBilgi(guvenli("crm_xp") || 0); $("#lvl-n").textContent = b.lv; $("#lvl-t").textContent = UNVANLAR[Math.min(b.lv - 1, UNVANLAR.length - 1)]; $("#lvl-bar").style.width = (100 * b.kalan / b.gerek) + "%"; $("#lvl-xp").textContent = `${b.kalan} / ${b.gerek} XP · Seviye ${b.lv}`; }
+function xpCiz() { const b = xpBilgi(guvenli("crm_xp") || 0); $("#lvl-n").textContent = $("#m-lvl-n").textContent = b.lv; $("#lvl-t").textContent = UNVANLAR[Math.min(b.lv - 1, UNVANLAR.length - 1)]; $("#lvl-bar").style.width = (100 * b.kalan / b.gerek) + "%"; $("#lvl-xp").textContent = `${b.kalan} / ${b.gerek} XP · Seviye ${b.lv}`; }
+function xpGoster() { const b = xpBilgi(guvenli("crm_xp") || 0); toast("xp", `Seviye ${b.lv} · ${UNVANLAR[Math.min(b.lv - 1, UNVANLAR.length - 1)]}`, `${b.kalan} / ${b.gerek} XP`, 3000); }
 function xpKazan(n, neden) {
   const once = xpBilgi(guvenli("crm_xp") || 0).lv;
   guvenli("crm_xp", (guvenli("crm_xp") || 0) + n); xpCiz();
@@ -515,7 +649,8 @@ function sayiAnim(el, hedef) {
    YÖNLENDİRME
    ============================================================ */
 const MENU = [["dashboard", "grid", "Ana Ekran"], ["musteriler", "users", "Müşteriler"], ["policeler", "file", "Poliçeler"], ["finansal", "chart", "Finansal Analiz"], ["pazarlama", "mega", "Pazarlama & Çapraz Satış"], ["dersler", "book", "Eğitim Merkezi"]];
-$("#nav").innerHTML = MENU.map(([v, i, t]) => `<button class="nav-btn" data-view="${v}">${ic(i)}<span>${t}</span></button>`).join("");
+const MENU_KISA = { dashboard: "Özet", musteriler: "Müşteriler", policeler: "Poliçeler", finansal: "Finans", pazarlama: "Pazarlama", dersler: "Eğitim" };
+$("#nav").innerHTML = MENU.map(([v, i, t]) => `<button class="nav-btn" data-view="${v}" title="${t}">${ic(i)}<span>${t}</span><em>${MENU_KISA[v]}</em></button>`).join("");
 $("#nav").addEventListener("click", e => { const b = e.target.closest("[data-view]"); if (b) location.hash = "#/" + b.dataset.view; });
 
 const YUKLEYICI = { dashboard: () => yukleDashboard(), musteriler: () => yukleMusteriler($("#musteri-ara").value, 1), policeler: () => yuklePoliceler(1), finansal: () => yukleFinansalHazirlik(), pazarlama: () => yuklePazarlama(), dersler: () => yukleDersler() };
@@ -593,9 +728,9 @@ async function yukleMusteriler(q = "", page = 1) {
       const ad = tamAd(m), h = basHarf(ad);
       if (h !== son && !q) { son = h; html += `<tr class="grp"><td colspan="6">${esc(h)}</td></tr>`; }
       const dag = Object.entries(m.aktif_police_sayilari || {});
-      html += `<tr class="click" data-kart="${m.id}"><td><div class="row"><div class="avatar" ${m.musteri_tipi === "Kurumsal" ? 'style="border-radius:9px" title="Kurumsal"' : ""}>${m.musteri_tipi === "Kurumsal" ? ic("build") : esc(h)}</div><b style="color:var(--navy)">${esc(ad)}</b></div></td><td>${esc(m.telefon || "—")}</td>
-        <td>${dag.length ? dag.map(([t, a]) => `<span class="chip" style="margin:0 4px 4px 0">${esc(t)} · ${a}</span>`).join("") : '<span class="faint">Aktif poliçe yok</span>'}</td>
-        <td class="muted nw">${esc(m.portfoy_sorumlusu || "—")}</td><td class="faint">${esc(m.tc_kimlik || "—")}</td><td class="right"><span class="chip gold">Kartı aç ›</span></td></tr>`;
+      html += `<tr class="click" data-kart="${m.id}"><td class="t-main"><div class="row"><div class="avatar" ${m.musteri_tipi === "Kurumsal" ? 'style="border-radius:9px" title="Kurumsal"' : ""}>${m.musteri_tipi === "Kurumsal" ? ic("build") : esc(h)}</div><b style="color:var(--navy)">${esc(ad)}</b></div></td><td data-l="Telefon">${esc(m.telefon || "—")}</td>
+        <td data-l="Branşlar">${dag.length ? dag.map(([t, a]) => `<span class="chip" style="margin:0 4px 4px 0">${esc(t)} · ${a}</span>`).join("") : '<span class="faint">Aktif poliçe yok</span>'}</td>
+        <td class="muted nw" data-l="Danışman">${esc(m.portfoy_sorumlusu || "—")}</td><td class="faint" data-l="TCKN / VKN">${esc(m.tc_kimlik || "—")}</td><td class="right t-act"><span class="chip gold">Kartı aç ›</span></td></tr>`;
     });
     tb.innerHTML = html; sayfalama("musteri-pagination", d, p => yukleMusteriler($("#musteri-ara").value, p));
   } catch (e) { tb.innerHTML = `<tr><td colspan="6" class="empty">${esc(e.message)}</td></tr>`; }
@@ -611,10 +746,10 @@ async function yuklePoliceler(page = 1) {
   try {
     const d = await api(`/api/policeler?page=${page}&limit=${perPage}&aktif=${aktifPoliceSekmesi}${q ? "&q=" + encodeURIComponent(q) : ""}`);
     if (!d.items.length) { tb.innerHTML = `<tr><td colspan="7" class="empty">Poliçe bulunamadı.</td></tr>`; sayfalama("police-pagination", null); return; }
-    tb.innerHTML = d.items.map(p => `<tr><td><b style="color:var(--navy)">${esc(p.police_no)}</b>${p.pdf_dosya_adi ? ` <a class="icon-btn" style="display:inline-grid;width:26px;height:26px" href="/api/pdf/${encodeURIComponent(p.pdf_dosya_adi)}" target="_blank" title="PDF'i aç">${ic("file")}</a>` : ""}</td>
-      <td><a href="#/musteri/${p.musteri_id}" style="color:inherit;font-weight:600">${esc(tamAd(p) || "—")}</a></td><td>${esc(p.sigorta_sirketi || "")}<br><b>${esc(p.sigorta_turu)}</b></td>
-      <td>${tarih(p.bitis_tarihi)}</td><td>${bitisChip(p)}</td><td><b style="color:var(--gold-d)">${para(p.prim)}</b></td>
-      <td class="right"><button class="icon-btn" title="Poliçeyi sil" data-sil="${p.id}" data-no="${esc(p.police_no)}">${ic("trash")}</button></td></tr>`).join("");
+    tb.innerHTML = d.items.map(p => `<tr><td class="t-main"><b style="color:var(--navy)">${esc(p.police_no)}</b>${p.pdf_dosya_adi ? ` <a class="icon-btn" style="display:inline-grid;width:26px;height:26px" href="/api/pdf/${encodeURIComponent(p.pdf_dosya_adi)}" target="_blank" title="PDF'i aç">${ic("file")}</a>` : ""}</td>
+      <td data-l="Müşteri"><a href="#/musteri/${p.musteri_id}" style="color:inherit;font-weight:600">${esc(tamAd(p) || "—")}</a></td><td data-l="Şirket / Branş">${esc(p.sigorta_sirketi || "")}<br><b>${esc(p.sigorta_turu)}</b></td>
+      <td data-l="Bitiş">${tarih(p.bitis_tarihi)}</td><td data-l="Durum">${bitisChip(p)}</td><td data-l="Prim"><b style="color:var(--gold-d)">${para(p.prim)}</b></td>
+      <td class="right t-act"><button class="icon-btn" title="Poliçeyi sil" data-sil="${p.id}" data-no="${esc(p.police_no)}">${ic("trash")}</button></td></tr>`).join("");
     sayfalama("police-pagination", d, yuklePoliceler);
   } catch (e) { tb.innerHTML = `<tr><td colspan="7" class="empty">${esc(e.message)}</td></tr>`; }
 }
@@ -694,7 +829,7 @@ function kartCiz(k) {
     ${k.oneriler.length ? `<div class="opps">${k.oneriler.map(o => `<button class="opp" data-teklif="${esc(o.brans)}" title="${esc(o.nedenler.join(" · "))}">${ic("plus")}${esc(BRANS_KISA[o.brans] || o.brans)}<small>${esc(o.nedenler[0])}${o.nedenler.length > 1 ? " +" + (o.nedenler.length - 1) : ""}</small></button>`).join("")}</div>` : `<p class="muted" style="padding:6px">Şimdilik önerilecek yeni branş yok — portföy dolu görünüyor. 👏</p>`}
     ${bos.length ? `<p class="faint" style="font-size:12px;margin-top:10px">Hiç poliçesi olmayan branşlar: ${bos.map(b => esc(BRANS_KISA[b] || b)).join(", ")}</p>` : ""}
     <div class="k-h">${ic("file")}Poliçe Geçmişi</div>
-    ${k.policeler.length ? `<div style="overflow:auto"><table class="mini"><thead><tr><th>Poliçe No</th><th>Branş</th><th>Şirket</th><th>Bitiş</th><th>Durum</th><th>Prim</th></tr></thead><tbody>${k.policeler.slice(0, 15).map(p => `<tr><td><b>${esc(p.police_no)}</b>${p.pdf_dosya_adi ? ` <a href="/api/pdf/${encodeURIComponent(p.pdf_dosya_adi)}" target="_blank" title="PDF">${ic("file")}</a>` : ""}</td><td>${esc(BRANS_KISA[p.sigorta_turu] || p.sigorta_turu)}</td><td>${esc(p.sigorta_sirketi || "")}</td><td>${tarih(p.bitis_tarihi)}</td><td>${bitisChip(p)}</td><td>${para(p.prim)}</td></tr>`).join("")}</tbody></table></div>${k.policeler.length > 15 ? `<p class="faint" style="font-size:12px;margin-top:6px">+${k.policeler.length - 15} poliçe daha…</p>` : ""}` : `<p class="muted" style="padding:6px">Poliçe kaydı yok.</p>`}
+    ${k.policeler.length ? `<div style="overflow:auto"><table class="mini tbl-cards"><thead><tr><th>Poliçe No</th><th>Branş</th><th>Şirket</th><th>Bitiş</th><th>Durum</th><th>Prim</th></tr></thead><tbody>${k.policeler.slice(0, 15).map(p => `<tr><td class="t-main"><b>${esc(p.police_no)}</b>${p.pdf_dosya_adi ? ` <a href="/api/pdf/${encodeURIComponent(p.pdf_dosya_adi)}" target="_blank" title="PDF">${ic("file")}</a>` : ""}</td><td data-l="Branş">${esc(BRANS_KISA[p.sigorta_turu] || p.sigorta_turu)}</td><td data-l="Şirket">${esc(p.sigorta_sirketi || "")}</td><td data-l="Bitiş">${tarih(p.bitis_tarihi)}</td><td data-l="Durum">${bitisChip(p)}</td><td data-l="Prim">${para(p.prim)}</td></tr>`).join("")}</tbody></table></div>${k.policeler.length > 15 ? `<p class="faint" style="font-size:12px;margin-top:6px">+${k.policeler.length - 15} poliçe daha…</p>` : ""}` : `<p class="muted" style="padding:6px">Poliçe kaydı yok.</p>`}
     <div class="row" style="margin-top:18px"><button class="btn btn-g" data-teklif="">${ic("plus")}Bu müşteriye poliçe ekle</button></div>`}
     <div class="savebar" id="kart-savebar"><span class="muted" id="kart-degisiklik">Kaydedilmemiş değişiklikler var</span><span class="row"><button class="btn btn-o" onclick="kartKapat()">Vazgeç</button><button class="btn btn-p" id="kart-kaydet-btn" onclick="kartKaydet()">${ic("check")}Kaydet <kbd style="background:rgba(255,255,255,.15);color:#fff;border:0">Ctrl S</kbd></button></span></div>`;
   kart.orijinal = kartDegerleri();
@@ -870,9 +1005,9 @@ async function yuklePazarlama() {
     const liste = pazarlamaDataCache = await api("/api/pazarlama");
     if (!liste.length) { tb.innerHTML = ""; $("#pazarlama-empty").hidden = false; return; }
     tb.innerHTML = liste.map(i => { const wa = waLink(i.telefon, `Merhaba ${i.ad_soyad}, ${i.tetikleyici_police} poliçenizin bitiş tarihi yaklaşıyor. Ayrıca size özel ${i.firsatlar} tekliflerimiz var, konuşalım mı?`);
-      return `<tr class="click" data-kart="${i.musteri_id}"><td><b style="color:var(--navy)">${esc(i.ad_soyad)}</b></td><td>${esc(i.telefon)} ${wa ? `<a class="icon-btn" style="display:inline-grid" href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp">${ic("chat")}</a>` : ""}</td><td class="muted">${esc(i.tetikleyici_police)}</td>
-        <td>${(i.firsatlar || "").split("+").map(f => `<span class="chip navy" style="margin:0 4px 4px 0">${esc(f.trim())}</span>`).join("")}</td><td class="center"><span class="chip warn">${esc(i.bitis)}</span></td></tr>
-        <tr><td colspan="5" style="background:var(--gold-bg);padding:9px 16px"><span class="row" style="align-items:flex-start"><span class="chip gold" style="flex:none">${ic("zap")}AI SATIŞ NOTU</span><i style="font-size:12.5px;color:#4b4630">${esc(i.taktik)}</i></span></td></tr>`; }).join("");
+      return `<tr class="click t-top" data-kart="${i.musteri_id}"><td class="t-main"><b style="color:var(--navy)">${esc(i.ad_soyad)}</b></td><td data-l="Telefon">${esc(i.telefon)} ${wa ? `<a class="icon-btn" style="display:inline-grid" href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp">${ic("chat")}</a>` : ""}</td><td class="muted" data-l="Biten Poliçe">${esc(i.tetikleyici_police)}</td>
+        <td data-l="Fırsatlar">${(i.firsatlar || "").split("+").map(f => `<span class="chip navy" style="margin:0 4px 4px 0">${esc(f.trim())}</span>`).join("")}</td><td class="center" data-l="Bitiş"><span class="chip warn">${esc(i.bitis)}</span></td></tr>
+        <tr class="t-note"><td colspan="5" style="background:var(--gold-bg);padding:9px 16px"><span class="row" style="align-items:flex-start"><span class="chip gold" style="flex:none">${ic("zap")}AI SATIŞ NOTU</span><i style="font-size:12.5px;color:#4b4630">${esc(i.taktik)}</i></span></td></tr>`; }).join("");
   } catch (e) { tb.innerHTML = `<tr><td colspan="5" class="empty">${esc(e.message)}</td></tr>`; }
 }
 function yazdirPenceresi(html) { const w = window.open("", "_blank"); if (!w) return toast("warn", "Açılır pencere engellendi", "Tarayıcının açılır pencere iznini verin."); w.document.write(html); w.document.close(); }
