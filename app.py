@@ -24,7 +24,9 @@ from database import (  # noqa: F401  (SessionLocal/Musteri/Police/init_db diğe
     ascii_buyuk, gelismis_firma_temizle, get_db, init_db, musteri_bul, musteri_kaydet,
     musteri_verisi_temizle, police_bul, police_no_temizle, tarih_coz, veritabanini_temizle, yas_hesapla,
 )
+from ozel_gunler import bugunku_ozel_gunler, musterinin_bugunku_mesajlari, yaklasan_ozel_gunler
 from pdf_parser import ayikla_police_pdf
+from whatsapp_gonderici import mesaj_gonder
 
 log = logging.getLogger("crm.app")
 
@@ -458,6 +460,49 @@ def api_dogum_gunleri(gun: int = Query(14, ge=1, le=90), db: Session = Depends(g
 
 
 # =========================================================================
+# Özel gün / doğum günü kutlama mesajları (WhatsApp altyapısı)
+#
+# Hesaplama ozel_gunler.py'de, gönderim whatsapp_gonderici.py'dedir. Gerçek bir WhatsApp sağlayıcısı
+# (Baileys/Evolution API/WPPConnect) bağlanana kadar gönderim "dry-run" çalışır: mesaj üretilir ve
+# loglanır ama iletilmez — WHATSAPP_WEBHOOK_URL ortam değişkeni tanımlanınca otomatik gerçek gönderime döner.
+# =========================================================================
+@app.get("/api/kutlama/takvim")
+def api_kutlama_takvim(gun: int = Query(30, ge=1, le=365)):
+    """Önümüzdeki `gun` içindeki milli/dini özel günler (müşteriden bağımsız, genel takvim önizlemesi)."""
+    return [{"tarih": og.tarih, "kod": og.kod, "baslik": og.baslik, "tur": og.tur} for og in yaklasan_ozel_gunler(gun)]
+
+
+@app.get("/api/kutlama/bugun")
+def api_kutlama_bugun(db: Session = Depends(get_db)):
+    """Bugün doğum günü olan ya da bugüne denk gelen özel gün(ler) bulunan, telefonu kayıtlı müşteriler."""
+    ozel_gunler_bugun = bugunku_ozel_gunler()
+    sonuc = []
+    for m in db.query(Musteri).filter(Musteri.telefon.isnot(None), Musteri.telefon != ""):
+        ad_soyad = f"{m.ad} {m.soyad}".strip()
+        for mesaj in musterinin_bugunku_mesajlari(ad_soyad, m.dogum_tarihi):
+            sonuc.append({"musteri_id": m.id, "ad_soyad": ad_soyad, "telefon": m.telefon, **mesaj})
+    return {"ozel_gunler": [{"kod": og.kod, "baslik": og.baslik, "tur": og.tur} for og in ozel_gunler_bugun], "mesajlar": sonuc}
+
+
+class KutlamaGonderRequest(BaseModel):
+    musteri_id: int
+    tur: str
+    mesaj: str
+
+
+@app.post("/api/kutlama/gonder")
+def api_kutlama_gonder(payload: KutlamaGonderRequest, db: Session = Depends(get_db)):
+    """Tek bir müşteriye kutlama mesajını gönderir. Sağlayıcı bağlı değilse yalnızca hazırlanır (dry-run)."""
+    m = db.get(Musteri, payload.musteri_id)
+    if not m:
+        raise HTTPException(404, "Müşteri bulunamadı")
+    if not (m.telefon or "").strip():
+        raise HTTPException(400, "Bu müşterinin telefon numarası kayıtlı değil")
+    sonuc = mesaj_gonder(m.telefon, payload.mesaj)
+    return {"basarili": sonuc.basarili, "gonderildi": sonuc.gonderildi, "detay": sonuc.detay}
+
+
+# =========================================================================
 # Müşteriler
 # =========================================================================
 @app.get("/api/musteriler")
@@ -659,15 +704,31 @@ def api_yaklasan(gun: int = 7, db: Session = Depends(get_db)):
     return [police_to_out(p) for p in kayitlar]
 
 
-@app.get("/api/policeler/bu-ay")
-def api_bu_ay(db: Session = Depends(get_db)):
-    bugun = date.today()
-    ilk_gun = bugun.replace(day=1)
-    son_gun = bugun.replace(day=calendar.monthrange(bugun.year, bugun.month)[1])
+def _ay_araligi(bugun: date, ay_ofset: int = 0) -> tuple:
+    """`ay_ofset` kadar ay sonrasının (0=bu ay, 1=gelecek ay) ilk ve son gününü döndürür."""
+    ay_toplam = bugun.month - 1 + ay_ofset
+    yil, ay = bugun.year + ay_toplam // 12, ay_toplam % 12 + 1
+    ilk_gun = date(yil, ay, 1)
+    son_gun = date(yil, ay, calendar.monthrange(yil, ay)[1])
+    return ilk_gun, son_gun
+
+
+def _ay_policelerini_getir(db: Session, ay_ofset: int) -> list:
+    ilk_gun, son_gun = _ay_araligi(date.today(), ay_ofset)
     kayitlar = (db.query(Police).options(joinedload(Police.musteri))
                 .filter(Police.durum != "iptal", Police.bitis_tarihi >= ilk_gun, Police.bitis_tarihi <= son_gun,
                         Police.sigorta_turu.in_(YENILENEBILIR_BRANSLAR)).all())
     return [police_to_out(p) for p in kayitlar]
+
+
+@app.get("/api/policeler/bu-ay")
+def api_bu_ay(db: Session = Depends(get_db)):
+    return _ay_policelerini_getir(db, 0)
+
+
+@app.get("/api/policeler/gelecek-ay")
+def api_gelecek_ay(db: Session = Depends(get_db)):
+    return _ay_policelerini_getir(db, 1)
 
 
 def _musteri_id_coz(payload: dict, db: Session) -> int:

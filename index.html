@@ -309,7 +309,7 @@ kbd{background:var(--line-2);border:1px solid var(--line);border-radius:6px;padd
     <div class="grid2">
       <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--bad)"><use href="#i-clock"/></svg>Acil Yenilemeler (7 gün)</span></div><div class="list" id="yaklasan-liste"></div></div>
       <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--gold-d)"><use href="#i-calendar"/></svg>Bu Ay Yenilenecekler · <span id="ay-ismi" class="muted"></span></span><button class="btn btn-o btn-sm" onclick="aylikListeyiYazdir()"><svg class="i"><use href="#i-printer"/></svg>PDF</button></div><div class="list" id="aylik-liste"></div></div>
-      <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--gold-d)"><use href="#i-gift"/></svg>Yaklaşan Doğum Günleri</span><small class="muted" style="font-weight:500">14 gün</small></div><div class="list" id="dogum-liste"></div></div>
+      <div class="card"><div class="card-h"><span class="row"><svg class="i" style="color:var(--gold-d)"><use href="#i-calendar"/></svg>Gelecek Ay Yenilenecekler · <span id="gelecek-ay-ismi" class="muted"></span></span><button class="btn btn-o btn-sm" onclick="gelecekAylikListeyiYazdir()"><svg class="i"><use href="#i-printer"/></svg>PDF</button></div><div class="list" id="gelecek-ay-liste"></div></div>
     </div>
   </section>
 
@@ -536,6 +536,7 @@ window.addEventListener("hashchange", hashIsle);
    ANA EKRAN
    ============================================================ */
 let buAyBitenlerCache = [];
+let gelecekAyBitenlerCache = [];
 const seviyeSinif = s => s === "kirmizi" ? { w: "red", b: "bad" } : s === "sari" ? { w: "amber", b: "warn" } : { w: "", b: "" };
 function selamla() { const h = new Date().getHours(); return (h < 6 ? "İyi geceler" : h < 12 ? "Günaydın" : h < 18 ? "İyi günler" : "İyi akşamlar") + " 👋"; }
 
@@ -552,17 +553,13 @@ function renderPoliceListesi(liste, id) {
 async function yukleDashboard() {
   $("#karsilama").textContent = selamla();
   const skel = `<div class="list">${'<div class="skel" style="height:54px"></div>'.repeat(3)}</div>`;
-  ["yaklasan-liste", "aylik-liste", "dogum-liste"].forEach(i => { $("#" + i).innerHTML = skel; });
+  ["yaklasan-liste", "aylik-liste", "gelecek-ay-liste"].forEach(i => { $("#" + i).innerHTML = skel; });
   try {
-    const [ozet, l7, lAy, dg] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=7"), api("/api/policeler/bu-ay"), api("/api/dogum-gunleri?gun=14")]);
-    buAyBitenlerCache = lAy;
+    const [ozet, l7, lAy, lGelecekAy] = await Promise.all([api("/api/ozet"), api("/api/policeler/yaklasan?gun=7"), api("/api/policeler/bu-ay"), api("/api/policeler/gelecek-ay")]);
+    buAyBitenlerCache = lAy; gelecekAyBitenlerCache = lGelecekAy;
     $("#ozet-kartlar").innerHTML = [["Kayıtlı Müşteri", ozet.musteri_sayisi], ["Toplam Poliçe", ozet.police_sayisi], ["Aktif Poliçe", ozet.aktif_police], ["Yaklaşan (7 Gün)", ozet.yaklasan_7_gun]].map(([t, v]) => `<div class="card kpi"><small>${t}</small><b data-say="${v}">0</b></div>`).join("");
     $$("[data-say]").forEach(el => sayiAnim(el, el.dataset.say));
-    renderPoliceListesi(l7, "yaklasan-liste"); renderPoliceListesi(lAy, "aylik-liste");
-    $("#dogum-liste").innerHTML = !dg.length ? `<div class="empty">Yakın zamanda doğum günü yok.</div>` : dg.map(d => {
-      const wa = waLink(d.telefon, `Merhaba ${d.ad_soyad}, doğum gününüzü kutlarız! Nice mutlu ve sağlıklı yıllar dileriz. 🎂 — Altun Kardeşler Sigorta`);
-      return `<div class="item ${d.kalan_gun === 0 ? "amber" : ""}"><div class="grow"><b style="cursor:pointer" data-kart="${d.id}">${esc(d.ad_soyad)}</b><small>${d.tarih} · ${d.yeni_yas}. yaş</small></div><span class="chip ${d.kalan_gun === 0 ? "gold" : ""}">${d.kalan_gun === 0 ? "🎂 Bugün!" : d.kalan_gun + " gün"}</span>${wa ? `<a class="icon-btn" href="${wa}" target="_blank" rel="noopener" title="Kutla">${ic("chat")}</a>` : ""}</div>`;
-    }).join("");
+    renderPoliceListesi(l7, "yaklasan-liste"); renderPoliceListesi(lAy, "aylik-liste"); renderPoliceListesi(lGelecekAy, "gelecek-ay-liste");
   } catch (e) { toast("err", "Ana ekran yüklenemedi", e.message); }
 }
 async function policeYenilendi(id, ad, no) {
@@ -883,11 +880,13 @@ function pazarlamaListeyiYazdir() {
   if (!pazarlamaDataCache.length) return toast("warn", "Yazdırılacak veri yok");
   yazdirPenceresi(`<html><head><title>Satış Planı</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#333}h2{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;color:#061337}table{width:100%;border-collapse:collapse;margin-bottom:30px}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background:#061337;color:#fff}.ai{background:#fefce8;font-style:italic;color:#854d0e}@media print{button{display:none}}</style></head><body><h2>Yapay Zeka Destekli Çapraz Satış Planı</h2><table><thead><tr><th>Müşteri</th><th>Telefon</th><th>Biten Poliçe</th><th>Fırsatlar</th><th>Bitiş</th></tr></thead><tbody>${pazarlamaDataCache.map(i => `<tr><td><b>${esc(i.ad_soyad)}</b></td><td>${esc(i.telefon)}</td><td>${esc(i.tetikleyici_police)}</td><td><b>${esc(i.firsatlar)}</b></td><td><b>${esc(i.bitis)}</b></td></tr><tr class="ai"><td colspan="5"><b>Satış Taktiği:</b> ${esc(i.taktik)}</td></tr>`).join("")}</tbody></table><div style="text-align:center"><button onclick="window.print()" style="padding:12px 24px;background:#061337;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer">Çıktı Al / PDF Kaydet</button></div></body></html>`);
 }
-function aylikListeyiYazdir() {
-  if (!buAyBitenlerCache.length) return toast("warn", "Yazdırılacak poliçe yok");
-  const g = {}; buAyBitenlerCache.forEach(p => (g[p.sigorta_turu || "Diğer"] ||= []).push(p));
-  yazdirPenceresi(`<html><head><title>Yenileme Listesi</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px}h2{text-align:center;border-bottom:2px solid #000;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th,td{border:1px solid #000;padding:8px;text-align:left}th{background:#f0f0f0}.bx{width:20px;height:20px;border:1.5px solid #000}@media print{button{display:none}}</style></head><body>${Object.entries(g).map(([b, pl]) => `<h2>BRANŞ: ${esc(b.toUpperCase())}</h2><table><thead><tr><th>Bitiş</th><th>Müşteri</th><th>Şirket</th><th>Poliçe No</th><th>Durum</th></tr></thead><tbody>${pl.sort((x, y) => new Date(x.bitis_tarihi) - new Date(y.bitis_tarihi)).map(p => `<tr><td>${tarih(p.bitis_tarihi)}</td><td><b>${esc(tamAd(p).toUpperCase())}</b></td><td>${esc(p.sigorta_sirketi || "-")}</td><td>${esc(p.police_no || "-")}</td><td style="text-align:center"><div class="bx"></div></td></tr>`).join("")}</tbody></table>`).join("")}<div style="text-align:center"><button onclick="window.print()" style="padding:10px 20px;background:#061337;color:#fff;border:0">Yazdır</button></div></body></html>`);
+function yenilemeListesiYazdir(liste, baslik) {
+  if (!liste.length) return toast("warn", "Yazdırılacak poliçe yok");
+  const g = {}; liste.forEach(p => (g[p.sigorta_turu || "Diğer"] ||= []).push(p));
+  yazdirPenceresi(`<html><head><title>${esc(baslik)}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px}h1{text-align:center;margin-bottom:4px}h2{text-align:center;border-bottom:2px solid #000;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th,td{border:1px solid #000;padding:8px;text-align:left}th{background:#f0f0f0}.bx{width:20px;height:20px;border:1.5px solid #000}@media print{button{display:none}}</style></head><body><h1>${esc(baslik)}</h1>${Object.entries(g).map(([b, pl]) => `<h2>BRANŞ: ${esc(b.toUpperCase())}</h2><table><thead><tr><th>Bitiş</th><th>Müşteri</th><th>Şirket</th><th>Poliçe No</th><th>Durum</th></tr></thead><tbody>${pl.sort((x, y) => new Date(x.bitis_tarihi) - new Date(y.bitis_tarihi)).map(p => `<tr><td>${tarih(p.bitis_tarihi)}</td><td><b>${esc(tamAd(p).toUpperCase())}</b></td><td>${esc(p.sigorta_sirketi || "-")}</td><td>${esc(p.police_no || "-")}</td><td style="text-align:center"><div class="bx"></div></td></tr>`).join("")}</tbody></table>`).join("")}<div style="text-align:center"><button onclick="window.print()" style="padding:10px 20px;background:#061337;color:#fff;border:0">Yazdır</button></div></body></html>`);
 }
+function aylikListeyiYazdir() { yenilemeListesiYazdir(buAyBitenlerCache, "Bu Ay Yenilenecek Poliçeler"); }
+function gelecekAylikListeyiYazdir() { yenilemeListesiYazdir(gelecekAyBitenlerCache, "Gelecek Ay Yenilenecek Poliçeler"); }
 
 /* ============================================================
    FİNANSAL ANALİZ
@@ -1216,7 +1215,9 @@ document.addEventListener("keydown", e => {
   else if (e.key === "Escape") { if ($("#pal")) palKapat(); else if ($("#ai-modal")) aiModalKapat(); else if ($(".overlay")) $(".overlay").remove(); else if ($(".drawer-wrap")) kartKapat(); }
 });
 window.addEventListener("error", e => console.error("UI hatası:", e.message));
-$("#ay-ismi").textContent = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"][new Date().getMonth()];
+const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+$("#ay-ismi").textContent = AYLAR[new Date().getMonth()];
+$("#gelecek-ay-ismi").textContent = AYLAR[(new Date().getMonth() + 1) % 12];
 sesGuncelle(); xpCiz(); hashIsle();
 </script>
 </body>

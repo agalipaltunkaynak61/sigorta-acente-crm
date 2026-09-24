@@ -10,3 +10,5 @@ google-generativeai
 # bot.py (Excel içe aktarımı)
 pandas>=2.0
 openpyxl>=3.1
+# ozel_gunler.py (dini/milli gün hesaplama)
+hijridate>=2.3.0
